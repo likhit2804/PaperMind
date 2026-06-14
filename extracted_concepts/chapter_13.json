@@ -1,0 +1,57 @@
+{
+  "chapter": 13,
+  "sections": {
+    "13.1 Overview": [
+      "operating system"
+    ],
+    "13.2 I/O Hardware": [
+      "interrupt",
+      "controller",
+      "cpu",
+      "dma",
+      "bus"
+    ],
+    "13.3 Application I/O Interface": [
+      "operating system",
+      "system call"
+    ],
+    "13.4 Kernel I/O Subsystem": [
+      "disk",
+      "buffer",
+      "operating system",
+      "protection"
+    ],
+    "13.5 Transforming I/O Requests to Hardware Operations": [
+      "file system",
+      "inode",
+      "name space"
+    ],
+    "13.6 STREAMS": [],
+    "13.7 Performance": [
+      "device driver",
+      "interrupt",
+      "context switch",
+      "cpu"
+    ]
+  },
+  "unique_key_terms": [
+    "buffer",
+    "bus",
+    "context switch",
+    "controller",
+    "cpu",
+    "device driver",
+    "disk",
+    "dma",
+    "file system",
+    "i/o system",
+    "inode",
+    "interrupt",
+    "main memory",
+    "name space",
+    "operating system",
+    "protection",
+    "system call",
+    "virtual memory"
+  ]
+}

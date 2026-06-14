@@ -1,0 +1,101 @@
+{
+  "chapter": 1,
+  "sections": {
+    "1.1 What Operating Systems Do": [
+      "operating system",
+      "application program"
+    ],
+    "1.2 Computer-System Organization": [
+      "main memory",
+      "interrupt"
+    ],
+    "1.3 Computer-System Architecture": [
+      "multiprocessor system",
+      "device controller",
+      "cache"
+    ],
+    "1.4 Operating-System Structure": [
+      "operating system",
+      "cpu scheduling",
+      "main memory"
+    ],
+    "1.5 Operating-System Operations": [
+      "kernel mode",
+      "operating system",
+      "trap",
+      "system call",
+      "mode bit",
+      "interrupt",
+      "user mode"
+    ],
+    "1.6 Process Management": [
+      "timer",
+      "interrupt",
+      "user program",
+      "operating system"
+    ],
+    "1.7 Memory Management": [
+      "main memory",
+      "cpu",
+      "process synchronization"
+    ],
+    "1.8 Storage Management": [
+      "main memory",
+      "cache",
+      "secondary storage",
+      "magnetic disk",
+      "file system"
+    ],
+    "1.9 Protection and Security": [
+      "protection",
+      "security",
+      "address space"
+    ],
+    "1.10 Kernel Data Structures": [
+      "hash function",
+      "linked list",
+      "data structure",
+      "bitmap",
+      "security"
+    ],
+    "1.11 Computing Environments": [
+      "virtual machine"
+    ],
+    "1.12 Open-Source Operating Systems": [
+      "operating system",
+      "real time",
+      "virtual machine"
+    ]
+  },
+  "unique_key_terms": [
+    "address space",
+    "application program",
+    "bitmap",
+    "cache",
+    "cpu",
+    "cpu scheduling",
+    "data structure",
+    "device controller",
+    "file system",
+    "hash function",
+    "interrupt",
+    "kernel mode",
+    "linked list",
+    "magnetic disk",
+    "main memory",
+    "mode bit",
+    "multiprocessor system",
+    "operating system",
+    "process synchronization",
+    "protection",
+    "real time",
+    "secondary storage",
+    "security",
+    "system call",
+    "timer",
+    "trap",
+    "user mode",
+    "user program",
+    "virtual machine"
+  ]
+}

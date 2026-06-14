@@ -1,0 +1,60 @@
+{
+  "chapter": 7,
+  "sections": {
+    "7.1 System Model": [
+      "deadlock"
+    ],
+    "7.2 Deadlock Characterization": [
+      "deadlock",
+      "pthread mutex",
+      "resource allocation graph",
+      "pthread",
+      "mutex lock"
+    ],
+    "7.3 Methods for Handling Deadlocks": [
+      "deadlock avoidance",
+      "deadlock prevention"
+    ],
+    "7.4 Deadlock Prevention": [
+      "deadlock",
+      "mutex",
+      "mutual exclusion",
+      "pthread"
+    ],
+    "7.5 Deadlock Avoidance": [
+      "deadlock avoidance",
+      "safe state",
+      "resource allocation graph"
+    ],
+    "7.6 Deadlock Detection": [
+      "deadlock detection",
+      "resource allocation graph",
+      "detection algorithm",
+      "wait for graph",
+      "resource type"
+    ],
+    "7.7 Recovery from Deadlock": [
+      "deadlock cycle",
+      "deadlocked process",
+      "safe state"
+    ]
+  },
+  "unique_key_terms": [
+    "deadlock",
+    "deadlock avoidance",
+    "deadlock cycle",
+    "deadlock detection",
+    "deadlock prevention",
+    "deadlocked process",
+    "detection algorithm",
+    "mutex",
+    "mutex lock",
+    "mutual exclusion",
+    "pthread",
+    "pthread mutex",
+    "resource allocation graph",
+    "resource type",
+    "safe state",
+    "wait for graph"
+  ]
+}

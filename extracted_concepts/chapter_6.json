@@ -1,0 +1,76 @@
+{
+  "chapter": 6,
+  "sections": {
+    "6.1 Basic Concepts": [
+      "cpu scheduling algorithm",
+      "cpu burst",
+      "preemptive",
+      "interrupt"
+    ],
+    "6.2 Scheduling Criteria": [
+      "cpu scheduling algorithm",
+      "dispatcher",
+      "turnaround time"
+    ],
+    "6.3 Scheduling Algorithms": [
+      "cpu burst",
+      "priority",
+      "time quantum"
+    ],
+    "6.4 Thread Scheduling": [
+      "kernel level thread",
+      "user level",
+      "pthread",
+      "thread library"
+    ],
+    "6.5 Multiple-Processor Scheduling": [
+      "affinity",
+      "cpu scheduling",
+      "smp"
+    ],
+    "6.6 Real-Time CPU Scheduling": [
+      "deadline",
+      "real time",
+      "rate monotonic scheduling",
+      "priority",
+      "latency",
+      "interrupt"
+    ],
+    "6.7 Operating-System Examples": [
+      "priority class",
+      "scheduling class",
+      "real time",
+      "nice"
+    ],
+    "6.8 Algorithm Evaluation": [
+      "waiting time",
+      "deterministic"
+    ]
+  },
+  "unique_key_terms": [
+    "affinity",
+    "cpu burst",
+    "cpu scheduling",
+    "cpu scheduling algorithm",
+    "deadline",
+    "deterministic",
+    "dispatcher",
+    "interrupt",
+    "kernel level thread",
+    "latency",
+    "nice",
+    "preemptive",
+    "priority",
+    "priority class",
+    "pthread",
+    "rate monotonic scheduling",
+    "real time",
+    "scheduling class",
+    "smp",
+    "thread library",
+    "time quantum",
+    "turnaround time",
+    "user level",
+    "waiting time"
+  ]
+}

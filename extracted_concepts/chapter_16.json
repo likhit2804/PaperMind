@@ -1,0 +1,70 @@
+{
+  "chapter": 16,
+  "sections": {
+    "16.1 Overview": [
+      "virtualization",
+      "vmm",
+      "vmware esx"
+    ],
+    "16.2 History": [
+      "virtual machine",
+      "virtualization",
+      "indirection"
+    ],
+    "16.3 Benefits and Features": [
+      "virtual machine",
+      "guest",
+      "virtualization",
+      "file system"
+    ],
+    "16.4 Building Blocks": [
+      "instruction",
+      "user mode",
+      "page table",
+      "virtual machine",
+      "guest",
+      "binary translation",
+      "trap"
+    ],
+    "16.5 Types of Virtual Machines and Their Implementations": [
+      "guest",
+      "virtual machine",
+      "page table",
+      "hypervisor",
+      "xen",
+      "vmm"
+    ],
+    "16.6 Virtualization and Operating-System Components": [
+      "guest",
+      "vmm",
+      "device",
+      "virtual machine",
+      "page table"
+    ],
+    "16.7 Examples": [
+      "java virtual machine",
+      "cpu virtual memory",
+      "guest"
+    ]
+  },
+  "unique_key_terms": [
+    "binary translation",
+    "cpu virtual memory",
+    "device",
+    "file system",
+    "guest",
+    "hypervisor",
+    "indirection",
+    "instruction",
+    "java virtual machine",
+    "page table",
+    "protection",
+    "trap",
+    "user mode",
+    "virtual machine",
+    "virtualization",
+    "vmm",
+    "vmware esx",
+    "xen"
+  ]
+}

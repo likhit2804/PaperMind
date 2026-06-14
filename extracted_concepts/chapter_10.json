@@ -1,0 +1,98 @@
+{
+  "chapter": 10,
+  "sections": {
+    "10.1 Overview of Mass-Storage Structure": [
+      "disk",
+      "ssd",
+      "mass storage",
+      "platter",
+      "head",
+      "seek time"
+    ],
+    "10.2 Disk Structure": [
+      "track",
+      "disk",
+      "tape",
+      "sector",
+      "logical block",
+      "zone"
+    ],
+    "10.3 Disk Attachment": [
+      "host attached storage",
+      "network attached storage",
+      "address space",
+      "disk",
+      "architecture",
+      "track"
+    ],
+    "10.4 Disk Scheduling": [
+      "scheduling",
+      "disk",
+      "head",
+      "cylinder",
+      "storage"
+    ],
+    "10.5 Disk Management": [
+      "disk",
+      "file system",
+      "partition",
+      "sector",
+      "controller"
+    ],
+    "10.6 Swap-Space Management": [
+      "swap space",
+      "virtual memory",
+      "file system",
+      "swapping",
+      "main memory",
+      "disk",
+      "partition"
+    ],
+    "10.7 RAID Structure": [
+      "raid level",
+      "disk",
+      "parity",
+      "file system",
+      "striping"
+    ],
+    "10.8 Stable-Storage Implementation": [
+      "file system",
+      "volume",
+      "storage",
+      "checksum"
+    ]
+  },
+  "unique_key_terms": [
+    "address space",
+    "architecture",
+    "checksum",
+    "controller",
+    "cylinder",
+    "disk",
+    "file system",
+    "head",
+    "host attached storage",
+    "inode",
+    "logical block",
+    "main memory",
+    "mass storage",
+    "network attached storage",
+    "parity",
+    "partition",
+    "platter",
+    "raid level",
+    "scheduling",
+    "sector",
+    "seek time",
+    "ssd",
+    "storage",
+    "striping",
+    "swap space",
+    "swapping",
+    "tape",
+    "track",
+    "virtual memory",
+    "volume",
+    "zone"
+  ]
+}

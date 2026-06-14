@@ -1,0 +1,62 @@
+{
+  "chapter": 19,
+  "sections": {
+    "19.1 History": [
+      "operating system",
+      "file system",
+      "subsystem"
+    ],
+    "19.2 Design Principles": [
+      "security"
+    ],
+    "19.3 System Components": [
+      "page table",
+      "working set",
+      "file system",
+      "driver",
+      "virtual memory",
+      "interrupt",
+      "device"
+    ],
+    "19.4 Terminal Services and Fast User Switching": [],
+    "19.5 File System": [
+      "file system",
+      "volume",
+      "cluster",
+      "mft"
+    ],
+    "19.6 Networking": [
+      "file system",
+      "redirector"
+    ],
+    "19.7 Programmer Interface": [
+      "priority",
+      "critical section",
+      "address space",
+      "win32",
+      "virtual memory"
+    ]
+  },
+  "unique_key_terms": [
+    "address space",
+    "cluster",
+    "critical section",
+    "device",
+    "driver",
+    "file system",
+    "interrupt",
+    "mft",
+    "operating system",
+    "page table",
+    "priority",
+    "protection",
+    "redirector",
+    "security",
+    "subsystem",
+    "tlb",
+    "virtual memory",
+    "volume",
+    "win32",
+    "working set"
+  ]
+}

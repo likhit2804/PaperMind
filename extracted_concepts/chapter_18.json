@@ -1,0 +1,101 @@
+{
+  "chapter": 18,
+  "sections": {
+    "18.1 Linux History": [
+      "file system"
+    ],
+    "18.2 Design Principles": [
+      "system library",
+      "posix"
+    ],
+    "18.3 Kernel Modules": [
+      "kernel module",
+      "symbol table",
+      "file system",
+      "device driver",
+      "module management"
+    ],
+    "18.4 Process Management": [
+      "file system hierarchy",
+      "address space",
+      "namespace"
+    ],
+    "18.5 Scheduling": [
+      "task",
+      "critical section",
+      "scheduling",
+      "interrupt"
+    ],
+    "18.6 Memory Management": [
+      "virtual memory",
+      "page table",
+      "address space",
+      "slab",
+      "cache"
+    ],
+    "18.7 File Systems": [
+      "file system",
+      "inode object"
+    ],
+    "18.8 Input and Output": [
+      "character device",
+      "inode number",
+      "block device",
+      "file system",
+      "line discipline",
+      "device driver"
+    ],
+    "18.9 Interprocess Communication": [
+      "signal",
+      "wait queue",
+      "semaphore",
+      "pipe"
+    ],
+    "18.10 Network Structure": [
+      "shared memory",
+      "socket",
+      "skbuff"
+    ],
+    "18.11 Security": [
+      "effective uid",
+      "security",
+      "authentication"
+    ]
+  },
+  "unique_key_terms": [
+    "address space",
+    "authentication",
+    "block device",
+    "cache",
+    "character device",
+    "critical section",
+    "device driver",
+    "effective uid",
+    "file system",
+    "file system hierarchy",
+    "inode",
+    "inode number",
+    "inode object",
+    "interrupt",
+    "kernel module",
+    "line discipline",
+    "module management",
+    "namespace",
+    "page table",
+    "pipe",
+    "posix",
+    "scheduling",
+    "security",
+    "semaphore",
+    "shared memory",
+    "signal",
+    "skbuff",
+    "slab",
+    "socket",
+    "symbol table",
+    "system library",
+    "task",
+    "virtual memory",
+    "wait queue"
+  ]
+}

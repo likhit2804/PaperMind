@@ -1,0 +1,79 @@
+{
+  "chapter": 2,
+  "sections": {
+    "2.1 Operating-System Services": [
+      "operating system service",
+      "security",
+      "protection",
+      "file system"
+    ],
+    "2.2 User and Operating-System Interface": [
+      "command interpreter",
+      "command line interface",
+      "gui",
+      "operating system",
+      "shell"
+    ],
+    "2.3 System Calls": [
+      "system call",
+      "api",
+      "operating system"
+    ],
+    "2.4 Types of System Calls": [
+      "system call",
+      "protection",
+      "command interpreter"
+    ],
+    "2.5 System Programs": [
+      "loader"
+    ],
+    "2.6 Operating-System Design and Implementation": [
+      "assembly language",
+      "operating system"
+    ],
+    "2.7 Operating-System Structure": [
+      "microkernel",
+      "file system",
+      "operating system",
+      "cpu scheduling"
+    ],
+    "2.8 Operating-System Debugging": [
+      "dtrace",
+      "file system"
+    ],
+    "2.9 Operating-System Generation": [
+      "operating system",
+      "dtrace",
+      "system generation",
+      "applet"
+    ],
+    "2.10 System Boot": [
+      "bootstrap",
+      "operating system",
+      "cpu scheduling",
+      "main memory"
+    ]
+  },
+  "unique_key_terms": [
+    "api",
+    "applet",
+    "assembly language",
+    "bootstrap",
+    "command interpreter",
+    "command line interface",
+    "cpu scheduling",
+    "dtrace",
+    "file system",
+    "gui",
+    "loader",
+    "main memory",
+    "microkernel",
+    "operating system",
+    "operating system service",
+    "protection",
+    "security",
+    "shell",
+    "system call",
+    "system generation"
+  ]
+}

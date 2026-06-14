@@ -1,0 +1,97 @@
+{
+  "chapter": 20,
+  "sections": {
+    "20.1 Feature Migration": [
+      "operating system",
+      "feature migration"
+    ],
+    "20.2 Early Systems": [
+      "control card",
+      "job",
+      "device",
+      "resident monitor"
+    ],
+    "20.3 Atlas": [
+      "job",
+      "spooling",
+      "drum",
+      "core memory",
+      "device"
+    ],
+    "20.4 XDS-940": [
+      "subprocess",
+      "block",
+      "virtual memory",
+      "page table",
+      "demand paging"
+    ],
+    "20.6 RC 4000": [
+      "deadlock",
+      "priority",
+      "batch system",
+      "buffer",
+      "cpu scheduling"
+    ],
+    "20.7 CTSS": [
+      "buffer",
+      "device",
+      "queue",
+      "quantum",
+      "driver"
+    ],
+    "20.9 IBM OS/360": [
+      "file system",
+      "virtual memory",
+      "protection",
+      "address space",
+      "multic",
+      "time sharing"
+    ],
+    "20.11 CP/M and MS/DOS": [
+      "operating system"
+    ],
+    "20.12 Macintosh Operating System and Windows": [
+      "operating system"
+    ],
+    "20.13 Mach": [
+      "virtual machine",
+      "unix",
+      "operating system"
+    ],
+    "20.14 Other Systems": [
+      "virtual machine",
+      "operating system"
+    ]
+  },
+  "unique_key_terms": [
+    "address space",
+    "batch system",
+    "block",
+    "buffer",
+    "control card",
+    "core memory",
+    "cpu scheduling",
+    "deadlock",
+    "demand paging",
+    "device",
+    "driver",
+    "drum",
+    "feature migration",
+    "file system",
+    "job",
+    "multic",
+    "operating system",
+    "page table",
+    "priority",
+    "protection",
+    "quantum",
+    "queue",
+    "resident monitor",
+    "spooling",
+    "subprocess",
+    "time sharing",
+    "unix",
+    "virtual machine",
+    "virtual memory"
+  ]
+}

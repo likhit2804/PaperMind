@@ -1,0 +1,67 @@
+{
+  "chapter": 3,
+  "sections": {
+    "3.1 Process Concept": [
+      "program counter",
+      "executable file",
+      "cpu"
+    ],
+    "3.2 Process Scheduling": [
+      "cpu",
+      "ready queue",
+      "context",
+      "scheduling"
+    ],
+    "3.3 Operations on Processes": [
+      "parent process",
+      "child process",
+      "system call",
+      "pid",
+      "address space"
+    ],
+    "3.4 Interprocess Communication": [
+      "message",
+      "mailbox",
+      "shared memory",
+      "buffer"
+    ],
+    "3.5 Examples of IPC Systems": [
+      "message",
+      "mailbox",
+      "memory object",
+      "mach",
+      "port"
+    ],
+    "3.6 Communication in Client\u2013Server Systems": [
+      "pipe",
+      "socket",
+      "port",
+      "rpc",
+      "message"
+    ]
+  },
+  "unique_key_terms": [
+    "address space",
+    "buffer",
+    "child process",
+    "context",
+    "cpu",
+    "executable file",
+    "mach",
+    "mailbox",
+    "memory object",
+    "message",
+    "parent process",
+    "pid",
+    "pipe",
+    "port",
+    "program counter",
+    "ready queue",
+    "rpc",
+    "scheduling",
+    "security",
+    "shared memory",
+    "socket",
+    "system call"
+  ]
+}

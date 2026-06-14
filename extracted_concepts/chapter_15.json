@@ -1,0 +1,83 @@
+{
+  "chapter": 15,
+  "sections": {
+    "15.1 The Security Problem": [
+      "protection"
+    ],
+    "15.2 Program Threats": [
+      "virus",
+      "security",
+      "stack frame"
+    ],
+    "15.3 System and Network Threats": [
+      "worm",
+      "security",
+      "virus",
+      "network threat"
+    ],
+    "15.4 Cryptography as a Security Tool": [
+      "public key",
+      "encryption",
+      "security",
+      "cryptography"
+    ],
+    "15.5 User Authentication": [
+      "one time password",
+      "security",
+      "protection",
+      "authentication"
+    ],
+    "15.6 Implementing Security Defenses": [
+      "security",
+      "anomaly detection",
+      "tripwire",
+      "virus",
+      "file system"
+    ],
+    "15.7 Firewalling to Protect Systems and Networks": [
+      "firewall",
+      "dmz",
+      "security",
+      "domain"
+    ],
+    "15.8 Computer-Security Classifications": [
+      "security classification",
+      "protection system",
+      "tcb"
+    ],
+    "15.9 An Example: Windows 7": [
+      "security descriptor",
+      "integrity label",
+      "access token",
+      "auditing",
+      "security policy"
+    ]
+  },
+  "unique_key_terms": [
+    "access token",
+    "anomaly detection",
+    "auditing",
+    "authentication",
+    "cryptography",
+    "dmz",
+    "domain",
+    "encryption",
+    "file system",
+    "firewall",
+    "integrity label",
+    "network threat",
+    "one time password",
+    "protection",
+    "protection system",
+    "public key",
+    "security",
+    "security classification",
+    "security descriptor",
+    "security policy",
+    "stack frame",
+    "tcb",
+    "tripwire",
+    "virus",
+    "worm"
+  ]
+}
