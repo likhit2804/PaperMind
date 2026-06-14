@@ -48,7 +48,7 @@ def main():
         print(f"Running key term extraction for Chapter {ch_num}...")
         
         try:
-            cmd = ["python", "pipeline/extract_concepts.py", ch_pdf_path, str(ch_num), output_json]
+            cmd = ["python", "pipeline/textbook/extract_concepts.py", ch_pdf_path, str(ch_num), output_json]
             result = subprocess.run(cmd, capture_output=True, text=True, encoding="utf-8")
             
             if result.returncode == 0:
