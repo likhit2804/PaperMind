@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState } from "react";
 import Card from "./Card";
 import Banner from "./Banner";
 import ProblemLinkBanner from "./ProblemLinkBanner";
@@ -17,17 +17,9 @@ export default function Step4Checkpoint({
   const [description, setDescription] = useState("");
   const [selectedMcqOption, setSelectedMcqOption] = useState("");
 
-  // Reset inputs when problem changes
-  useEffect(() => {
-    setSuccessChecked(true);
-    setSelectedIssues([]);
-    setDescription("");
-    setSelectedMcqOption("");
-  }, [checkpointProblem]);
-
   if (!checkpointProblem) return null;
 
-  const matchLink = checkpointProblem.question_text?.match(/https?:\/\/[^\s\)]+/);
+  const matchLink = checkpointProblem.question_text?.match(/https?:\/\/[^\s)]+/);
   const isExternalLink = matchLink !== null || topicId === "dsa_comprehensive";
 
   const handleIssueToggle = (issueId) => {

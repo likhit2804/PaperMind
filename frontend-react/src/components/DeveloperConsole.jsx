@@ -1,5 +1,3 @@
-import React from "react";
-
 export default function DeveloperConsole({ payload }) {
   return (
     <details className="dev-console">

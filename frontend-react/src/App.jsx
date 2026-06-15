@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
-import { ThemeProvider, useTheme } from "./context/ThemeContext";
+import { useCallback, useEffect, useState } from "react";
+import { ThemeProvider } from "./context/ThemeContext";
 import ThemeToggle from "./components/ThemeToggle";
 import Banner from "./components/Banner";
 import Step1ChooseTopic from "./components/Step1ChooseTopic";
@@ -7,32 +7,45 @@ import Step2BaselineCheck from "./components/Step2BaselineCheck";
 import Step3StudyPlan from "./components/Step3StudyPlan";
 import Step4Checkpoint from "./components/Step4Checkpoint";
 import DeveloperConsole from "./components/DeveloperConsole";
+import PaperExplorer from "./components/PaperExplorer/PaperExplorer";
 
 const BACKEND_URL = "http://localhost:8000";
 
+function loadSavedJourneyState() {
+  try {
+    const raw = localStorage.getItem("cogniweave_state");
+    return raw ? JSON.parse(raw) || {} : {};
+  } catch {
+    return {};
+  }
+}
+
 function AppContent() {
-  const { theme } = useTheme();
+  const [savedJourney] = useState(() => loadSavedJourneyState());
   const [backendOnline, setBackendOnline] = useState(false);
   const [backendStatus, setBackendStatus] = useState("Checking Backend...");
-  
+  const [activeTab, setActiveTab] = useState("journey"); // 'journey' | 'paper'
+
   // App States
-  const [sessionId, setSessionId] = useState(null);
-  const [studentId, setStudentId] = useState("student_johndoe");
-  const [topicId, setTopicId] = useState("dsa_comprehensive");
+  const [sessionId, setSessionId] = useState(savedJourney.sessionId ?? null);
+  const [studentId, setStudentId] = useState(savedJourney.studentId ?? "student_johndoe");
+  const [topicId, setTopicId] = useState(savedJourney.topicId ?? "dsa_comprehensive");
   const [topics, setTopics] = useState([]);
-  const [activeCardId, setActiveCardId] = useState("step1Card");
+  const [activeCardId, setActiveCardId] = useState(savedJourney.activeCardId ?? "step1Card");
   const [isLoading, setIsLoading] = useState(false);
 
   // Step 2 Diagnostic states
-  const [currentQuestion, setCurrentQuestion] = useState(null);
-  const [currentQuestionProgress, setCurrentQuestionProgress] = useState(null);
+  const [currentQuestion, setCurrentQuestion] = useState(savedJourney.currentQuestion ?? null);
+  const [currentQuestionProgress, setCurrentQuestionProgress] = useState(
+    savedJourney.currentQuestionProgress ?? null
+  );
 
   // Step 3 Plan states
-  const [planData, setPlanData] = useState(null);
-  const [weakestConceptId, setWeakestConceptId] = useState("");
+  const [planData, setPlanData] = useState(savedJourney.planData ?? null);
+  const [weakestConceptId, setWeakestConceptId] = useState(savedJourney.weakestConceptId ?? "");
 
   // Step 4 Checkpoint states
-  const [checkpointProblem, setCheckpointProblem] = useState(null);
+  const [checkpointProblem, setCheckpointProblem] = useState(savedJourney.checkpointProblem ?? null);
 
   // Message Banners
   const [step1Message, setStep1Message] = useState({ text: "", type: "info" });
@@ -56,6 +69,25 @@ function AppContent() {
     planData,
   };
 
+  const fetchTopics = useCallback(async () => {
+    try {
+      const res = await fetch(`${BACKEND_URL}/ingest/topics`);
+      if (!res.ok) return;
+
+      const data = await res.json();
+      setTopics(data);
+
+      if (data && data.length > 0) {
+        const hasTopic = data.some((t) => t.topic_id === topicId);
+        if (!hasTopic) {
+          setTopicId(data[0].topic_id);
+        }
+      }
+    } catch (err) {
+      console.warn("Failed to fetch topics:", err);
+    }
+  }, [topicId]);
+
   // 1. Health check & Fetch topics on load
   useEffect(() => {
     async function checkBackend() {
@@ -68,7 +100,7 @@ function AppContent() {
         } else {
           throw new Error();
         }
-      } catch (err) {
+      } catch {
         setBackendOnline(false);
         setBackendStatus("Backend Offline");
         setStep1Message({
@@ -78,31 +110,7 @@ function AppContent() {
       }
     }
     checkBackend();
-  }, []);
-
-  // 2. Load cached state from LocalStorage after backend connection is verified
-  useEffect(() => {
-    if (!backendOnline) return;
-    try {
-      const raw = localStorage.getItem("cogniweave_state");
-      if (raw) {
-        const saved = JSON.parse(raw);
-        if (saved) {
-          if (saved.sessionId) setSessionId(saved.sessionId);
-          if (saved.studentId) setStudentId(saved.studentId);
-          if (saved.topicId) setTopicId(saved.topicId);
-          if (saved.currentQuestion) setCurrentQuestion(saved.currentQuestion);
-          if (saved.currentQuestionProgress) setCurrentQuestionProgress(saved.currentQuestionProgress);
-          if (saved.weakestConceptId) setWeakestConceptId(saved.weakestConceptId);
-          if (saved.checkpointProblem) setCheckpointProblem(saved.checkpointProblem);
-          if (saved.activeCardId) setActiveCardId(saved.activeCardId);
-          if (saved.planData) setPlanData(saved.planData);
-        }
-      }
-    } catch (e) {
-      console.warn("Failed to restore state:", e);
-    }
-  }, [backendOnline]);
+  }, [fetchTopics]);
 
   // 3. Cache state to LocalStorage when states change
   useEffect(() => {
@@ -137,25 +145,6 @@ function AppContent() {
     planData,
     backendOnline,
   ]);
-
-  const fetchTopics = async () => {
-    try {
-      const res = await fetch(`${BACKEND_URL}/ingest/topics`);
-      if (res.ok) {
-        const data = await res.json();
-        setTopics(data);
-        if (data && data.length > 0) {
-          // If current topicId is not in fetched topics, default to first topic
-          const hasTopic = data.some((t) => t.topic_id === topicId);
-          if (!hasTopic) {
-            setTopicId(data[0].topic_id);
-          }
-        }
-      }
-    } catch (err) {
-      console.warn("Failed to fetch topics:", err);
-    }
-  };
 
   // Step 1 action: Start Baseline assessment
   const startAssessment = async () => {
@@ -345,7 +334,9 @@ function AppContent() {
     setActiveCardId("step1Card");
     try {
       localStorage.removeItem("cogniweave_state");
-    } catch (e) {}
+    } catch (error) {
+      console.warn("Failed to clear saved journey state:", error);
+    }
   };
 
   return (
@@ -385,49 +376,77 @@ function AppContent() {
           <ThemeToggle />
         </header>
 
-        {activeCardId === "step1Card" && (
-          <Step1ChooseTopic
-            studentId={studentId}
-            setStudentId={setStudentId}
-            topicId={topicId}
-            setTopicId={setTopicId}
-            topics={topics}
-            onStart={startAssessment}
-            isLoading={isLoading}
-            message={step1Message}
-          />
-        )}
+        {/* ── Tab Bar ── */}
+        <div className="tab-bar">
+          <button
+            id="tab-journey"
+            className={`tab-btn${activeTab === "journey" ? " tab-active" : ""}`}
+            onClick={() => setActiveTab("journey")}
+          >
+            Learning Journey
+          </button>
+          <button
+            id="tab-paper"
+            className={`tab-btn${activeTab === "paper" ? " tab-active" : ""}`}
+            onClick={() => setActiveTab("paper")}
+          >
+            Paper Explorer
+          </button>
+        </div>
 
-        {activeCardId === "step2Card" && (
-          <Step2BaselineCheck
-            question={currentQuestion}
-            progress={currentQuestionProgress}
-            topicId={topicId}
-            onSubmitAnswer={submitAssessmentAnswer}
-            isLoading={isLoading}
-            message={assessmentMessage}
-          />
-        )}
+        {/* ── Paper Explorer Tab ── */}
+        {activeTab === "paper" && <PaperExplorer />}
 
-        {activeCardId === "step3Card" && (
-          <Step3StudyPlan
-            planData={planData}
-            onContinue={handleContinueToPractice}
-          />
-        )}
+        {/* ── Learning Journey Tab ── */}
+        {activeTab === "journey" && (
+          <>
+            {activeCardId === "step1Card" && (
+              <Step1ChooseTopic
+                studentId={studentId}
+                setStudentId={setStudentId}
+                topicId={topicId}
+                setTopicId={setTopicId}
+                topics={topics}
+                onStart={startAssessment}
+                isLoading={isLoading}
+                message={step1Message}
+              />
+            )}
 
-        {activeCardId === "step4Card" && (
-          <Step4Checkpoint
-            checkpointProblem={checkpointProblem}
-            topicId={topicId}
-            onSubmitCheckpoint={submitCheckpointOutcome}
-            onRestart={restartJourney}
-            isLoading={isLoading}
-            message={checkpointMessage}
-          />
-        )}
+            {activeCardId === "step2Card" && (
+              <Step2BaselineCheck
+                key={currentQuestion?.id ?? "step2Card"}
+                question={currentQuestion}
+                progress={currentQuestionProgress}
+                topicId={topicId}
+                onSubmitAnswer={submitAssessmentAnswer}
+                isLoading={isLoading}
+                message={assessmentMessage}
+              />
+            )}
 
-        <DeveloperConsole payload={devState} />
+            {activeCardId === "step3Card" && (
+              <Step3StudyPlan
+                planData={planData}
+                onContinue={handleContinueToPractice}
+              />
+            )}
+
+            {activeCardId === "step4Card" && (
+              <Step4Checkpoint
+                key={checkpointProblem?.id ?? "step4Card"}
+                checkpointProblem={checkpointProblem}
+                topicId={topicId}
+                onSubmitCheckpoint={submitCheckpointOutcome}
+                onRestart={restartJourney}
+                isLoading={isLoading}
+                message={checkpointMessage}
+              />
+            )}
+
+            <DeveloperConsole payload={devState} />
+          </>
+        )}
       </div>
     </>
   );

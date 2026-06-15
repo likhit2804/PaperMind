@@ -8,6 +8,7 @@ import orchestratorRouter from "./routes/orchestrator.js";
 import assessmentRouter from "./routes/assessment.js";
 import evaluationRouter from "./routes/evaluation.js";
 import ingestRouter from "./routes/ingest.js";
+import paperRouter from "./routes/paper.js";
 
 const app = express();
 
@@ -28,6 +29,7 @@ app.use(orchestratorRouter);
 app.use(assessmentRouter);
 app.use(evaluationRouter);
 app.use(ingestRouter);
+app.use(paperRouter);
 
 // --------------- Error handler ---------------
 app.use((err, _req, res, _next) => {

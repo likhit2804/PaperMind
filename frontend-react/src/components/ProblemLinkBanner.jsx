@@ -1,7 +1,5 @@
-import React from "react";
-
 export default function ProblemLinkBanner({ title, questionText, solveBtnId }) {
-  const matchLink = questionText?.match(/https?:\/\/[^\s\)]+/);
+  const matchLink = questionText?.match(/https?:\/\/[^\s)]+/);
   const leetcodeLink = matchLink ? matchLink[0] : "https://leetcode.com/problemset/";
   const isLeetcode = leetcodeLink.includes("leetcode.com");
 

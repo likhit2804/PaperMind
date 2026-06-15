@@ -1,6 +1,4 @@
-import React from "react";
-
-export const COMMON_ISSUES = [
+const COMMON_ISSUES = [
   { id: "incorrect_map_lookup", label: "Lookup Key Error", desc: "Student checks index instead of value, or uses bad keys inside hash maps." },
   { id: "wrong_pointer_increment", label: "Pointer Move Error", desc: "Incrementing right pointer instead of decrementing, or missing edge increments." },
   { id: "out_of_bounds_window", label: "Off-by-One Window Bounds", desc: "Window sizes calculated as right - left, or failing to shrink boundaries dynamically." },

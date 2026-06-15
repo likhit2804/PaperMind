@@ -1,0 +1,117 @@
+{
+  "paper_title": "Quantum Image Processing Algorithm Using Line Detection Mask Based on NEQR",
+  "sections": {
+    "Introduction": [
+      "quantum image processing",
+      "image segmentation",
+      "line detection mask",
+      "quantum image transformation"
+    ],
+    "The Preparation of Quantum Line Detection": [
+      "quantum line detection",
+      "quantum image processing",
+      "kirsch operator",
+      "image segmentation"
+    ],
+    "The Classical Line Detection Method": [
+      "quantum line detection",
+      "quantum image processing",
+      "kirsch operator",
+      "image segmentation"
+    ],
+    "Quantum Representation of Image": [
+      "neqr representation",
+      "frqi",
+      "mcrqi",
+      "gqir",
+      "qirhsi"
+    ],
+    "Several Auxiliary Modules for Quantum Line Detection": [
+      "quantum circuit"
+    ],
+    "Quantum Line Detection Algorithm": [
+      "quantum image representation",
+      "convolution",
+      "quantum circuit",
+      "quantum line detection"
+    ],
+    "Step 1: Quantum Image Representation": [
+      "quantum image representation",
+      "convolution",
+      "quantum circuit",
+      "quantum line detection"
+    ],
+    "Step 2: Quantum Image Shift Transformation": [
+      "quantum image representation",
+      "convolution",
+      "quantum circuit",
+      "quantum line detection"
+    ],
+    "Step 3: Quantum Line Calculation in Different Directions": [
+      "quantum circuit realization",
+      "quantum double module"
+    ],
+    "Step 4: Quantum Threshold Value Classification": [
+      "quantum measurement",
+      "cnot gate",
+      "line detection",
+      "reversible parallel adder",
+      "quantum double module"
+    ],
+    "Step 5: Quantum Measurement Operation": [
+      "quantum measurement",
+      "cnot gate",
+      "line detection",
+      "reversible parallel adder",
+      "quantum double module"
+    ],
+    "Complexity Analysis": [
+      "quantum measurement",
+      "cnot gate",
+      "line detection",
+      "reversible parallel adder",
+      "quantum double module"
+    ],
+    "Simulation Analysis": [
+      "neqr"
+    ]
+  },
+  "unique_key_terms": [
+    "binary complement",
+    "cnot gate",
+    "convolution",
+    "correlation",
+    "cycle shift transformation",
+    "frqi",
+    "gqir",
+    "hadamard gate",
+    "image segmentation",
+    "kirsch operator",
+    "line detection",
+    "line detection mask",
+    "maj gate",
+    "mcrqi",
+    "neqr",
+    "neqr representation",
+    "prewitt operator",
+    "qirhsi",
+    "quantum absolute value module",
+    "quantum circuit",
+    "quantum circuit realization",
+    "quantum copy module",
+    "quantum double module",
+    "quantum image processing",
+    "quantum image representation",
+    "quantum image transformation",
+    "quantum line detection",
+    "quantum measurement",
+    "quantum no-cloning principle",
+    "quantum superposition",
+    "reversible parallel adder",
+    "robinson operator",
+    "sobel operator",
+    "threshold classification",
+    "toffoli gate",
+    "uma gate"
+  ]
+}

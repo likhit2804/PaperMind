@@ -1,4 +1,5 @@
-import React, { createContext, useState, useEffect, useContext } from "react";
+/* eslint-disable react-refresh/only-export-components */
+import { createContext, useState, useEffect, useContext } from "react";
 
 const ThemeContext = createContext();
 
@@ -7,7 +8,9 @@ export function ThemeProvider({ children }) {
     try {
       const saved = localStorage.getItem("cogniweave_theme");
       if (saved === "light" || saved === "dark") return saved;
-    } catch (e) {}
+    } catch (error) {
+      console.warn("Failed to read saved theme:", error);
+    }
     return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
   });
 
@@ -15,7 +18,9 @@ export function ThemeProvider({ children }) {
     document.documentElement.setAttribute("data-theme", theme);
     try {
       localStorage.setItem("cogniweave_theme", theme);
-    } catch (e) {}
+    } catch (error) {
+      console.warn("Failed to persist theme:", error);
+    }
   }, [theme]);
 
   const toggleTheme = () => {

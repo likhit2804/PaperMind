@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState } from "react";
 import Card from "./Card";
 import Banner from "./Banner";
 import ProblemLinkBanner from "./ProblemLinkBanner";
@@ -17,18 +17,10 @@ export default function Step2BaselineCheck({
   const [description, setDescription] = useState("");
   const [selectedMcqOption, setSelectedMcqOption] = useState("");
 
-  // Reset inputs when question changes
-  useEffect(() => {
-    setSuccessChecked(true);
-    setSelectedIssues([]);
-    setDescription("");
-    setSelectedMcqOption("");
-  }, [question]);
-
   if (!question) return null;
 
   // Determine if it is external-link or dsa comprehensive
-  const matchLink = question.question_text?.match(/https?:\/\/[^\s\)]+/);
+  const matchLink = question.question_text?.match(/https?:\/\/[^\s)]+/);
   const isExternalLink = matchLink !== null || topicId === "dsa_comprehensive";
 
   const handleIssueToggle = (issueId) => {

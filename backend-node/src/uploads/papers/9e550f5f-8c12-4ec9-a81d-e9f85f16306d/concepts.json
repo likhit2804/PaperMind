@@ -3,58 +3,49 @@
   "sections": {
     "Introduction": [
       "quantum image processing",
+      "quantum representation",
       "line detection mask",
-      "edge detection",
       "image segmentation",
       "quantum information"
     ],
     "The Preparation of Quantum Line Detection": [
-      "edge detection",
       "quantum line detection",
+      "time complexity",
       "quantum image processing",
       "kirsch operator"
     ],
     "The Classical Line Detection Method": [
-      "edge detection",
       "quantum line detection",
+      "time complexity",
       "quantum image processing",
       "kirsch operator"
     ],
     "Quantum Representation of Image": [
-      "neqr representation",
+      "neqr",
+      "quantum representation",
       "frqi",
       "mcrqi",
       "gqir",
       "qirhsi"
     ],
-    "Several Auxiliary Modules for Quantum Line Detection": [
-      "sign bit",
-      "quantum circuit"
-    ],
+    "Several Auxiliary Modules for Quantum Line Detection": [],
     "Quantum Line Detection Algorithm": [
-      "quantum circuit",
-      "convolution",
-      "gray scale",
-      "quantum line detection"
+      "quantum line detection",
+      "convolution"
     ],
     "Step 1: Quantum Image Representation": [
-      "quantum circuit",
-      "convolution",
-      "gray scale",
-      "quantum line detection"
+      "quantum line detection",
+      "convolution"
     ],
     "Step 2: Quantum Image Shift Transformation": [
-      "quantum circuit",
-      "convolution",
-      "gray scale",
-      "quantum line detection"
+      "quantum line detection",
+      "convolution"
     ],
     "Step 3: Quantum Line Calculation in Different Directions": [
-      "quantum circuit realization",
-      "quantum double module"
+      "quantum double module",
+      "correlation calculation"
     ],
     "Step 4: Quantum Threshold Value Classification": [
-      "complexity analysis",
       "quantum measurement",
       "cnot gate",
       "line detection",
@@ -62,7 +53,6 @@
       "quantum double module"
     ],
     "Step 5: Quantum Measurement Operation": [
-      "complexity analysis",
       "quantum measurement",
       "cnot gate",
       "line detection",
@@ -70,7 +60,6 @@
       "quantum double module"
     ],
     "Complexity Analysis": [
-      "complexity analysis",
       "quantum measurement",
       "cnot gate",
       "line detection",
@@ -78,52 +67,45 @@
       "quantum double module"
     ],
     "Simulation Analysis": [
-      "neqr",
-      "edge detection"
+      "neqr"
     ]
   },
   "unique_key_terms": [
     "binary complement",
     "cnot gate",
-    "complexity analysis",
     "convolution",
-    "correlation",
+    "correlation calculation",
     "cycle shift transformation",
-    "edge detection",
-    "entanglement",
     "frqi",
     "gqir",
-    "gray scale",
+    "gray-scale image",
     "hadamard gate",
     "image segmentation",
     "kirsch operator",
     "line detection",
     "line detection mask",
     "maj gate",
+    "marr\u2013hildreth edge detection",
     "mcrqi",
     "neqr",
-    "neqr representation",
-    "novel enhanced quantum representation",
-    "parallelism",
     "prewitt operator",
     "qirhsi",
     "quantum absolute value module",
-    "quantum circuit",
-    "quantum circuit realization",
     "quantum copy module",
     "quantum double module",
     "quantum image processing",
     "quantum image transformation",
     "quantum information",
-    "quantum information science",
     "quantum line detection",
     "quantum measurement",
     "quantum no-cloning principle",
+    "quantum representation",
+    "quantum superposition",
     "reversible parallel adder",
-    "sign bit",
+    "robinson operator",
     "sobel operator",
-    "superposition",
     "threshold classification module",
+    "time complexity",
     "toffoli gate",
     "uma gate"
   ]

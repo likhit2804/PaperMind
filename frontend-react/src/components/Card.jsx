@@ -1,5 +1,3 @@
-import React from "react";
-
 export default function Card({ id, step, title, description, children, className = "" }) {
   return (
     <section className={`card ${className}`} id={id}>
