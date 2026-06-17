@@ -9,7 +9,9 @@ import Step4Checkpoint from "./components/Step4Checkpoint";
 import DeveloperConsole from "./components/DeveloperConsole";
 import PaperExplorer from "./components/PaperExplorer/PaperExplorer";
 
-const BACKEND_URL = "http://localhost:8000";
+const BACKEND_URL = import.meta.env.DEV 
+  ? "http://localhost:8000" 
+  : window.location.origin;
 
 function loadSavedJourneyState() {
   try {
@@ -356,7 +358,7 @@ function AppContent() {
         </svg>
       </div>
 
-      <div className="container">
+      <div className={`container ${activeTab === "paper" ? "full-width" : ""}`}>
         {isLiveServer && (
           <Banner type="error" className="live-server-warning" style={{ marginBottom: "20px" }}>
             Warning: You are viewing this page via a VS Code Live Server port. To prevent database writes from triggering automatic browser reloads, please use the official Node server address:{" "}

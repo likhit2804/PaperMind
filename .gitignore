@@ -29,3 +29,8 @@ frontend/dist/
 db/cogniweave.db
 db/cogniweave.db-shm
 db/cogniweave.db-wal
+
+# Temporary / Uploaded Files
+backend-node/src/uploads/
+scratch/
+frontend-react/dist/

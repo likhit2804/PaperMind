@@ -1,11 +1,10 @@
-import { useState, useCallback, useEffect } from "react";
-import GraphCanvas from "./GraphCanvas";
-import NodeDrawer from "./NodeDrawer";
-import KeyTermsPanel from "./KeyTermsPanel";
+import { useState, useCallback, useEffect, useRef } from "react";
 import PdfViewer from "./PdfViewer";
 import UploadZone from "./UploadZone";
 
-const BACKEND_URL = "http://localhost:8000";
+const BACKEND_URL = import.meta.env.DEV 
+  ? "http://localhost:8000" 
+  : window.location.origin;
 const STORAGE_KEY = "cogniweave_paper_session";
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
@@ -35,6 +34,25 @@ function clearSession() {
   }
 }
 
+function groupSources(sources) {
+  if (!sources || sources.length === 0) return [];
+  const groups = {};
+  sources.forEach((src) => {
+    const page = src.page;
+    const section = src.section || "the text";
+    const key = `${page}_${section}`;
+    if (!groups[key]) {
+      groups[key] = {
+        page,
+        section: src.section,
+        count: 0,
+      };
+    }
+    groups[key].count += 1;
+  });
+  return Object.values(groups);
+}
+
 export default function PaperExplorer() {
   // ── Initialise from localStorage so data survives page refresh ──────────
   const saved = loadSavedSession();
@@ -45,14 +63,171 @@ export default function PaperExplorer() {
   const [nodes, setNodes]             = useState(saved?.nodes || []);
   const [sessionId, setSessionId]     = useState(saved?.sessionId || null);
   const [selectedNode, setSelectedNode] = useState(null);
-  const [showKeyTerms, setShowKeyTerms] = useState(false);
+  
+  // Tabs & Search states for the master list
+  const [activeTab, setActiveTab]     = useState("all");
+  const [search, setSearch]           = useState("");
+
+  const [pdfPage, setPdfPage]         = useState(1);
+  const [pdfOpen, setPdfOpen]         = useState(!!saved);
+  const [pdfDocked, setPdfDocked]     = useState(true);
+  const [autoFilterPage, setAutoFilterPage] = useState(true);
+
+  const [showUpgradeBanner, setShowUpgradeBanner] = useState(false);
+
+  // VS Code Layout Toggle States
+  const [showPdf, setShowPdf] = useState(true);
+  const [showMaster, setShowMaster] = useState(true);
+  const [showDetail, setShowDetail] = useState(true);
+
+  // Adjustable split pane widths
+  const [pdfWidth, setPdfWidth] = useState(480);
+  const [masterWidth, setMasterWidth] = useState(340);
+  const [draggingResizer, setDraggingResizer] = useState(null); // null | 'pdf' | 'master'
+  const dashboardRef = useRef(null);
 
   // pdfUrl is derived from sessionId — never stored directly (avoids stale host issues)
   const pdfUrl = sessionId ? `${BACKEND_URL}/paper/pdf/${sessionId}` : null;
 
-  const [pdfPage, setPdfPage] = useState(1);
-  const [pdfSearchTerm, setPdfSearchTerm] = useState("");
-  const [pdfOpen, setPdfOpen] = useState(!!saved);
+  const isPdfVisible = !!(pdfOpen && pdfDocked && showPdf && pdfUrl);
+  const isMasterVisible = showMaster;
+  const isDetailVisible = showDetail;
+
+  const togglePdf = useCallback(() => {
+    if (!pdfOpen) {
+      setPdfOpen(true);
+      setShowPdf(true);
+    } else {
+      const visibleCount = [pdfOpen && pdfDocked && showPdf, showMaster, showDetail].filter(Boolean).length;
+      if (visibleCount > 1 || !showPdf) {
+        setShowPdf(prev => !prev);
+      }
+    }
+  }, [pdfOpen, pdfDocked, showPdf, showMaster, showDetail]);
+
+  const toggleMaster = useCallback(() => {
+    const isPdfVisibleLoc = !!(pdfOpen && pdfDocked && showPdf);
+    const visibleCount = [isPdfVisibleLoc, showMaster, showDetail].filter(Boolean).length;
+    if (visibleCount > 1 || !showMaster) {
+      setShowMaster(prev => !prev);
+    }
+  }, [pdfOpen, pdfDocked, showPdf, showMaster, showDetail]);
+
+  const toggleDetail = useCallback(() => {
+    const isPdfVisibleLoc = !!(pdfOpen && pdfDocked && showPdf);
+    const visibleCount = [isPdfVisibleLoc, showMaster, showDetail].filter(Boolean).length;
+    if (visibleCount > 1 || !showDetail) {
+      setShowDetail(prev => !prev);
+    }
+  }, [pdfOpen, pdfDocked, showPdf, showMaster, showDetail]);
+
+  const startResizePdf = useCallback((e) => {
+    e.preventDefault();
+    setDraggingResizer("pdf");
+  }, []);
+
+  const startResizeMaster = useCallback((e) => {
+    e.preventDefault();
+    setDraggingResizer("master");
+  }, []);
+
+  // Window listeners for resizing
+  useEffect(() => {
+    if (!draggingResizer) return;
+
+    const handleMouseMove = (e) => {
+      if (!dashboardRef.current) return;
+      const rect = dashboardRef.current.getBoundingClientRect();
+
+      if (draggingResizer === "pdf") {
+        const newWidth = e.clientX - rect.left;
+        const minWidth = 320;
+        const maxWidth = rect.width * 0.7;
+        if (newWidth >= minWidth && newWidth <= maxWidth) {
+          setPdfWidth(newWidth);
+        }
+      } else if (draggingResizer === "master") {
+        const pdfPaneWidth = isPdfVisible ? pdfWidth + 8 : 0;
+        const newMasterWidth = e.clientX - rect.left - pdfPaneWidth;
+        const minWidth = 280;
+        const maxWidth = (rect.width - pdfPaneWidth) * 0.7;
+        if (newMasterWidth >= minWidth && newMasterWidth <= maxWidth) {
+          setMasterWidth(newMasterWidth);
+        }
+      }
+    };
+
+    const handleMouseUp = () => {
+      setDraggingResizer(null);
+    };
+
+    window.addEventListener("mousemove", handleMouseMove);
+    window.addEventListener("mouseup", handleMouseUp);
+    return () => {
+      window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("mouseup", handleMouseUp);
+    };
+  }, [draggingResizer, isPdfVisible, pdfWidth]);
+
+  // VS Code hotkeys (Alt+1, Alt+2, Alt+3) for layout toggles
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.altKey) {
+        if (e.key === "1") {
+          e.preventDefault();
+          if (pdfUrl) togglePdf();
+        } else if (e.key === "2") {
+          e.preventDefault();
+          toggleMaster();
+        } else if (e.key === "3") {
+          e.preventDefault();
+          toggleDetail();
+        }
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [togglePdf, toggleMaster, toggleDetail, pdfUrl]);
+
+  const getGridTemplateColumns = () => {
+    const parts = [];
+    const visibleCount = [isPdfVisible, isMasterVisible, isDetailVisible].filter(Boolean).length;
+    if (visibleCount === 0) return "1fr";
+
+    if (isPdfVisible) {
+      if (isMasterVisible || isDetailVisible) {
+        parts.push(`${pdfWidth}px`);
+        parts.push("8px");
+      } else {
+        parts.push("1fr");
+      }
+    }
+
+    if (isMasterVisible) {
+      if (isDetailVisible) {
+        parts.push(`${masterWidth}px`);
+        parts.push("8px");
+      } else {
+        parts.push("1fr");
+      }
+    }
+
+    if (isDetailVisible) {
+      parts.push("1fr");
+    }
+
+    return parts.join(" ");
+  };
+
+  // Check if saved session has only concept nodes (old schema)
+  useEffect(() => {
+    if (nodes && nodes.length > 0) {
+      const hasOtherTypes = nodes.some(n => n.type && n.type !== "concept");
+      setShowUpgradeBanner(!hasOtherTypes);
+    } else {
+      setShowUpgradeBanner(false);
+    }
+  }, [nodes]);
 
   // ── Persist whenever session changes ────────────────────────────────────
   useEffect(() => {
@@ -76,7 +251,6 @@ export default function PaperExplorer() {
     setError("");
     setNodes([]);
     setSelectedNode(null);
-    setPdfSearchTerm("");
     setPdfOpen(false);
     clearSession();
 
@@ -107,20 +281,9 @@ export default function PaperExplorer() {
   }, [sessionId]);
 
   // ── Node / reference interaction ─────────────────────────────────────────
-  const handleNodeClick = useCallback((node) => {
-    setSelectedNode(node);
-    setShowKeyTerms(false);
-  }, []);
-
-  const handleReferenceClick = useCallback((page, search = "") => {
+  const handleReferenceClick = useCallback((page) => {
     setPdfPage(page);
-    setPdfSearchTerm(search);
     setPdfOpen(true);
-  }, []);
-
-  const handleTermSelect = useCallback((node) => {
-    setSelectedNode(node);
-    setShowKeyTerms(false);
   }, []);
 
   // ── Clear / re-upload ─────────────────────────────────────────────────────
@@ -135,9 +298,175 @@ export default function PaperExplorer() {
     setPaperTitle("");
     setSessionId(null);
     setSelectedNode(null);
-    setPdfSearchTerm("");
     setPdfOpen(false);
+    setAutoFilterPage(true);
   }, [sessionId]);
+
+  // ── Filtering Logic ──────────────────────────────────────────────────────
+  const pageFilteredNodes = (pdfOpen && autoFilterPage)
+    ? nodes.filter(n => n.sources?.some(src => src.page === pdfPage))
+    : nodes;
+
+  const counts = {
+    all: pageFilteredNodes.length,
+    concept: pageFilteredNodes.filter(n => (n.type || "concept") === "concept").length,
+    notation: pageFilteredNodes.filter(n => n.type === "notation").length,
+    equation: pageFilteredNodes.filter(n => n.type === "equation").length,
+    reference: pageFilteredNodes.filter(n => n.type === "reference").length,
+    context: pageFilteredNodes.filter(n => n.type === "assumption" || n.type === "limitation").length,
+    future_work: pageFilteredNodes.filter(n => n.type === "future_work").length,
+  };
+
+  const tabFiltered = pageFilteredNodes.filter((n) => {
+    const type = n.type || "concept";
+    if (activeTab === "all") return true;
+    if (activeTab === "context") return type === "assumption" || type === "limitation";
+    return type === activeTab;
+  });
+
+  const filtered = tabFiltered.filter((n) =>
+    n.label.toLowerCase().includes(search.toLowerCase()) ||
+    n.definition?.toLowerCase().includes(search.toLowerCase())
+  );
+
+  const displayType = (type) => {
+    switch (type) {
+      case "concept": return "Concept";
+      case "notation": return "Notation";
+      case "equation": return "Equation";
+      case "reference": return "Reference";
+      case "assumption": return "Assumption";
+      case "limitation": return "Limitation";
+      case "future_work": return "Future Work";
+      default: return "Detail";
+    }
+  };
+
+  // ── Render Detail View Content ───────────────────────────────────────────
+  const renderDetailContent = (node) => {
+    // For references, parse the role prefix from the definition
+    let cleanDefinition = node.definition;
+    let roleBadge = null;
+    if (node.type === "reference") {
+      const roleMatch = node.definition.match(/^\[Role:\s*(.+?)\]\s*(.+)$/i);
+      if (roleMatch) {
+        roleBadge = roleMatch[1];
+        cleanDefinition = roleMatch[2];
+      }
+    }
+
+    const getLabelForType = (type) => {
+      switch (type) {
+        case "concept": return "Concept Definition";
+        case "notation": return "Mathematical Notation Meaning";
+        case "equation": return "Equation Definition & Explanation";
+        case "reference": return "Literature Reference Contribution";
+        case "assumption": return "Assumption Description";
+        case "limitation": return "Limitation Description";
+        case "future_work": return "Proposed Future Work";
+        default: return "Details";
+      }
+    };
+
+    const grouped = groupSources(node.sources);
+
+    return (
+      <div className={`pe-detail-body type-${node.type || "concept"}`}>
+        <div className="pe-detail-header">
+          <div>
+            <p className={`nd-eyebrow type-${node.type || "concept"}`}>
+              {node.type ? node.type.toUpperCase().replace('_', ' ') : 'Concept'}
+            </p>
+            <h3 className="pe-detail-title">{node.label}</h3>
+          </div>
+        </div>
+
+        {roleBadge && (
+          <div className="nd-section nd-role-section" style={{ padding: "14px 0" }}>
+            <p className="nd-label">Influence Role</p>
+            <span className={`nd-role-badge role-${roleBadge.toLowerCase().replace(/[^a-z]/g, "")}`}>
+              {roleBadge}
+            </span>
+          </div>
+        )}
+
+        <div className="nd-section" style={{ padding: "14px 0" }}>
+          <p className="nd-label">{getLabelForType(node.type)}</p>
+          <p className="nd-definition">{cleanDefinition}</p>
+        </div>
+
+        {/* Equation LaTeX Formula Box */}
+        {node.type === "equation" && node.latex && (
+          <div className="pe-equation-box">
+            <p className="nd-label">LaTeX Formula</p>
+            <div className="pe-equation-formula">{node.latex}</div>
+            {node.rawText && (
+              <details className="pe-equation-raw">
+                <summary>View raw scanned text context</summary>
+                <pre>{node.rawText}</pre>
+              </details>
+            )}
+          </div>
+        )}
+
+        {grouped.length > 0 && (
+          <div className="nd-section" style={{ padding: "14px 0", borderBottom: "none" }}>
+            <p className="nd-label">Paper Occurrences — click to go to page</p>
+            <div className="nd-occurrences-list">
+              {grouped.map((src, i) => (
+                <div
+                  key={i}
+                  className={`nd-occurrence-item type-${node.type || "concept"}`}
+                  onClick={() => handleReferenceClick(src.page)}
+                  title={`Jump to Page ${src.page}`}
+                >
+                  <span className="nd-occurrence-icon">📍</span>
+                  <span className="nd-occurrence-text">
+                    It is mentioned in{" "}
+                    <strong>
+                      {src.section ? `Section '${src.section}'` : `Page ${src.page}`}
+                    </strong>{" "}
+                    (p. {src.page}){src.count > 1 ? ` — ${src.count} times` : ""}
+                  </span>
+                  <span className="nd-occurrence-arrow">↗</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {node.sources && node.sources.length === 0 && (
+          <div className="nd-section" style={{ padding: "14px 0", borderBottom: "none" }}>
+            <p className="nd-label">Source References</p>
+            <p className="nd-no-sources">No exact page references found in the paper body.</p>
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  const tabsRefVal = useRef(null);
+  const tabsRef = useCallback((node) => {
+    if (tabsRefVal.current && tabsRefVal.current._cleanupWheel) {
+      tabsRefVal.current._cleanupWheel();
+      tabsRefVal.current._cleanupWheel = null;
+    }
+
+    tabsRefVal.current = node;
+
+    if (node) {
+      const handleWheel = (e) => {
+        if (e.deltaY !== 0) {
+          e.preventDefault();
+          node.scrollLeft += e.deltaY;
+        }
+      };
+      node.addEventListener("wheel", handleWheel, { passive: false });
+      node._cleanupWheel = () => {
+        node.removeEventListener("wheel", handleWheel);
+      };
+    }
+  }, []);
 
   return (
     <div className="paper-explorer">
@@ -146,21 +475,56 @@ export default function PaperExplorer() {
         <div className="pe-title-row">
           <h2 className="pe-title">
             <span className="pe-icon">PE</span>
-            Paper Knowledge Graph
+            Paper Details Dashboard
           </h2>
           {paperTitle && <p className="pe-paper-name">{paperTitle}</p>}
         </div>
         <div className="pe-actions">
           {nodes.length > 0 && (
             <>
-              <button
-                className="pe-btn-terms"
-                onClick={() => { setShowKeyTerms(true); setSelectedNode(null); }}
-              >
-                All Key Terms ({nodes.length})
-              </button>
+              {/* VS Code Layout Toggles */}
+              <div className="pe-layout-controls">
+                <button 
+                  className={`pe-layout-btn ${isPdfVisible ? "active" : ""}`} 
+                  onClick={togglePdf}
+                  title="Toggle PDF Panel (Alt+1)"
+                  disabled={!pdfUrl}
+                >
+                  <svg className="layout-icon" viewBox="0 0 16 16" width="14" height="14">
+                    <rect x="1" y="2" width="14" height="12" rx="1.5" fill="none" stroke="currentColor" strokeWidth="1.5"/>
+                    <line x1="5.5" y1="2" x2="5.5" y2="14" stroke="currentColor" strokeWidth="1.5"/>
+                    {isPdfVisible && <rect x="1.5" y="2.5" width="3.5" height="11" fill="currentColor" opacity="0.35"/>}
+                  </svg>
+                </button>
+                <button 
+                  className={`pe-layout-btn ${isMasterVisible ? "active" : ""}`} 
+                  onClick={toggleMaster}
+                  title="Toggle Glossary List (Alt+2)"
+                >
+                  <svg className="layout-icon" viewBox="0 0 16 16" width="14" height="14">
+                    <rect x="1" y="2" width="14" height="12" rx="1.5" fill="none" stroke="currentColor" strokeWidth="1.5"/>
+                    <line x1="5" y1="2" x2="5" y2="14" stroke="currentColor" strokeWidth="1.5"/>
+                    <line x1="10" y1="2" x2="10" y2="14" stroke="currentColor" strokeWidth="1.5"/>
+                    {isMasterVisible && <rect x="5.5" y="2.5" width="4" height="11" fill="currentColor" opacity="0.35"/>}
+                  </svg>
+                </button>
+                <button 
+                  className={`pe-layout-btn ${isDetailVisible ? "active" : ""}`} 
+                  onClick={toggleDetail}
+                  title="Toggle Detail Pane (Alt+3)"
+                >
+                  <svg className="layout-icon" viewBox="0 0 16 16" width="14" height="14">
+                    <rect x="1" y="2" width="14" height="12" rx="1.5" fill="none" stroke="currentColor" strokeWidth="1.5"/>
+                    <line x1="10.5" y1="2" x2="10.5" y2="14" stroke="currentColor" strokeWidth="1.5"/>
+                    {isDetailVisible && <rect x="11" y="2.5" width="3.5" height="11" fill="currentColor" opacity="0.35"/>}
+                  </svg>
+                </button>
+              </div>
+
+              <div className="pe-header-divider" />
+
               {!pdfOpen && pdfUrl && (
-                <button className="pe-btn-pdf" onClick={() => setPdfOpen(true)}>
+                <button className="pe-btn-pdf" onClick={() => { setPdfOpen(true); setShowPdf(true); }}>
                   Open PDF
                 </button>
               )}
@@ -172,8 +536,19 @@ export default function PaperExplorer() {
         </div>
       </div>
 
-      {/* ── Canvas area ── */}
-      <div className="pe-canvas-wrapper">
+      {/* ── Upgrade Cache Banner ── */}
+      {showUpgradeBanner && (
+        <div className="pe-upgrade-banner">
+          <span className="pe-upgrade-icon">💡</span>
+          <div className="pe-upgrade-content">
+            <strong>Dashboard Upgrade Available:</strong> This saved session only contains concept nodes. Click <strong>↺ New Paper</strong> to re-upload and unlock math notations, cited literature, assumptions, and limitations in the details glossary!
+          </div>
+          <button className="pe-upgrade-dismiss" onClick={() => setShowUpgradeBanner(false)}>Dismiss</button>
+        </div>
+      )}
+
+      {/* ── Dashboard Split View ── */}
+      <div className="pe-canvas-wrapper pe-dashboard-wrapper">
         {status === "idle" && (
           <UploadZone onFile={handleFileUpload} />
         )}
@@ -181,8 +556,8 @@ export default function PaperExplorer() {
         {status === "uploading" && (
           <div className="pe-loading">
             <img src="/hexagon-loader.svg" alt="Loading…" className="pe-hex-loader" />
-            <p>Extracting concepts from PDF…</p>
-            <p className="pe-loading-sub">Running Python pipeline (may take 60-90s)</p>
+            <p>Extracting paper details & notations…</p>
+            <p className="pe-loading-sub">Running Python pipeline & Gemini filters (may take 60-90s)</p>
           </div>
         )}
 
@@ -195,42 +570,190 @@ export default function PaperExplorer() {
         )}
 
         {status === "ready" && (
-          <GraphCanvas
-            nodes={nodes}
-            selectedNode={selectedNode}
-            onNodeClick={handleNodeClick}
-          />
+          <div 
+            ref={dashboardRef}
+            className={`pe-dashboard ${draggingResizer ? "is-resizing" : ""}`}
+            style={{ gridTemplateColumns: getGridTemplateColumns() }}
+          >
+            {/* Docked PDF Pane */}
+            {isPdfVisible && (
+              <div className="pe-pdf-dock">
+                <PdfViewer
+                  url={pdfUrl}
+                  page={pdfPage}
+                  onPageChange={setPdfPage}
+                  onClose={() => setPdfOpen(false)}
+                  docked={true}
+                  onToggleDock={() => setPdfDocked(false)}
+                />
+              </div>
+            )}
+
+            {/* Resizer 1 (between PDF and Glossary) */}
+            {isPdfVisible && (isMasterVisible || isDetailVisible) && (
+              <div
+                className={`pe-resizer-col ${draggingResizer === "pdf" ? "dragging" : ""}`}
+                onMouseDown={startResizePdf}
+              >
+                <div className="pe-resizer-line" />
+              </div>
+            )}
+
+            {/* Left Master List */}
+            {isMasterVisible && (
+              <div className="pe-master-pane">
+                {/* Search */}
+                <div className="ktp-search-wrap">
+                  <span className="ktp-search-icon">🔍</span>
+                  <input
+                    className="ktp-search"
+                    type="text"
+                    placeholder="Search extracted details..."
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                  />
+                  <span className="ktp-count">{filtered.length}/{tabFiltered.length}</span>
+                </div>
+
+                {/* Active Page Guide Indicator with Toggle */}
+                {pdfOpen && (
+                  <div className="pe-active-page-header-guide">
+                    <div className="pe-active-page-guide-info">
+                      <span className="pe-active-page-guide-icon">📖</span>
+                      <span className="pe-active-page-guide-text">
+                        Glossary active on <strong>Page {pdfPage}</strong>
+                      </span>
+                    </div>
+                    <label className="pe-auto-filter-toggle">
+                      <input
+                        type="checkbox"
+                        checked={autoFilterPage}
+                        onChange={(e) => setAutoFilterPage(e.target.checked)}
+                      />
+                      <span className="pe-auto-filter-toggle-label">Auto-filter</span>
+                    </label>
+                  </div>
+                )}
+
+                {/* Tabs */}
+                <div className="ktp-tabs" ref={tabsRef}>
+                  <button
+                    className={`ktp-tab-btn ${activeTab === "all" ? "active" : ""}`}
+                    onClick={() => setActiveTab("all")}
+                  >
+                    All ({counts.all})
+                  </button>
+                  <button
+                    className={`ktp-tab-btn ${activeTab === "concept" ? "active" : ""}`}
+                    onClick={() => setActiveTab("concept")}
+                  >
+                    Concepts ({counts.concept})
+                  </button>
+                  <button
+                    className={`ktp-tab-btn ${activeTab === "notation" ? "active" : ""}`}
+                    onClick={() => setActiveTab("notation")}
+                  >
+                    Notations ({counts.notation})
+                  </button>
+                  <button
+                    className={`ktp-tab-btn ${activeTab === "equation" ? "active" : ""}`}
+                    onClick={() => setActiveTab("equation")}
+                  >
+                    Equations ({counts.equation})
+                  </button>
+                  <button
+                    className={`ktp-tab-btn ${activeTab === "reference" ? "active" : ""}`}
+                    onClick={() => setActiveTab("reference")}
+                  >
+                    Refs ({counts.reference})
+                  </button>
+                  <button
+                    className={`ktp-tab-btn ${activeTab === "context" ? "active" : ""}`}
+                    onClick={() => setActiveTab("context")}
+                  >
+                    Context ({counts.context})
+                  </button>
+                  <button
+                    className={`ktp-tab-btn ${activeTab === "future_work" ? "active" : ""}`}
+                    onClick={() => setActiveTab("future_work")}
+                  >
+                    Future ({counts.future_work})
+                  </button>
+                </div>
+
+                {/* List */}
+                <div className="ktp-list">
+                  {filtered.map((node) => {
+                    const isOnActivePage = pdfOpen && node.sources?.some(src => src.page === pdfPage);
+                    return (
+                      <div
+                        key={node.id}
+                        className={`ktp-item ${selectedNode?.id === node.id ? "active" : ""} ${isOnActivePage ? "on-active-page" : ""} type-${node.type || "concept"}`}
+                        onClick={() => setSelectedNode(node)}
+                      >
+                        <div className="ktp-item-header">
+                          <div className="ktp-item-title-row">
+                            <span className="ktp-item-label">{node.label}</span>
+                            <div style={{ display: "flex", gap: "6px", alignItems: "center" }}>
+                              {isOnActivePage && (
+                                <span className="ktp-active-page-indicator" title={`Present on Page ${pdfPage}`}>
+                                  • Page {pdfPage}
+                                </span>
+                              )}
+                              <span className={`ktp-item-badge type-${node.type || "concept"}`}>
+                                {displayType(node.type || "concept")}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                        <p className="ktp-item-def">{node.definition}</p>
+                      </div>
+                    );
+                  })}
+                  {filtered.length === 0 && (
+                    <p className="ktp-empty">No matching details found.</p>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Resizer 2 (between Glossary and Details) */}
+            {isMasterVisible && isDetailVisible && (
+              <div
+                className={`pe-resizer-col ${draggingResizer === "master" ? "dragging" : ""}`}
+                onMouseDown={startResizeMaster}
+              >
+                <div className="pe-resizer-line" />
+              </div>
+            )}
+
+            {/* Right Detail Pane */}
+            {isDetailVisible && (
+              <div className="pe-detail-pane">
+                {selectedNode ? (
+                  renderDetailContent(selectedNode)
+                ) : (
+                  <div className="pe-detail-empty">
+                    <span className="pe-empty-icon">📄</span>
+                    <h4>No Item Selected</h4>
+                    <p>Select a concept, mathematical equation, literature reference, or research context parameter from the left sidebar to view detailed descriptions and page occurrences.</p>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
         )}
       </div>
 
-      {/* ── Node detail drawer ── */}
-      {selectedNode && (
-        <NodeDrawer
-          node={selectedNode}
-          onClose={() => setSelectedNode(null)}
-          onReferenceClick={handleReferenceClick}
-        />
-      )}
-
-      {/* ── Key terms panel ── */}
-      {showKeyTerms && (
-        <KeyTermsPanel
-          nodes={nodes}
-          onClose={() => setShowKeyTerms(false)}
-          onTermSelect={handleTermSelect}
-          onReferenceClick={handleReferenceClick}
-        />
-      )}
-
       {/* ── Floating PDF window ── */}
-      {pdfUrl && pdfOpen && (
+      {pdfUrl && pdfOpen && !pdfDocked && (
           <PdfViewer
             url={pdfUrl}
             page={pdfPage}
-            searchTerm={pdfSearchTerm}
-            onSearchTermChange={setPdfSearchTerm}
             onPageChange={setPdfPage}
             onClose={() => setPdfOpen(false)}
+            docked={false}
+            onToggleDock={() => setPdfDocked(true)}
           />
       )}
     </div>

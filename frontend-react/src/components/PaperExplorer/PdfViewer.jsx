@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, useCallback } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Document, Page, pdfjs } from "react-pdf";
 import "react-pdf/dist/Page/AnnotationLayer.css";
 import "react-pdf/dist/Page/TextLayer.css";
@@ -8,131 +8,97 @@ pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.vers
 const DEFAULT_W = 500;
 const DEFAULT_H = 680;
 
-function escapeRegExp(text) {
-  return text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-}
-
-export default function PdfViewer({ url, page, searchTerm = "", onSearchTermChange, onPageChange, onClose }) {
+export default function PdfViewer({ url, page, onPageChange, onClose, docked = false, onToggleDock }) {
   const [pos, setPos] = useState({ x: window.innerWidth - DEFAULT_W - 24, y: 72 });
   const [size, setSize] = useState({ w: DEFAULT_W, h: DEFAULT_H });
   const [minimized, setMinimized] = useState(false);
   const [numPages, setNumPages] = useState(null);
   const [scale, setScale] = useState(1.1);
   const pageRef = useRef(null);
-  const scrolledRef = useRef(false);
 
-  const trimmedSearch = searchTerm.trim();
-  const searchPattern = useMemo(() => {
-    if (trimmedSearch.length < 2) return null;
-    return new RegExp(`(${escapeRegExp(trimmedSearch)})`, "gi");
-  }, [trimmedSearch]);
+  const containerRef = useRef(null);
+  const [containerWidth, setContainerWidth] = useState(DEFAULT_W);
 
+  // ResizeObserver to dynamically track docked container width
   useEffect(() => {
-    scrolledRef.current = false;
-  }, [page, trimmedSearch, scale]);
+    if (!docked || !containerRef.current) return;
 
-  const customTextRenderer = useCallback(
-    ({ str }) => {
-      if (!searchPattern) return str;
-      const parts = str.split(searchPattern);
-      if (parts.length === 1) return str;
+    const observer = new ResizeObserver((entries) => {
+      if (!entries || entries.length === 0) return;
+      const { width } = entries[0].contentRect;
+      if (width > 0) {
+        setContainerWidth(width);
+      }
+    });
 
-      return parts
-        .map((part, index) =>
-          index % 2 === 1 ? `<mark class="pdf-match">${part}</mark>` : part
-        )
-        .join("");
-    },
-    [searchPattern]
-  );
+    observer.observe(containerRef.current);
+    return () => {
+      observer.disconnect();
+    };
+  }, [docked]);
 
-  const handleRenderTextLayerSuccess = useCallback(() => {
-    if (!searchPattern || scrolledRef.current) return;
+  const onDragMouseDown = (e) => {
+    if (docked) return;
+    if (e.target.closest(".pdf-float-controls")) return;
+    e.preventDefault();
+    const startX = e.clientX;
+    const startY = e.clientY;
+    const startPosX = pos.x;
+    const startPosY = pos.y;
 
-    window.setTimeout(() => {
-      const container = pageRef.current;
-      const firstMatch = container?.querySelector("mark.pdf-match");
-      if (!firstMatch) return;
+    const move = (event) => {
+      setPos({
+        x: Math.max(0, startPosX + event.clientX - startX),
+        y: Math.max(0, startPosY + event.clientY - startY),
+      });
+    };
 
-      scrolledRef.current = true;
-      firstMatch.scrollIntoView({ behavior: "smooth", block: "center" });
-    }, 0);
-  }, [searchPattern]);
+    const up = () => {
+      document.removeEventListener("mousemove", move);
+      document.removeEventListener("mouseup", up);
+    };
 
-  const onDragMouseDown = useCallback(
-    (e) => {
-      if (e.target.closest(".pdf-float-controls")) return;
-      e.preventDefault();
-      const startX = e.clientX;
-      const startY = e.clientY;
-      const startPosX = pos.x;
-      const startPosY = pos.y;
+    document.addEventListener("mousemove", move);
+    document.addEventListener("mouseup", up);
+  };
 
-      const move = (event) => {
-        setPos({
-          x: Math.max(0, startPosX + event.clientX - startX),
-          y: Math.max(0, startPosY + event.clientY - startY),
-        });
-      };
+  const onResizeMouseDown = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const startX = e.clientX;
+    const startY = e.clientY;
+    const startWidth = size.w;
+    const startHeight = size.h;
 
-      const up = () => {
-        document.removeEventListener("mousemove", move);
-        document.removeEventListener("mouseup", up);
-      };
+    const move = (event) => {
+      setSize({
+        w: Math.max(340, startWidth + event.clientX - startX),
+        h: Math.max(260, startHeight + event.clientY - startY),
+      });
+    };
 
-      document.addEventListener("mousemove", move);
-      document.addEventListener("mouseup", up);
-    },
-    [pos]
-  );
+    const up = () => {
+      document.removeEventListener("mousemove", move);
+      document.removeEventListener("mouseup", up);
+    };
 
-  const onResizeMouseDown = useCallback(
-    (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      const startX = e.clientX;
-      const startY = e.clientY;
-      const startWidth = size.w;
-      const startHeight = size.h;
-
-      const move = (event) => {
-        setSize({
-          w: Math.max(340, startWidth + event.clientX - startX),
-          h: Math.max(260, startHeight + event.clientY - startY),
-        });
-      };
-
-      const up = () => {
-        document.removeEventListener("mousemove", move);
-        document.removeEventListener("mouseup", up);
-      };
-
-      document.addEventListener("mousemove", move);
-      document.addEventListener("mouseup", up);
-    },
-    [size]
-  );
+    document.addEventListener("mousemove", move);
+    document.addEventListener("mouseup", up);
+  };
 
   const onDocumentLoadSuccess = ({ numPages: totalPages }) => setNumPages(totalPages);
   const safePage = numPages ? Math.min(Math.max(1, page), numPages) : page;
 
   return (
     <div
-      className="pdf-float"
-      style={{ left: pos.x, top: pos.y, width: size.w, height: minimized ? 44 : size.h }}
+      ref={containerRef}
+      className={`pdf-float ${docked ? "docked" : ""}`}
+      style={docked ? {} : { left: pos.x, top: pos.y, width: size.w, height: minimized ? 44 : size.h }}
     >
       <div className="pdf-float-bar" onMouseDown={onDragMouseDown}>
         <span className="pdf-float-icon">PDF</span>
         <span className="pdf-float-title">PDF Preview · p.{safePage}</span>
         <div className="pdf-float-controls">
-          <input
-            className="pdf-search-input"
-            type="search"
-            value={searchTerm}
-            onChange={(event) => onSearchTermChange?.(event.target.value)}
-            placeholder="Find in page"
-            title="Search inside the current PDF page"
-          />
           <button
             className="pdf-ctrl-btn"
             onClick={() => setScale((currentScale) => Math.max(0.6, +(currentScale - 0.1).toFixed(1)))}
@@ -150,15 +116,32 @@ export default function PdfViewer({ url, page, searchTerm = "", onSearchTermChan
           >
             +
           </button>
-          <button
-            className="pdf-ctrl-btn"
-            onClick={() => setMinimized((currentValue) => !currentValue)}
-            title={minimized ? "Restore" : "Minimise"}
-            style={{ marginLeft: 6 }}
-            type="button"
-          >
-            {minimized ? "Restore" : "Min"}
-          </button>
+
+          {/* Toggle Dock/Float */}
+          {onToggleDock && (
+            <button
+              className="pdf-ctrl-btn toggle-dock-btn"
+              onClick={onToggleDock}
+              title={docked ? "Float window" : "Dock to side"}
+              type="button"
+              style={{ width: "auto", padding: "0 8px", fontSize: "0.68rem", display: "flex", gap: "3px", alignItems: "center" }}
+            >
+              <span>{docked ? "🗗 Float" : "🗗 Dock"}</span>
+            </button>
+          )}
+
+          {!docked && (
+            <button
+              className="pdf-ctrl-btn"
+              onClick={() => setMinimized((currentValue) => !currentValue)}
+              title={minimized ? "Restore" : "Minimise"}
+              style={{ marginLeft: 6 }}
+              type="button"
+            >
+              {minimized ? "Restore" : "Min"}
+            </button>
+          )}
+          
           <button className="pdf-ctrl-btn" onClick={onClose} title="Close" type="button">
             X
           </button>
@@ -180,14 +163,12 @@ export default function PdfViewer({ url, page, searchTerm = "", onSearchTermChan
           >
             <Page
               inputRef={pageRef}
-              key={`page-${safePage}-${scale}`}
+              key={`page-${safePage}-${scale}-${docked}`}
               pageNumber={safePage}
               scale={scale}
               renderTextLayer
               renderAnnotationLayer
-              width={size.w - 2}
-              customTextRenderer={customTextRenderer}
-              onRenderTextLayerSuccess={handleRenderTextLayerSuccess}
+              width={docked ? containerWidth - 20 : size.w - 2}
             />
           </Document>
 
@@ -215,7 +196,7 @@ export default function PdfViewer({ url, page, searchTerm = "", onSearchTermChan
             </div>
           )}
 
-          <div className="pdf-resize-handle" onMouseDown={onResizeMouseDown} />
+          {!docked && <div className="pdf-resize-handle" onMouseDown={onResizeMouseDown} />}
         </div>
       )}
     </div>

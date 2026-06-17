@@ -372,37 +372,56 @@ def main():
     print("Formatting equations to LaTeX and generating annotations via a single Gemini batch call...")
     formatted_results = format_equations_via_ai(candidates, title)
         
-    # 3. Compile markdown file
-    print(f"Compiling final mathematical reference at: {output_md_path}")
-    
-    markdown_output = []
-    markdown_output.append(f"# Mathematical Reference: {title}\n")
-    markdown_output.append("This document compiles and defines the core mathematical expressions, state representations, and circuit parameters presented in this research publication.\n")
-    
-    current_section = None
-    for idx, eq in enumerate(candidates):
-        label = eq["label"]
-        res = formatted_results.get(label, {"latex": f"$${eq['raw_text']}$$", "description": "Failed to format."})
+    # 3. Compile output file
+    if output_md_path.endswith(".json"):
+        print(f"Compiling final mathematical reference JSON at: {output_md_path}")
+        json_output = []
+        for idx, eq in enumerate(candidates):
+            label = eq["label"]
+            res = formatted_results.get(label, {"latex": f"$${eq['raw_text']}$$", "description": "Failed to format."})
+            json_output.append({
+                "label": label,
+                "latex": res["latex"],
+                "description": res["description"],
+                "page": eq["page"],
+                "section": eq["section"],
+                "raw_text": eq["raw_text"]
+            })
         
-        # Section header boundary
-        if eq["section"] != current_section:
-            current_section = eq["section"]
-            markdown_output.append(f"\n## {current_section}\n")
+        with open(output_md_path, "w", encoding="utf-8") as f:
+            json.dump({"equations": json_output}, f, indent=2)
             
-        markdown_output.append(f"### Equation Reference {idx+1}: {label}")
-        markdown_output.append(f"*   **Location**: Page {eq['page']}")
-        markdown_output.append(f"*   **Equation Context**: {res['description']}\n")
+        print(f"\nSuccessfully wrote mathematical reference JSON to: {output_md_path}")
+    else:
+        print(f"Compiling final mathematical reference Markdown at: {output_md_path}")
+        markdown_output = []
+        markdown_output.append(f"# Mathematical Reference: {title}\n")
+        markdown_output.append("This document compiles and defines the core mathematical expressions, state representations, and circuit parameters presented in this research publication.\n")
         
-        # Ensure LaTeX formula formatting is clean
-        latex_formula = res['latex'].strip()
-        markdown_output.append(latex_formula)
-        markdown_output.append(f"\n*   **Raw text block context**:\n```text\n{eq['raw_text']}\n```\n")
-        markdown_output.append("---")
-        
-    with open(output_md_path, "w", encoding="utf-8") as f:
-        f.write("\n".join(markdown_output))
-        
-    print(f"\nSuccessfully wrote mathematical reference to: {output_md_path}")
+        current_section = None
+        for idx, eq in enumerate(candidates):
+            label = eq["label"]
+            res = formatted_results.get(label, {"latex": f"$${eq['raw_text']}$$", "description": "Failed to format."})
+            
+            # Section header boundary
+            if eq["section"] != current_section:
+                current_section = eq["section"]
+                markdown_output.append(f"\n## {current_section}\n")
+                
+            markdown_output.append(f"### Equation Reference {idx+1}: {label}")
+            markdown_output.append(f"*   **Location**: Page {eq['page']}")
+            markdown_output.append(f"*   **Equation Context**: {res['description']}\n")
+            
+            # Ensure LaTeX formula formatting is clean
+            latex_formula = res['latex'].strip()
+            markdown_output.append(latex_formula)
+            markdown_output.append(f"\n*   **Raw text block context**:\n```text\n{eq['raw_text']}\n```\n")
+            markdown_output.append("---")
+            
+        with open(output_md_path, "w", encoding="utf-8") as f:
+            f.write("\n".join(markdown_output))
+            
+        print(f"\nSuccessfully wrote mathematical reference to: {output_md_path}")
 
 if __name__ == "__main__":
     main()
