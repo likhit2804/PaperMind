@@ -343,14 +343,11 @@ export default function PaperExplorer() {
     notation: pageFilteredNodes.filter(n => n.type === "notation").length,
     equation: pageFilteredNodes.filter(n => n.type === "equation").length,
     reference: pageFilteredNodes.filter(n => n.type === "reference").length,
-    context: pageFilteredNodes.filter(n => n.type === "assumption" || n.type === "limitation").length,
-    future_work: pageFilteredNodes.filter(n => n.type === "future_work").length,
   };
 
   const tabFiltered = pageFilteredNodes.filter((n) => {
     const type = n.type || "concept";
     if (activeTab === "all") return true;
-    if (activeTab === "context") return type === "assumption" || type === "limitation";
     return type === activeTab;
   });
 
@@ -365,9 +362,6 @@ export default function PaperExplorer() {
       case "notation": return "Notation";
       case "equation": return "Equation";
       case "reference": return "Reference";
-      case "assumption": return "Assumption";
-      case "limitation": return "Limitation";
-      case "future_work": return "Future Work";
       default: return "Detail";
     }
   };
@@ -454,9 +448,6 @@ export default function PaperExplorer() {
         case "notation": return "Mathematical Notation Meaning";
         case "equation": return "Equation Definition & Explanation";
         case "reference": return "Literature Reference Contribution";
-        case "assumption": return "Assumption Description";
-        case "limitation": return "Limitation Description";
-        case "future_work": return "Proposed Future Work";
         default: return "Details";
       }
     };
@@ -676,7 +667,7 @@ export default function PaperExplorer() {
         <div className="pe-upgrade-banner">
           <span className="pe-upgrade-icon">💡</span>
           <div className="pe-upgrade-content">
-            <strong>Dashboard Upgrade Available:</strong> This saved session only contains concept nodes. Click <strong>↺ New Paper</strong> to re-upload and unlock math notations, cited literature, assumptions, and limitations in the details glossary!
+            <strong>Dashboard Upgrade Available:</strong> This saved session only contains concept nodes. Click <strong>↺ New Paper</strong> to re-upload and unlock math notations and cited literature in the details glossary!
           </div>
           <button className="pe-upgrade-dismiss" onClick={() => setShowUpgradeBanner(false)}>Dismiss</button>
         </div>
@@ -802,18 +793,7 @@ export default function PaperExplorer() {
                   >
                     Refs ({counts.reference})
                   </button>
-                  <button
-                    className={`ktp-tab-btn ${activeTab === "context" ? "active" : ""}`}
-                    onClick={() => setActiveTab("context")}
-                  >
-                    Context ({counts.context})
-                  </button>
-                  <button
-                    className={`ktp-tab-btn ${activeTab === "future_work" ? "active" : ""}`}
-                    onClick={() => setActiveTab("future_work")}
-                  >
-                    Future ({counts.future_work})
-                  </button>
+                  {/* Context and Future tabs removed */}
                 </div>
 
                 {/* List */}

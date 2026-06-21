@@ -85,7 +85,6 @@ router.post("/paper/analyze", upload.single("file"), async (req, res, next) => {
   fs.mkdirSync(outDir, { recursive: true });
 
   const referencesJson = path.join(outDir, "references.json");
-  const detailsJson = path.join(outDir, "details.json");
   const conceptsJson = path.join(outDir, "concepts.json");
   const equationsJson = path.join(outDir, "equations.json");
   const notesMd = path.join(outDir, "notes.md");
@@ -110,12 +109,6 @@ router.post("/paper/analyze", upload.single("file"), async (req, res, next) => {
     "research_paper",
     "extract_paper_references.py"
   );
-  const detailsScript = path.join(
-    settings.baseDir,
-    "pipeline",
-    "research_paper",
-    "extract_paper_details.py"
-  );
   const equationsScript = path.join(
     settings.baseDir,
     "pipeline",
@@ -134,12 +127,11 @@ router.post("/paper/analyze", upload.single("file"), async (req, res, next) => {
     console.log(`[paper/analyze] Running concept extractor for session ${sessionId}…`);
     await runPython([conceptsScript, pdfPath, conceptsJson], settings.baseDir);
 
-    // Step 2, 3, 4, 5, 6: run glossary, references, details, equations, and local notations extraction in parallel
-    console.log(`[paper/analyze] Running glossary, references, details, equations, and local notations extractors for session ${sessionId}…`);
+    // Step 2, 3, 4, 5: run glossary, references, equations, and local notations extraction in parallel
+    console.log(`[paper/analyze] Running glossary, references, equations, and local notations extractors for session ${sessionId}…`);
     await Promise.all([
       runPython([notesScript, pdfPath, conceptsJson, notesMd], settings.baseDir),
       runPython([referencesScript, pdfPath, referencesJson], settings.baseDir),
-      runPython([detailsScript, pdfPath, detailsJson], settings.baseDir),
       runPython([equationsScript, pdfPath, equationsJson], settings.baseDir),
       runPython([notationsScript, pdfPath, notationsJson], settings.baseDir)
     ]);
@@ -178,47 +170,6 @@ router.post("/paper/analyze", upload.single("file"), async (req, res, next) => {
       }
     }
 
-    // Parse details (assumptions, limitations, future work) if available
-    if (fs.existsSync(detailsJson)) {
-      try {
-        const detailsData = JSON.parse(fs.readFileSync(detailsJson, "utf-8"));
-
-        // 1. Assumptions & Limitations
-        const assumpLim = detailsData.assumptions_and_limitations || [];
-        assumpLim.forEach((item, index) => {
-          nodes.push({
-            id: `detail_${item.type.toLowerCase()}_${index}`,
-            label: `${item.type}: ${item.description.length > 25 ? item.description.slice(0, 22) + "..." : item.description}`,
-            definition: item.description,
-            sources: (item.anchors || []).map(anc => ({
-              page: anc.page,
-              section: anc.section || anc.subsection,
-              contextText: anc.anchor_text
-            })),
-            type: item.type.toLowerCase() // "assumption" or "limitation"
-          });
-        });
-
-        // 3. Future work
-        const futureWork = detailsData.future_work || [];
-        futureWork.forEach((item, index) => {
-          nodes.push({
-            id: `detail_future_${index}`,
-            label: `Future: ${item.description.length > 25 ? item.description.slice(0, 22) + "..." : item.description}`,
-            definition: item.description,
-            sources: (item.anchors || []).map(anc => ({
-              page: anc.page,
-              section: anc.section || anc.subsection,
-              contextText: anc.anchor_text
-            })),
-            type: "future_work"
-          });
-        });
-      } catch (err) {
-        console.warn(`[paper/analyze] Failed to parse details JSON:`, err);
-      }
-    }
-
     // Parse notations if available
     let notations = [];
     if (fs.existsSync(notationsJson)) {
@@ -228,12 +179,6 @@ router.post("/paper/analyze", upload.single("file"), async (req, res, next) => {
       } catch (err) {
         console.warn(`[paper/analyze] Failed to parse notations JSON:`, err);
       }
-    } else if (fs.existsSync(detailsJson)) {
-      // Fallback for older sessions uploaded before local notations script integration
-      try {
-        const detailsData = JSON.parse(fs.readFileSync(detailsJson, "utf-8"));
-        notations = detailsData.notations || [];
-      } catch (_) {}
     }
 
     if (notations.length > 0) {
