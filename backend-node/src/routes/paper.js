@@ -89,6 +89,7 @@ router.post("/paper/analyze", upload.single("file"), async (req, res, next) => {
   const conceptsJson = path.join(outDir, "concepts.json");
   const equationsJson = path.join(outDir, "equations.json");
   const notesMd = path.join(outDir, "notes.md");
+  const notationsJson = path.join(outDir, "notations.json");
 
   // Pipeline script paths (relative to project root)
   const conceptsScript = path.join(
@@ -121,19 +122,26 @@ router.post("/paper/analyze", upload.single("file"), async (req, res, next) => {
     "research_paper",
     "extract_paper_equations.py"
   );
+  const notationsScript = path.join(
+    settings.baseDir,
+    "pipeline",
+    "research_paper",
+    "extract_notations_local.py"
+  );
 
   try {
     // Step 1: extract concepts
     console.log(`[paper/analyze] Running concept extractor for session ${sessionId}…`);
     await runPython([conceptsScript, pdfPath, conceptsJson], settings.baseDir);
 
-    // Step 2, 3, 4, 5: run glossary, references, details, and equations extraction in parallel
-    console.log(`[paper/analyze] Running glossary, references, details, and equations extractors for session ${sessionId}…`);
+    // Step 2, 3, 4, 5, 6: run glossary, references, details, equations, and local notations extraction in parallel
+    console.log(`[paper/analyze] Running glossary, references, details, equations, and local notations extractors for session ${sessionId}…`);
     await Promise.all([
       runPython([notesScript, pdfPath, conceptsJson, notesMd], settings.baseDir),
       runPython([referencesScript, pdfPath, referencesJson], settings.baseDir),
       runPython([detailsScript, pdfPath, detailsJson], settings.baseDir),
-      runPython([equationsScript, pdfPath, equationsJson], settings.baseDir)
+      runPython([equationsScript, pdfPath, equationsJson], settings.baseDir),
+      runPython([notationsScript, pdfPath, notationsJson], settings.baseDir)
     ]);
 
     // Parse outputs
@@ -170,28 +178,12 @@ router.post("/paper/analyze", upload.single("file"), async (req, res, next) => {
       }
     }
 
-    // Parse details (notations, assumptions, limitations, future work) if available
+    // Parse details (assumptions, limitations, future work) if available
     if (fs.existsSync(detailsJson)) {
       try {
         const detailsData = JSON.parse(fs.readFileSync(detailsJson, "utf-8"));
-        
-        // 1. Notations
-        const notations = detailsData.notations || [];
-        notations.forEach(notation => {
-          nodes.push({
-            id: `notation_${notation.symbol.toLowerCase().replace(/[^a-z0-9]/g, "_")}`,
-            label: `Notation: ${notation.symbol}`,
-            definition: notation.meaning,
-            sources: (notation.anchors || []).map(anc => ({
-              page: anc.page,
-              section: anc.section || anc.subsection,
-              contextText: anc.anchor_text
-            })),
-            type: "notation"
-          });
-        });
 
-        // 2. Assumptions & Limitations
+        // 1. Assumptions & Limitations
         const assumpLim = detailsData.assumptions_and_limitations || [];
         assumpLim.forEach((item, index) => {
           nodes.push({
@@ -225,6 +217,40 @@ router.post("/paper/analyze", upload.single("file"), async (req, res, next) => {
       } catch (err) {
         console.warn(`[paper/analyze] Failed to parse details JSON:`, err);
       }
+    }
+
+    // Parse notations if available
+    let notations = [];
+    if (fs.existsSync(notationsJson)) {
+      try {
+        const notationsData = JSON.parse(fs.readFileSync(notationsJson, "utf-8"));
+        notations = notationsData.notations || [];
+      } catch (err) {
+        console.warn(`[paper/analyze] Failed to parse notations JSON:`, err);
+      }
+    } else if (fs.existsSync(detailsJson)) {
+      // Fallback for older sessions uploaded before local notations script integration
+      try {
+        const detailsData = JSON.parse(fs.readFileSync(detailsJson, "utf-8"));
+        notations = detailsData.notations || [];
+      } catch (_) {}
+    }
+
+    if (notations.length > 0) {
+      notations.forEach((notation, index) => {
+        nodes.push({
+          id: `notation_${index}_${notation.symbol.toLowerCase().replace(/[^a-z0-9]/g, "_")}`,
+          label: `Notation: ${notation.symbol}`,
+          definition: notation.meaning,
+          sources: (notation.anchors || []).map(anc => ({
+            page: anc.page,
+            section: anc.section || anc.subsection,
+            contextText: anc.anchor_text
+          })),
+          type: "notation",
+          symbol: notation.symbol
+        });
+      });
     }
 
     // Parse equations if available

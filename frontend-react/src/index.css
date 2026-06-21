@@ -1641,3 +1641,27 @@ button.secondary:hover {
   pointer-events: none !important; /* Prevents iframe mouse capture during resizing */
   user-select: none !important;
 }
+
+/* -- Linked Notations Styles -- */
+.pe-linked-notations-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 8px;
+}
+.pe-linked-notation-item {
+  display: flex;
+  flex-direction: column;
+  padding: 10px 14px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.pe-linked-notation-item:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: var(--primary);
+  transform: translateX(4px);
+}
+

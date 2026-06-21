@@ -80,23 +80,11 @@ def get_outline_for_page(page_num, valid_toc):
 def extract_candidate_sentences(doc, first_terminal_page, valid_toc):
     """
     Scans the body pages offline to gather candidate sentences for:
-      - Math variables & notations (sentences containing mathematical symbols/variables)
       - Assumptions & scope limitations (sentences containing keywords like assume, limit, requires)
       - Future work directions (sentences containing keywords like future, extend, ongoing)
-      
-    This uses HIGH RECALL filters as requested: we include anything that matches,
-    leaving the final precision filtering to the Gemini API at the end.
     """
-    math_sentences = []
     assumption_sentences = []
     future_sentences = []
-    
-    # High-recall math operators and symbols regex
-    math_symbols_pat = re.compile(
-        r'[=+−*/<>≤≥∑∏⊕⊗⟩⟨|αβγδεζηθικλμνξοπρστυφχψω^\\{}_()]'
-    )
-    # Match indices, state kets (e.g. |0>, |i>), and sub-superscripts
-    math_syntax_pat = re.compile(r'\|\w+[\⟩\>]|\b[a-zA-Z]\b\_|\^|\b[NnQqIiJjXxYy]\b')
     
     # High-recall assumptions keywords
     assumption_pat = re.compile(
@@ -136,10 +124,6 @@ def extract_candidate_sentences(doc, first_terminal_page, valid_toc):
                 "sentence": sentence_strip
             }
                 
-            # Check Math Candidates
-            if math_symbols_pat.search(sentence_strip) or math_syntax_pat.search(sentence_strip):
-                math_sentences.append(sentence_data)
-                
             # Check Assumption & Limitation Candidates
             if assumption_pat.search(sentence_strip):
                 assumption_sentences.append(sentence_data)
@@ -148,36 +132,30 @@ def extract_candidate_sentences(doc, first_terminal_page, valid_toc):
             if future_pat.search(sentence_strip):
                 future_sentences.append(sentence_data)
                 
-    return math_sentences, assumption_sentences, future_sentences
+    return assumption_sentences, future_sentences
 
-def query_gemini_to_synthesize_details(math_candidates, assumption_candidates, future_candidates, title):
+def query_gemini_to_synthesize_details(assumption_candidates, future_candidates, title):
     """
     Calls Gemini in a single final batch call to:
-      1. Filter false positives from our high-recall candidate lists.
-      2. Compile the mathematical symbol/variable notations table.
-      3. Identify the true assumptions and scope limitations.
-      4. Synthesize future work directions.
+      1. Identify the true assumptions and scope limitations.
+      2. Synthesize future work directions.
     """
     api_key = os.environ.get("GEMINI_API_KEY")
     if not api_key:
-        return {"notations": [], "assumptions_and_limitations": [], "future_work": []}
+        return {"assumptions_and_limitations": [], "future_work": []}
 
     genai.configure(api_key=api_key)
     model_name = os.environ.get("LLM_MODEL", "gemini-3.1-flash-lite")
     model = genai.GenerativeModel(model_name)
     
     # Format candidates compactly for the prompt. Limit lists to avoid token limits
-    math_str = "\n".join([f"- (Page {c['page']}, Section '{c['section']}', Subsection '{c['subsection']}'): {c['sentence']}" for c in math_candidates[:120]])
-    assump_str = "\n".join([f"- (Page {c['page']}, Section '{c['section']}', Subsection '{c['subsection']}'): {c['sentence']}" for c in assumption_candidates[:80]])
-    future_str = "\n".join([f"- (Page {c['page']}, Section '{c['section']}', Subsection '{c['subsection']}'): {c['sentence']}" for c in future_candidates[:50]])
+    assump_str = "\n".join([f"- (Page {c['page']}, Section '{c['section']}', Subsection '{c['subsection']}'): {c['sentence']}" for c in assumption_candidates[:200]])
+    future_str = "\n".join([f"- (Page {c['page']}, Section '{c['section']}', Subsection '{c['subsection']}'): {c['sentence']}" for c in future_candidates[:120]])
     
     prompt = f"""You are an expert scientific peer reviewer and research analyst.
 We are compiling detailed technical notes for a research paper titled "{title}".
 
 We have run a high-recall offline pre-filtering pass to extract candidate sentences from the paper. These candidates contain false positives (noise), which you MUST filter out.
-
-=== CANDIDATE MATH SENTENCES ===
-{math_str}
 
 === CANDIDATE ASSUMPTION & LIMITATION SENTENCES ===
 {assump_str}
@@ -186,17 +164,12 @@ We have run a high-recall offline pre-filtering pass to extract candidate senten
 {future_str}
 
 === INSTRUCTIONS ===
-1. **Mathematical Symbol & Variable Notations**:
-   - Filter through candidate math sentences. Extract symbols, variables, or state kets (e.g. $N$, $q$, $\\oplus$, $|I\\rangle$) used in the paper.
-   - For each, provide a precise definition/meaning based on the text.
-   - Match it to its exact verbatim supporting sentences from the candidate lists.
-   - Ignore standard English words that slipped through, and ignore simple numbers (like 1, 2) unless they represent a specific math index parameter.
-2. **Assumptions & Limitations**:
+1. **Assumptions & Limitations**:
    - Filter through candidate assumptions sentences. Identify true underlying research assumptions (e.g., noise-free gates, specific initializations) and limitations (e.g., bounds on dimensions, hardware constraints).
    - Classify each as either "Assumption" or "Limitation".
    - Match each to its exact verbatim supporting sentences from the candidate lists.
    - Ignore sentences that just mention keywords in general context (like *"we do not limit the discussion"*).
-3. **Future Work Directions**:
+2. **Future Work Directions**:
    - Filter through candidate future work sentences. Synthesize actual future steps or research opportunities explicitly stated by the authors.
    - Provide a clear description and match it to its exact verbatim supporting sentences from the candidate lists.
 
@@ -210,20 +183,6 @@ An anchor is an object containing:
 
 Return your response strictly in JSON format matching this schema:
 {{
-  "notations": [
-    {{
-      "symbol": "q",
-      "meaning": "The number of qubits required to represent the gray-scale values of pixels.",
-      "anchors": [
-        {{
-          "section": "Quantum Representation of Image",
-          "subsection": "NEQR Model",
-          "page": 3,
-          "anchor_text": "The gray-scale value of each pixel is represented by a sequence of qubits, let q denote..."
-        }}
-      ]
-    }}
-  ],
   "assumptions_and_limitations": [
     {{
       "type": "Assumption",
@@ -234,18 +193,6 @@ Return your response strictly in JSON format matching this schema:
           "subsection": "NEQR Model",
           "page": 3,
           "anchor_text": "For a 2n × 2n image, n is an integer representing..."
-        }}
-      ]
-    }},
-    {{
-      "type": "Limitation",
-      "description": "Gate complexity scales with pixel count, which could be restrictive on near-term NISQ hardware.",
-      "anchors": [
-        {{
-          "section": "Complexity Analysis",
-          "subsection": "",
-          "page": 10,
-          "anchor_text": "The circuit design requires many Toffoli gates, which is restricted by current experimental hardware..."
         }}
       ]
     }}
@@ -304,9 +251,8 @@ def main():
     
     # 1. Offline high-recall filtering
     print("Running high-recall offline pre-filtering for sentences...")
-    math_cands, assump_cands, future_cands = extract_candidate_sentences(doc, first_terminal_page, valid_toc)
+    assump_cands, future_cands = extract_candidate_sentences(doc, first_terminal_page, valid_toc)
     print(f"Extracted candidate sentence counts:")
-    print(f"  - Math/Symbol sentences: {len(math_cands)}")
     print(f"  - Assumptions/Limitations sentences: {len(assump_cands)}")
     print(f"  - Future Work sentences: {len(future_cands)}")
     
@@ -317,8 +263,8 @@ def main():
          title = "Quantum Image Processing Algorithm Using Line Detection Mask Based on NEQR"
          
     # 2. Call Gemini at the final step to filter noise and structure details
-    print("Querying Gemini API at the last step for high-precision filtering and synthesis...")
-    details = query_gemini_to_synthesize_details(math_cands, assump_cands, future_cands, title)
+    print("Querying Gemini API at the final step for high-precision filtering and synthesis...")
+    details = query_gemini_to_synthesize_details(assump_cands, future_cands, title)
     
     print(f"Writing structured details JSON output to: {output_json_path}")
     with open(output_json_path, "w", encoding="utf-8") as f:

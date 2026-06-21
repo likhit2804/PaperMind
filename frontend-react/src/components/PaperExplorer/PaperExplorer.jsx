@@ -53,6 +53,36 @@ function groupSources(sources) {
   return Object.values(groups);
 }
 
+// ── Math / LaTeX Renderer Component using KaTeX CDN ───────────────────────────
+function MathRenderer({ math, block = false }) {
+  const ref = useRef(null);
+
+  useEffect(() => {
+    if (ref.current && window.katex) {
+      try {
+        let cleanMath = math.trim();
+        // Remove enclosing $$ ... $$ or $ ... $
+        if (cleanMath.startsWith("$$") && cleanMath.endsWith("$$")) {
+          cleanMath = cleanMath.slice(2, -2).trim();
+        } else if (cleanMath.startsWith("$") && cleanMath.endsWith("$")) {
+          cleanMath = cleanMath.slice(1, -1).trim();
+        }
+        window.katex.render(cleanMath, ref.current, {
+          displayMode: block,
+          throwOnError: false,
+        });
+      } catch (err) {
+        console.warn("KaTeX render error:", err);
+        ref.current.textContent = math;
+      }
+    } else if (ref.current) {
+      ref.current.textContent = math;
+    }
+  }, [math, block]);
+
+  return <span ref={ref} />;
+}
+
 export default function PaperExplorer() {
   // ── Initialise from localStorage so data survives page refresh ──────────
   const saved = loadSavedSession();
@@ -304,7 +334,7 @@ export default function PaperExplorer() {
 
   // ── Filtering Logic ──────────────────────────────────────────────────────
   const pageFilteredNodes = (pdfOpen && autoFilterPage)
-    ? nodes.filter(n => n.sources?.some(src => src.page === pdfPage))
+    ? nodes.filter(n => n.type === "notation" || n.sources?.some(src => src.page === pdfPage))
     : nodes;
 
   const counts = {
@@ -342,6 +372,69 @@ export default function PaperExplorer() {
     }
   };
 
+  // ── Helper to Link Equations and Notations ──────────────────────────────
+  const findUsedNotations = (equationNode, allNodes) => {
+    if (equationNode.type !== "equation") return [];
+    
+    const notationNodes = allNodes.filter(n => n.type === "notation");
+    const used = [];
+    
+    const latex = equationNode.latex || "";
+    const definition = equationNode.definition || "";
+    const rawText = equationNode.rawText || "";
+    const searchPool = (latex + " " + definition + " " + rawText);
+    
+    for (const notation of notationNodes) {
+      const symbol = notation.symbol || notation.label.replace(/^Notation:\s*/, "");
+      if (!symbol) continue;
+      
+      const cleanSymbol = symbol.trim();
+      if (!cleanSymbol) continue;
+      
+      let isUsed = false;
+      
+      // 1. Literal match in searchPool
+      if (searchPool.includes(cleanSymbol)) {
+        isUsed = true;
+      }
+      
+      // 2. Greek unicode-to-latex mappings
+      if (!isUsed) {
+        const greekMap = {
+          'α': '\\alpha', 'β': '\\beta', 'γ': '\\gamma', 'δ': '\\delta', 'ϵ': '\\epsilon', 'ε': '\\epsilon',
+          'ζ': '\\zeta', 'η': '\\eta', 'θ': '\\theta', 'ι': '\\iota', 'κ': '\\kappa', 'λ': '\\lambda',
+          'μ': '\\mu', 'ν': '\\nu', 'ξ': '\\xi', 'ο': '\\omicron', 'π': '\\pi', 'ρ': '\\rho',
+          'σ': '\\sigma', 'τ': '\\tau', 'υ': '\\upsilon', 'φ': '\\phi', 'χ': '\\chi', 'ψ': '\\psi',
+          'ω': '\\omega', 'Φ': '\\Phi', 'Ψ': '\\Psi', 'Ω': '\\Omega'
+        };
+        for (const [char, latexCmd] of Object.entries(greekMap)) {
+          if (cleanSymbol.includes(char) && searchPool.includes(latexCmd)) {
+            isUsed = true;
+            break;
+          }
+        }
+      }
+      
+      // 3. Subscript mapping (base_sub or base_{sub})
+      if (!isUsed && cleanSymbol.includes('_')) {
+        const parts = cleanSymbol.split('_');
+        const base = parts[0];
+        const sub = parts[1];
+        const pattern1 = `${base}_{${sub}}`;
+        const pattern2 = `${base}_${sub}`;
+        if (searchPool.includes(pattern1) || searchPool.includes(pattern2)) {
+          isUsed = true;
+        }
+      }
+      
+      if (isUsed) {
+        used.push(notation);
+      }
+    }
+    
+    return used;
+  };
+
   // ── Render Detail View Content ───────────────────────────────────────────
   const renderDetailContent = (node) => {
     // For references, parse the role prefix from the definition
@@ -377,7 +470,15 @@ export default function PaperExplorer() {
             <p className={`nd-eyebrow type-${node.type || "concept"}`}>
               {node.type ? node.type.toUpperCase().replace('_', ' ') : 'Concept'}
             </p>
-            <h3 className="pe-detail-title">{node.label}</h3>
+            <h3 className="pe-detail-title">
+              {node.type === "notation" ? (
+                <span>
+                  Notation: <MathRenderer math={node.label.replace(/^Notation:\s*/, "")} />
+                </span>
+              ) : (
+                node.label
+              )}
+            </h3>
           </div>
         </div>
 
@@ -399,7 +500,9 @@ export default function PaperExplorer() {
         {node.type === "equation" && node.latex && (
           <div className="pe-equation-box">
             <p className="nd-label">LaTeX Formula</p>
-            <div className="pe-equation-formula">{node.latex}</div>
+            <div className="pe-equation-formula">
+              <MathRenderer math={node.latex} block={true} />
+            </div>
             {node.rawText && (
               <details className="pe-equation-raw">
                 <summary>View raw scanned text context</summary>
@@ -407,6 +510,38 @@ export default function PaperExplorer() {
               </details>
             )}
           </div>
+        )}
+
+        {/* Linked Notations for Equation */}
+        {node.type === "equation" && (
+          (() => {
+            const linked = findUsedNotations(node, nodes);
+            if (linked.length === 0) return null;
+            return (
+              <div className="nd-section" style={{ padding: "14px 0" }}>
+                <p className="nd-label">Symbols Used in this Equation</p>
+                <div className="pe-linked-notations-list">
+                  {linked.map((not) => (
+                    <div 
+                      key={not.id} 
+                      className="pe-linked-notation-item"
+                      onClick={() => setSelectedNode(not)}
+                    >
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                        <strong style={{ color: "#facc15", fontFamily: "monospace", fontSize: "0.95rem" }}>
+                          {not.symbol || not.label.replace(/^Notation:\s*/, "")}
+                        </strong>
+                        <span style={{ fontSize: "0.74rem", color: "var(--text-muted)", opacity: 0.8 }}>View Meaning ↗</span>
+                      </div>
+                      <p style={{ margin: "6px 0 0 0", fontSize: "0.85rem", color: "var(--text-main)", lineHeight: 1.4 }}>
+                        {not.definition}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            );
+          })()
         )}
 
         {grouped.length > 0 && (
@@ -693,7 +828,15 @@ export default function PaperExplorer() {
                       >
                         <div className="ktp-item-header">
                           <div className="ktp-item-title-row">
-                            <span className="ktp-item-label">{node.label}</span>
+                            <span className="ktp-item-label">
+                              {node.type === "notation" ? (
+                                <span>
+                                  Notation: <MathRenderer math={node.label.replace(/^Notation:\s*/, "")} />
+                                </span>
+                              ) : (
+                                node.label
+                              )}
+                            </span>
                             <div style={{ display: "flex", gap: "6px", alignItems: "center" }}>
                               {isOnActivePage && (
                                 <span className="ktp-active-page-indicator" title={`Present on Page ${pdfPage}`}>
