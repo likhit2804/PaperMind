@@ -8,7 +8,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
-from backend.app.config import settings
+from knowledge_base.ingestion.config import settings
 from knowledge_base.ingestion.topic_extractor import ExtractedTopicPack
 
 logger = logging.getLogger(__name__)

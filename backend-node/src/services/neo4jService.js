@@ -206,7 +206,7 @@ export async function fetchQuestionContextForConcepts(conceptIds = [], limit = 1
       MATCH (c:Concept)<-[:ABOUT]-(m:Misconception)
       WHERE c.concept_id IN $concept_ids
       OPTIONAL MATCH (q:Question)-[:TESTS]->(c)
-      OPTIONAL MATCH (q)-[:TARGETS_MISCONCEPTION]->(m)
+      OPTIONAL MATCH (q)-[:EXPOSES]->(m)
       RETURN c.concept_id AS concept_id,
              c.name AS concept_name,
              m.misconception_id AS misconception_id,

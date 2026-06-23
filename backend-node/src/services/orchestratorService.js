@@ -54,7 +54,8 @@ export class OrchestratorService {
     const fallbackConcepts = [...new Set((snapshot.attempts || []).map((a) => a.concept).filter(Boolean))];
     const retrievalContext = await buildQuestionGenerationContext(
       snapshot.profile.student_id,
-      fallbackConcepts
+      fallbackConcepts,
+      snapshot.profile.subject
     );
 
     // 1. Create Initial State

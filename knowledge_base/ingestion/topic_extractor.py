@@ -69,7 +69,7 @@ def extract_topic_pack(
         An ExtractedTopicPack with all six JSON structures.
     """
     if llm is None:
-        from backend.app.services.llm_client import get_llm
+        from knowledge_base.ingestion.config import get_llm
         llm = get_llm(temperature=0.3)
 
     result = ExtractedTopicPack(topic_id=topic_id)
