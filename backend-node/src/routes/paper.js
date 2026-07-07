@@ -89,6 +89,8 @@ router.post("/paper/analyze", upload.single("file"), async (req, res, next) => {
   const equationsJson = path.join(outDir, "equations.json");
   const notesMd = path.join(outDir, "notes.md");
   const notationsJson = path.join(outDir, "notations.json");
+  const summaryJson = path.join(outDir, "summary.json");
+  const archNotesMd = path.join(outDir, "architecture_notes.md");
 
   // Pipeline script paths (relative to project root)
   const conceptsScript = path.join(
@@ -121,16 +123,30 @@ router.post("/paper/analyze", upload.single("file"), async (req, res, next) => {
     "research_paper",
     "extract_notations_local.py"
   );
+  const summaryScript = path.join(
+    settings.baseDir,
+    "pipeline",
+    "research_paper",
+    "generate_paper_summary.py"
+  );
+  const archNotesScript = path.join(
+    settings.baseDir,
+    "pipeline",
+    "research_paper",
+    "generate_architecture_notes.py"
+  );
 
   try {
     // Step 1: extract concepts
     console.log(`[paper/analyze] Running concept extractor for session ${sessionId}…`);
     await runPython([conceptsScript, pdfPath, conceptsJson], settings.baseDir);
 
-    // Step 2, 3, 4, 5: run glossary, references, equations, and local notations extraction in parallel
-    console.log(`[paper/analyze] Running glossary, references, equations, and local notations extractors for session ${sessionId}…`);
+    // Step 2-7: run glossary, summary, architecture, references, equations, and local notations extraction in parallel
+    console.log(`[paper/analyze] Running glossary, summary, architecture, references, equations, and local notations extractors for session ${sessionId}…`);
     await Promise.all([
       runPython([notesScript, pdfPath, conceptsJson, notesMd], settings.baseDir),
+      runPython([summaryScript, pdfPath, summaryJson], settings.baseDir),
+      runPython([archNotesScript, pdfPath, conceptsJson, archNotesMd], settings.baseDir),
       runPython([referencesScript, pdfPath, referencesJson], settings.baseDir),
       runPython([equationsScript, pdfPath, equationsJson], settings.baseDir),
       runPython([notationsScript, pdfPath, notationsJson], settings.baseDir)
@@ -140,6 +156,26 @@ router.post("/paper/analyze", upload.single("file"), async (req, res, next) => {
     const conceptsData = JSON.parse(fs.readFileSync(conceptsJson, "utf-8"));
     const mdText = fs.readFileSync(notesMd, "utf-8");
     const glossaryNodes = parseGlossaryMd(mdText);
+
+    // Parse summary if available
+    let summary = null;
+    if (fs.existsSync(summaryJson)) {
+      try {
+        summary = JSON.parse(fs.readFileSync(summaryJson, "utf-8"));
+      } catch (err) {
+        console.warn(`[paper/analyze] Failed to parse summary JSON:`, err);
+      }
+    }
+
+    // Read architecture notes if available
+    let architectureNotes = "";
+    if (fs.existsSync(archNotesMd)) {
+      try {
+        architectureNotes = fs.readFileSync(archNotesMd, "utf-8");
+      } catch (err) {
+        console.warn(`[paper/analyze] Failed to read architecture notes:`, err);
+      }
+    }
 
     // Initialize combined nodes with type: "concept"
     const nodes = glossaryNodes.map(node => ({
@@ -227,6 +263,8 @@ router.post("/paper/analyze", upload.single("file"), async (req, res, next) => {
       sessionId,
       paperTitle: conceptsData.paper_title || "Research Paper",
       nodes,
+      summary,
+      architectureNotes,
       pdfUrl: `/paper/pdf/${sessionId}`,
     });
   } catch (err) {

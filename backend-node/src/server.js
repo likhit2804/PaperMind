@@ -2,12 +2,7 @@ import express from "express";
 import cors from "cors";
 import path from "path";
 import settings from "./config.js";
-import { initDb } from "./services/database.js";
 import healthRouter from "./routes/health.js";
-import orchestratorRouter from "./routes/orchestrator.js";
-import assessmentRouter from "./routes/assessment.js";
-import evaluationRouter from "./routes/evaluation.js";
-import ingestRouter from "./routes/ingest.js";
 import paperRouter from "./routes/paper.js";
 
 const app = express();
@@ -26,10 +21,6 @@ app.get("/", (_req, res) => {
 
 // --------------- Routes ---------------
 app.use(healthRouter);
-app.use(orchestratorRouter);
-app.use(assessmentRouter);
-app.use(evaluationRouter);
-app.use(ingestRouter);
 app.use(paperRouter);
 
 // --------------- Error handler ---------------
@@ -39,7 +30,6 @@ app.use((err, _req, res, _next) => {
 });
 
 // --------------- Start ---------------
-initDb();
 app.listen(settings.port, () => {
   console.log(`${settings.appName} backend running at http://localhost:${settings.port}`);
 });

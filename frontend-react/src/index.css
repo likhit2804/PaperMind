@@ -1665,3 +1665,302 @@ button.secondary:hover {
   transform: translateX(4px);
 }
 
+/* -- Segment Selector in Header -- */
+.pe-view-selector {
+  display: inline-flex;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 3px;
+  gap: 4px;
+}
+.pe-view-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-family: inherit;
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: 7px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+}
+.pe-view-btn:hover:not(:disabled) {
+  color: var(--text-main);
+  background: rgba(255, 255, 255, 0.04);
+}
+.pe-view-btn.active {
+  color: var(--primary);
+  background: rgba(56, 189, 248, 0.1);
+}
+.pe-view-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+/* -- Summary & Architecture View Panes -- */
+.pe-summary-pane,
+.pe-architecture-pane {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  backdrop-filter: var(--backdrop);
+}
+.pe-summary-scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding: 30px;
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+}
+.pe-summary-hero {
+  background: rgba(56, 189, 248, 0.04);
+  border: 1px dashed rgba(56, 189, 248, 0.2);
+  border-radius: 12px;
+  padding: 20px;
+  position: relative;
+}
+.pe-hero-badge {
+  position: absolute;
+  top: -10px;
+  left: 20px;
+  background: var(--primary);
+  color: #090d16;
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 2px 8px;
+  border-radius: 20px;
+}
+.pe-hero-text {
+  font-size: 1.05rem;
+  line-height: 1.6;
+  color: var(--text-main);
+  margin-top: 5px;
+}
+.pe-summary-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+@media (max-width: 768px) {
+  .pe-summary-grid {
+    grid-template-columns: 1fr;
+  }
+}
+.pe-summary-card {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 18px;
+}
+.pe-summary-card h4 {
+  font-size: 0.9rem;
+  font-weight: 700;
+  margin-bottom: 8px;
+  color: var(--primary);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+.pe-summary-card p {
+  font-size: 0.92rem;
+  line-height: 1.5;
+  color: var(--text-muted);
+}
+.pe-summary-section {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  border-top: 1px solid var(--border);
+  padding-top: 25px;
+}
+.pe-summary-section.limitations {
+  border-top: 1px solid var(--border);
+  background: rgba(248, 113, 113, 0.02);
+  border-radius: 12px;
+  padding: 20px;
+  border: 1px solid rgba(248, 113, 113, 0.1);
+}
+.pe-summary-section h3 {
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-main);
+}
+.pe-contrib-list {
+  list-style: none;
+  padding-left: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.pe-contrib-list li {
+  position: relative;
+  padding-left: 20px;
+  font-size: 0.95rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+.pe-contrib-list li::before {
+  content: "✦";
+  position: absolute;
+  left: 0;
+  color: var(--accent);
+}
+.pe-sections-timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+.pe-section-summary-card {
+  background: rgba(255, 255, 255, 0.015);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px;
+}
+.pe-sec-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+.pe-sec-num {
+  background: var(--border);
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text-main);
+}
+.pe-sec-header h5 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-main);
+}
+.pe-sec-desc {
+  font-size: 0.92rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+  margin-bottom: 10px;
+}
+.pe-sec-points {
+  list-style: disc;
+  padding-left: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.pe-sec-points li {
+  font-size: 0.88rem;
+  color: var(--text-muted);
+}
+
+/* -- Connections List & Tag styles -- */
+.pe-connections-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+.pe-connection-tag {
+  background: rgba(56, 189, 248, 0.06);
+  border: 1px solid rgba(56, 189, 248, 0.2);
+  color: #38bdf8;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+.pe-connection-tag:hover {
+  background: rgba(56, 189, 248, 0.15);
+  border-color: #38bdf8;
+}
+
+/* -- Architecture Notes Rich Markdown rendering -- */
+.markdown-body h1 {
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 1.5rem;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 8px;
+  margin-bottom: 15px;
+  margin-top: 10px;
+  color: var(--primary);
+}
+.markdown-body h2 {
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 1.25rem;
+  margin-top: 20px;
+  margin-bottom: 10px;
+  color: var(--text-main);
+}
+.markdown-body h3 {
+  font-size: 1.05rem;
+  margin-top: 15px;
+  margin-bottom: 8px;
+  color: var(--text-main);
+}
+.markdown-body p {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: var(--text-muted);
+  margin-bottom: 12px;
+}
+.pe-arch-list {
+  list-style: disc;
+  padding-left: 20px;
+  margin-bottom: 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.pe-arch-list li {
+  font-size: 0.92rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+.pe-table-wrapper {
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  margin: 15px 0;
+}
+.pe-arch-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+  text-align: left;
+}
+.pe-arch-table th,
+.pe-arch-table td {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+}
+.pe-arch-table th {
+  background: rgba(255, 255, 255, 0.03);
+  font-weight: 600;
+  color: var(--text-main);
+}
+.pe-arch-table td {
+  color: var(--text-muted);
+}
+.pe-arch-table tr:last-child td {
+  border-bottom: none;
+}
+

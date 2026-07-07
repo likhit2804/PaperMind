@@ -91,6 +91,9 @@ export default function PaperExplorer() {
   const [error, setError]             = useState("");
   const [paperTitle, setPaperTitle]   = useState(saved?.paperTitle || "");
   const [nodes, setNodes]             = useState(saved?.nodes || []);
+  const [summary, setSummary]         = useState(saved?.summary || null);
+  const [architectureNotes, setArchitectureNotes] = useState(saved?.architectureNotes || "");
+  const [mainView, setMainView]       = useState("glossary"); // 'glossary' | 'summary' | 'architecture'
   const [sessionId, setSessionId]     = useState(saved?.sessionId || null);
   const [selectedNode, setSelectedNode] = useState(null);
   
@@ -220,6 +223,9 @@ export default function PaperExplorer() {
   }, [togglePdf, toggleMaster, toggleDetail, pdfUrl]);
 
   const getGridTemplateColumns = () => {
+    if (mainView !== "glossary") {
+      return isPdfVisible ? `${pdfWidth}px 8px 1fr` : "1fr";
+    }
     const parts = [];
     const visibleCount = [isPdfVisible, isMasterVisible, isDetailVisible].filter(Boolean).length;
     if (visibleCount === 0) return "1fr";
@@ -262,9 +268,9 @@ export default function PaperExplorer() {
   // ── Persist whenever session changes ────────────────────────────────────
   useEffect(() => {
     if (sessionId && nodes.length > 0) {
-      saveSession({ sessionId, paperTitle, nodes });
+      saveSession({ sessionId, paperTitle, nodes, summary, architectureNotes });
     }
-  }, [sessionId, paperTitle, nodes]);
+  }, [sessionId, paperTitle, nodes, summary, architectureNotes]);
 
   // ── Upload handler ───────────────────────────────────────────────────────
   const handleFileUpload = useCallback(async (file) => {
@@ -281,6 +287,9 @@ export default function PaperExplorer() {
     setError("");
     setNodes([]);
     setSelectedNode(null);
+    setSummary(null);
+    setArchitectureNotes("");
+    setMainView("glossary");
     setPdfOpen(false);
     clearSession();
 
@@ -299,11 +308,19 @@ export default function PaperExplorer() {
       setPaperTitle(data.paperTitle);
       setNodes(data.nodes || []);
       setSessionId(sid);
+      setSummary(data.summary || null);
+      setArchitectureNotes(data.architectureNotes || "");
       setPdfPage(1);
       setPdfOpen(true);
       setStatus("ready");
       // Persist immediately after successful analysis
-      saveSession({ sessionId: sid, paperTitle: data.paperTitle, nodes: data.nodes || [] });
+      saveSession({ 
+        sessionId: sid, 
+        paperTitle: data.paperTitle, 
+        nodes: data.nodes || [], 
+        summary: data.summary || null, 
+        architectureNotes: data.architectureNotes || "" 
+      });
     } catch (err) {
       setError(err.message);
       setStatus("error");
@@ -328,6 +345,9 @@ export default function PaperExplorer() {
     setPaperTitle("");
     setSessionId(null);
     setSelectedNode(null);
+    setSummary(null);
+    setArchitectureNotes("");
+    setMainView("glossary");
     setPdfOpen(false);
     setAutoFilterPage(true);
   }, [sessionId]);
@@ -431,15 +451,30 @@ export default function PaperExplorer() {
 
   // ── Render Detail View Content ───────────────────────────────────────────
   const renderDetailContent = (node) => {
-    // For references, parse the role prefix from the definition
     let cleanDefinition = node.definition;
     let roleBadge = null;
+    let connections = [];
+
     if (node.type === "reference") {
       const roleMatch = node.definition.match(/^\[Role:\s*(.+?)\]\s*(.+)$/i);
       if (roleMatch) {
         roleBadge = roleMatch[1];
         cleanDefinition = roleMatch[2];
       }
+    } else if (node.type === "concept") {
+      // Parse: "Def text [Role: Role explanation] [Connections: term1, term2]"
+      let currentText = node.definition;
+      const roleMatch = currentText.match(/\[Role:\s*(.+?)\]/i);
+      if (roleMatch) {
+        roleBadge = roleMatch[1];
+        currentText = currentText.replace(/\[Role:\s*(.+?)\]/i, "").trim();
+      }
+      const connMatch = currentText.match(/\[Connections:\s*(.+?)\]/i);
+      if (connMatch) {
+        connections = connMatch[1].split(",").map(c => c.trim()).filter(Boolean);
+        currentText = currentText.replace(/\[Connections:\s*(.+?)\]/i, "").trim();
+      }
+      cleanDefinition = currentText;
     }
 
     const getLabelForType = (type) => {
@@ -535,6 +570,30 @@ export default function PaperExplorer() {
           })()
         )}
 
+        {/* Connections List */}
+        {connections.length > 0 && (
+          <div className="nd-section" style={{ padding: "14px 0" }}>
+            <p className="nd-label">Connections to other concepts</p>
+            <div className="pe-connections-list">
+              {connections.map((conn, idx) => {
+                const targetNode = nodes.find(n => n.label.toLowerCase().trim() === conn.toLowerCase().trim());
+                return (
+                  <span 
+                    key={idx} 
+                    className="pe-connection-tag"
+                    onClick={() => {
+                      if (targetNode) setSelectedNode(targetNode);
+                    }}
+                    style={{ cursor: targetNode ? "pointer" : "default", opacity: targetNode ? 1 : 0.6 }}
+                  >
+                    {conn} {targetNode ? "↗" : ""}
+                  </span>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
         {grouped.length > 0 && (
           <div className="nd-section" style={{ padding: "14px 0", borderBottom: "none" }}>
             <p className="nd-label">Paper Occurrences — click to go to page</p>
@@ -567,6 +626,205 @@ export default function PaperExplorer() {
             <p className="nd-no-sources">No exact page references found in the paper body.</p>
           </div>
         )}
+      </div>
+    );
+  };
+
+  const parseMarkdownInline = (text) => {
+    const parts = [];
+    let lastIdx = 0;
+    const regex = /\*\*(.*?)\*\*|\*(.*?)\*/g;
+    let match;
+    let keyIdx = 0;
+    
+    while ((match = regex.exec(text)) !== null) {
+      if (match.index > lastIdx) {
+        parts.push(text.slice(lastIdx, match.index));
+      }
+      if (match[1]) {
+        parts.push(<strong key={keyIdx++}>{match[1]}</strong>);
+      } else if (match[2]) {
+        parts.push(<em key={keyIdx++}>{match[2]}</em>);
+      }
+      lastIdx = regex.lastIndex;
+    }
+    if (lastIdx < text.length) {
+      parts.push(text.slice(lastIdx));
+    }
+    return parts.length > 0 ? parts : text;
+  };
+
+  const renderMarkdownRich = (md) => {
+    const lines = md.split("\n");
+    const elements = [];
+    let inList = false;
+    let listItems = [];
+    let inTable = false;
+    let tableHeaders = [];
+    let tableRows = [];
+    
+    const flushList = (key) => {
+      if (listItems.length > 0) {
+        elements.push(
+          <ul key={`ul-${key}`} className="pe-arch-list">
+            {listItems.map((item, idx) => <li key={idx}>{item}</li>)}
+          </ul>
+        );
+        listItems = [];
+        inList = false;
+      }
+    };
+    
+    const flushTable = (key) => {
+      if (tableRows.length > 0 || tableHeaders.length > 0) {
+        elements.push(
+          <div key={`table-container-${key}`} className="pe-table-wrapper">
+            <table className="pe-arch-table">
+              {tableHeaders.length > 0 && (
+                <thead>
+                  <tr>
+                    {tableHeaders.map((h, idx) => <th key={idx}>{h}</th>)}
+                  </tr>
+                </thead>
+              )}
+              <tbody>
+                {tableRows.map((row, rIdx) => (
+                  <tr key={rIdx}>
+                    {row.map((cell, cIdx) => <td key={cIdx}>{cell}</td>)}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        );
+        tableHeaders = [];
+        tableRows = [];
+        inTable = false;
+      }
+    };
+
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i].trim();
+      
+      if (line.startsWith("•") || line.startsWith("*") || line.startsWith("-")) {
+        flushTable(i);
+        inList = true;
+        const text = line.replace(/^[•\*\-]\s*/, "");
+        listItems.push(parseMarkdownInline(text));
+        continue;
+      } else if (inList) {
+        flushList(i);
+      }
+
+      if (line.startsWith("|")) {
+        flushList(i);
+        inTable = true;
+        const cells = line.split("|").map(c => c.trim()).filter((_, idx, arr) => idx > 0 && idx < arr.length - 1);
+        if (cells.every(c => c.startsWith("-"))) {
+          continue;
+        }
+        if (tableHeaders.length === 0 && tableRows.length === 0) {
+          tableHeaders = cells;
+        } else {
+          tableRows.push(cells.map(c => parseMarkdownInline(c)));
+        }
+        continue;
+      } else if (inTable) {
+        flushTable(i);
+      }
+
+      if (line.startsWith("# ")) {
+        elements.push(<h1 key={i}>{parseMarkdownInline(line.slice(2))}</h1>);
+      } else if (line.startsWith("## ")) {
+        elements.push(<h2 key={i}>{parseMarkdownInline(line.slice(3))}</h2>);
+      } else if (line.startsWith("### ")) {
+        elements.push(<h3 key={i}>{parseMarkdownInline(line.slice(4))}</h3>);
+      } else if (line.startsWith("#### ")) {
+        elements.push(<h4 key={i}>{parseMarkdownInline(line.slice(5))}</h4>);
+      } else if (line) {
+        elements.push(<p key={i}>{parseMarkdownInline(line)}</p>);
+      }
+    }
+    
+    flushList("end");
+    flushTable("end");
+    return elements;
+  };
+
+  const renderSummaryView = () => {
+    if (!summary) return <div className="pe-summary-empty">No summary available.</div>;
+    return (
+      <div className="pe-summary-scroll">
+        <div className="pe-summary-hero">
+          <span className="pe-hero-badge">Executive Summary</span>
+          <p className="pe-hero-text">{summary.executive}</p>
+        </div>
+        
+        <div className="pe-summary-grid">
+          {summary.research_question && (
+            <div className="pe-summary-card">
+              <h4>🎯 Core Research Question</h4>
+              <p>{summary.research_question}</p>
+            </div>
+          )}
+          {summary.tldr && (
+            <div className="pe-summary-card">
+              <h4>⚡ TL;DR</h4>
+              <p>{summary.tldr}</p>
+            </div>
+          )}
+        </div>
+
+        {summary.contributions && summary.contributions.length > 0 && (
+          <div className="pe-summary-section">
+            <h3>Key Contributions</h3>
+            <ul className="pe-contrib-list">
+              {summary.contributions.map((c, i) => (
+                <li key={i}>{c}</li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        {summary.sections && summary.sections.length > 0 && (
+          <div className="pe-summary-section">
+            <h3>Section-by-Section Summary</h3>
+            <div className="pe-sections-timeline">
+              {summary.sections.map((sec, i) => (
+                <div key={i} className="pe-section-summary-card">
+                  <div className="pe-sec-header">
+                    <span className="pe-sec-num">{i + 1}</span>
+                    <h5>{sec.label}</h5>
+                  </div>
+                  <p className="pe-sec-desc">{sec.summary}</p>
+                  {sec.key_points && sec.key_points.length > 0 && (
+                    <ul className="pe-sec-points">
+                      {sec.key_points.map((pt, j) => (
+                        <li key={j}>{pt}</li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {summary.limitations && (
+          <div className="pe-summary-section limitations">
+            <h3>Limitations & Future Work</h3>
+            <p>{summary.limitations}</p>
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  const renderArchitectureView = () => {
+    if (!architectureNotes) return <div className="pe-summary-empty">No architecture notes available.</div>;
+    return (
+      <div className="pe-summary-scroll markdown-body">
+        {renderMarkdownRich(architectureNotes)}
       </div>
     );
   };
@@ -608,13 +866,39 @@ export default function PaperExplorer() {
         <div className="pe-actions">
           {nodes.length > 0 && (
             <>
+              {/* Segmented Selector for Main Views */}
+              <div className="pe-view-selector">
+                <button 
+                  className={`pe-view-btn ${mainView === "glossary" ? "active" : ""}`}
+                  onClick={() => setMainView("glossary")}
+                >
+                  📖 Glossary
+                </button>
+                <button 
+                  className={`pe-view-btn ${mainView === "summary" ? "active" : ""}`}
+                  onClick={() => setMainView("summary")}
+                  disabled={!summary}
+                >
+                  📝 Summary
+                </button>
+                <button 
+                  className={`pe-view-btn ${mainView === "architecture" ? "active" : ""}`}
+                  onClick={() => setMainView("architecture")}
+                  disabled={!architectureNotes}
+                >
+                  🏗️ Architecture
+                </button>
+              </div>
+
+              <div className="pe-header-divider" />
+
               {/* VS Code Layout Toggles */}
               <div className="pe-layout-controls">
                 <button 
                   className={`pe-layout-btn ${isPdfVisible ? "active" : ""}`} 
                   onClick={togglePdf}
                   title="Toggle PDF Panel (Alt+1)"
-                  disabled={!pdfUrl}
+                  disabled={!pdfUrl || mainView !== "glossary"}
                 >
                   <svg className="layout-icon" viewBox="0 0 16 16" width="14" height="14">
                     <rect x="1" y="2" width="14" height="12" rx="1.5" fill="none" stroke="currentColor" strokeWidth="1.5"/>
@@ -626,6 +910,7 @@ export default function PaperExplorer() {
                   className={`pe-layout-btn ${isMasterVisible ? "active" : ""}`} 
                   onClick={toggleMaster}
                   title="Toggle Glossary List (Alt+2)"
+                  disabled={mainView !== "glossary"}
                 >
                   <svg className="layout-icon" viewBox="0 0 16 16" width="14" height="14">
                     <rect x="1" y="2" width="14" height="12" rx="1.5" fill="none" stroke="currentColor" strokeWidth="1.5"/>
@@ -638,6 +923,7 @@ export default function PaperExplorer() {
                   className={`pe-layout-btn ${isDetailVisible ? "active" : ""}`} 
                   onClick={toggleDetail}
                   title="Toggle Detail Pane (Alt+3)"
+                  disabled={mainView !== "glossary"}
                 >
                   <svg className="layout-icon" viewBox="0 0 16 16" width="14" height="14">
                     <rect x="1" y="2" width="14" height="12" rx="1.5" fill="none" stroke="currentColor" strokeWidth="1.5"/>
@@ -715,8 +1001,8 @@ export default function PaperExplorer() {
               </div>
             )}
 
-            {/* Resizer 1 (between PDF and Glossary) */}
-            {isPdfVisible && (isMasterVisible || isDetailVisible) && (
+            {/* Resizer 1 (between PDF and Main Content) */}
+            {isPdfVisible && (mainView === "glossary" ? (isMasterVisible || isDetailVisible) : true) && (
               <div
                 className={`pe-resizer-col ${draggingResizer === "pdf" ? "dragging" : ""}`}
                 onMouseDown={startResizePdf}
@@ -725,143 +1011,154 @@ export default function PaperExplorer() {
               </div>
             )}
 
-            {/* Left Master List */}
-            {isMasterVisible && (
-              <div className="pe-master-pane">
-                {/* Search */}
-                <div className="ktp-search-wrap">
-                  <span className="ktp-search-icon">🔍</span>
-                  <input
-                    className="ktp-search"
-                    type="text"
-                    placeholder="Search extracted details..."
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                  />
-                  <span className="ktp-count">{filtered.length}/{tabFiltered.length}</span>
-                </div>
-
-                {/* Active Page Guide Indicator with Toggle */}
-                {pdfOpen && (
-                  <div className="pe-active-page-header-guide">
-                    <div className="pe-active-page-guide-info">
-                      <span className="pe-active-page-guide-icon">📖</span>
-                      <span className="pe-active-page-guide-text">
-                        Glossary active on <strong>Page {pdfPage}</strong>
-                      </span>
-                    </div>
-                    <label className="pe-auto-filter-toggle">
+            {mainView === "glossary" ? (
+              <>
+                {/* Left Master List */}
+                {isMasterVisible && (
+                  <div className="pe-master-pane">
+                    {/* Search */}
+                    <div className="ktp-search-wrap">
+                      <span className="ktp-search-icon">🔍</span>
                       <input
-                        type="checkbox"
-                        checked={autoFilterPage}
-                        onChange={(e) => setAutoFilterPage(e.target.checked)}
+                        className="ktp-search"
+                        type="text"
+                        placeholder="Search extracted details..."
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
                       />
-                      <span className="pe-auto-filter-toggle-label">Auto-filter</span>
-                    </label>
-                  </div>
-                )}
+                      <span className="ktp-count">{filtered.length}/{tabFiltered.length}</span>
+                    </div>
 
-                {/* Tabs */}
-                <div className="ktp-tabs" ref={tabsRef}>
-                  <button
-                    className={`ktp-tab-btn ${activeTab === "all" ? "active" : ""}`}
-                    onClick={() => setActiveTab("all")}
-                  >
-                    All ({counts.all})
-                  </button>
-                  <button
-                    className={`ktp-tab-btn ${activeTab === "concept" ? "active" : ""}`}
-                    onClick={() => setActiveTab("concept")}
-                  >
-                    Concepts ({counts.concept})
-                  </button>
-                  <button
-                    className={`ktp-tab-btn ${activeTab === "notation" ? "active" : ""}`}
-                    onClick={() => setActiveTab("notation")}
-                  >
-                    Notations ({counts.notation})
-                  </button>
-                  <button
-                    className={`ktp-tab-btn ${activeTab === "equation" ? "active" : ""}`}
-                    onClick={() => setActiveTab("equation")}
-                  >
-                    Equations ({counts.equation})
-                  </button>
-                  <button
-                    className={`ktp-tab-btn ${activeTab === "reference" ? "active" : ""}`}
-                    onClick={() => setActiveTab("reference")}
-                  >
-                    Refs ({counts.reference})
-                  </button>
-                  {/* Context and Future tabs removed */}
-                </div>
-
-                {/* List */}
-                <div className="ktp-list">
-                  {filtered.map((node) => {
-                    const isOnActivePage = pdfOpen && node.sources?.some(src => src.page === pdfPage);
-                    return (
-                      <div
-                        key={node.id}
-                        className={`ktp-item ${selectedNode?.id === node.id ? "active" : ""} ${isOnActivePage ? "on-active-page" : ""} type-${node.type || "concept"}`}
-                        onClick={() => setSelectedNode(node)}
-                      >
-                        <div className="ktp-item-header">
-                          <div className="ktp-item-title-row">
-                            <span className="ktp-item-label">
-                              {node.type === "notation" ? (
-                                <span>
-                                  Notation: <MathRenderer math={node.label.replace(/^Notation:\s*/, "")} />
-                                </span>
-                              ) : (
-                                node.label
-                              )}
-                            </span>
-                            <div style={{ display: "flex", gap: "6px", alignItems: "center" }}>
-                              {isOnActivePage && (
-                                <span className="ktp-active-page-indicator" title={`Present on Page ${pdfPage}`}>
-                                  • Page {pdfPage}
-                                </span>
-                              )}
-                              <span className={`ktp-item-badge type-${node.type || "concept"}`}>
-                                {displayType(node.type || "concept")}
-                              </span>
-                            </div>
-                          </div>
+                    {/* Active Page Guide Indicator with Toggle */}
+                    {pdfOpen && (
+                      <div className="pe-active-page-header-guide">
+                        <div className="pe-active-page-guide-info">
+                          <span className="pe-active-page-guide-icon">📖</span>
+                          <span className="pe-active-page-guide-text">
+                            Glossary active on <strong>Page {pdfPage}</strong>
+                          </span>
                         </div>
-                        <p className="ktp-item-def">{node.definition}</p>
+                        <label className="pe-auto-filter-toggle">
+                          <input
+                            type="checkbox"
+                            checked={autoFilterPage}
+                            onChange={(e) => setAutoFilterPage(e.target.checked)}
+                          />
+                          <span className="pe-auto-filter-toggle-label">Auto-filter</span>
+                        </label>
                       </div>
-                    );
-                  })}
-                  {filtered.length === 0 && (
-                    <p className="ktp-empty">No matching details found.</p>
-                  )}
-                </div>
-              </div>
-            )}
+                    )}
 
-            {/* Resizer 2 (between Glossary and Details) */}
-            {isMasterVisible && isDetailVisible && (
-              <div
-                className={`pe-resizer-col ${draggingResizer === "master" ? "dragging" : ""}`}
-                onMouseDown={startResizeMaster}
-              >
-                <div className="pe-resizer-line" />
-              </div>
-            )}
+                    {/* Tabs */}
+                    <div className="ktp-tabs" ref={tabsRef}>
+                      <button
+                        className={`ktp-tab-btn ${activeTab === "all" ? "active" : ""}`}
+                        onClick={() => setActiveTab("all")}
+                      >
+                        All ({counts.all})
+                      </button>
+                      <button
+                        className={`ktp-tab-btn ${activeTab === "concept" ? "active" : ""}`}
+                        onClick={() => setActiveTab("concept")}
+                      >
+                        Concepts ({counts.concept})
+                      </button>
+                      <button
+                        className={`ktp-tab-btn ${activeTab === "notation" ? "active" : ""}`}
+                        onClick={() => setActiveTab("notation")}
+                      >
+                        Notations ({counts.notation})
+                      </button>
+                      <button
+                        className={`ktp-tab-btn ${activeTab === "equation" ? "active" : ""}`}
+                        onClick={() => setActiveTab("equation")}
+                      >
+                        Equations ({counts.equation})
+                      </button>
+                      <button
+                        className={`ktp-tab-btn ${activeTab === "reference" ? "active" : ""}`}
+                        onClick={() => setActiveTab("reference")}
+                      >
+                        Refs ({counts.reference})
+                      </button>
+                    </div>
 
-            {/* Right Detail Pane */}
-            {isDetailVisible && (
-              <div className="pe-detail-pane">
-                {selectedNode ? (
-                  renderDetailContent(selectedNode)
-                ) : (
-                  <div className="pe-detail-empty">
-                    <span className="pe-empty-icon">📄</span>
-                    <h4>No Item Selected</h4>
-                    <p>Select a concept, mathematical equation, literature reference, or research context parameter from the left sidebar to view detailed descriptions and page occurrences.</p>
+                    {/* List */}
+                    <div className="ktp-list">
+                      {filtered.map((node) => {
+                        const isOnActivePage = pdfOpen && node.sources?.some(src => src.page === pdfPage);
+                        return (
+                          <div
+                            key={node.id}
+                            className={`ktp-item ${selectedNode?.id === node.id ? "active" : ""} ${isOnActivePage ? "on-active-page" : ""} type-${node.type || "concept"}`}
+                            onClick={() => setSelectedNode(node)}
+                          >
+                            <div className="ktp-item-header">
+                              <div className="ktp-item-title-row">
+                                <span className="ktp-item-label">
+                                  {node.type === "notation" ? (
+                                    <span>
+                                      Notation: <MathRenderer math={node.label.replace(/^Notation:\s*/, "")} />
+                                    </span>
+                                  ) : (
+                                    node.label
+                                  )}
+                                </span>
+                                <div style={{ display: "flex", gap: "6px", alignItems: "center" }}>
+                                  {isOnActivePage && (
+                                    <span className="ktp-active-page-indicator" title={`Present on Page ${pdfPage}`}>
+                                      • Page {pdfPage}
+                                    </span>
+                                  )}
+                                  <span className={`ktp-item-badge type-${node.type || "concept"}`}>
+                                    {displayType(node.type || "concept")}
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                            <p className="ktp-item-def">{node.definition}</p>
+                          </div>
+                        );
+                      })}
+                      {filtered.length === 0 && (
+                        <p className="ktp-empty">No matching details found.</p>
+                      )}
+                    </div>
                   </div>
                 )}
+
+                {/* Resizer 2 (between Glossary and Details) */}
+                {isMasterVisible && isDetailVisible && (
+                  <div
+                    className={`pe-resizer-col ${draggingResizer === "master" ? "dragging" : ""}`}
+                    onMouseDown={startResizeMaster}
+                  >
+                    <div className="pe-resizer-line" />
+                  </div>
+                )}
+
+                {/* Right Detail Pane */}
+                {isDetailVisible && (
+                  <div className="pe-detail-pane">
+                    {selectedNode ? (
+                      renderDetailContent(selectedNode)
+                    ) : (
+                      <div className="pe-detail-empty">
+                        <span className="pe-empty-icon">📄</span>
+                        <h4>No Item Selected</h4>
+                        <p>Select a concept, mathematical equation, literature reference, or research context parameter from the left sidebar to view detailed descriptions and page occurrences.</p>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </>
+            ) : mainView === "summary" ? (
+              <div className="pe-summary-pane">
+                {renderSummaryView()}
+              </div>
+            ) : (
+              <div className="pe-architecture-pane">
+                {renderArchitectureView()}
               </div>
             )}
           </div>

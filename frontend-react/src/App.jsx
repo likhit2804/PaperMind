@@ -1,96 +1,21 @@
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { ThemeProvider } from "./context/ThemeContext";
 import ThemeToggle from "./components/ThemeToggle";
 import Banner from "./components/Banner";
-import Step1ChooseTopic from "./components/Step1ChooseTopic";
-import Step2BaselineCheck from "./components/Step2BaselineCheck";
-import Step3StudyPlan from "./components/Step3StudyPlan";
-import Step4Checkpoint from "./components/Step4Checkpoint";
-import DeveloperConsole from "./components/DeveloperConsole";
 import PaperExplorer from "./components/PaperExplorer/PaperExplorer";
 
 const BACKEND_URL = import.meta.env.DEV 
   ? "http://localhost:8000" 
   : window.location.origin;
 
-function loadSavedJourneyState() {
-  try {
-    const raw = localStorage.getItem("cogniweave_state");
-    return raw ? JSON.parse(raw) || {} : {};
-  } catch {
-    return {};
-  }
-}
-
 function AppContent() {
-  const [savedJourney] = useState(() => loadSavedJourneyState());
   const [backendOnline, setBackendOnline] = useState(false);
   const [backendStatus, setBackendStatus] = useState("Checking Backend...");
-  const [activeTab, setActiveTab] = useState("journey"); // 'journey' | 'paper'
-
-  // App States
-  const [sessionId, setSessionId] = useState(savedJourney.sessionId ?? null);
-  const [studentId, setStudentId] = useState(savedJourney.studentId ?? "student_johndoe");
-  const [topicId, setTopicId] = useState(savedJourney.topicId ?? "dsa_comprehensive");
-  const [topics, setTopics] = useState([]);
-  const [activeCardId, setActiveCardId] = useState(savedJourney.activeCardId ?? "step1Card");
-  const [isLoading, setIsLoading] = useState(false);
-
-  // Step 2 Diagnostic states
-  const [currentQuestion, setCurrentQuestion] = useState(savedJourney.currentQuestion ?? null);
-  const [currentQuestionProgress, setCurrentQuestionProgress] = useState(
-    savedJourney.currentQuestionProgress ?? null
-  );
-
-  // Step 3 Plan states
-  const [planData, setPlanData] = useState(savedJourney.planData ?? null);
-  const [weakestConceptId, setWeakestConceptId] = useState(savedJourney.weakestConceptId ?? "");
-
-  // Step 4 Checkpoint states
-  const [checkpointProblem, setCheckpointProblem] = useState(savedJourney.checkpointProblem ?? null);
-
-  // Message Banners
-  const [step1Message, setStep1Message] = useState({ text: "", type: "info" });
-  const [assessmentMessage, setAssessmentMessage] = useState({ text: "", type: "info" });
-  const [checkpointMessage, setCheckpointMessage] = useState({ text: "", type: "info" });
+  const [errorMessage, setErrorMessage] = useState("");
 
   const isLiveServer = window.location.port === "5500" || window.location.port === "5501";
 
-  // Build full payload for Developer console logs
-  const devState = {
-    backendOnline,
-    sessionId,
-    studentId,
-    topicId,
-    currentQuestion,
-    currentQuestionProgress,
-    weakestConceptId,
-    checkpointProblem,
-    topics,
-    activeCardId,
-    planData,
-  };
-
-  const fetchTopics = useCallback(async () => {
-    try {
-      const res = await fetch(`${BACKEND_URL}/ingest/topics`);
-      if (!res.ok) return;
-
-      const data = await res.json();
-      setTopics(data);
-
-      if (data && data.length > 0) {
-        const hasTopic = data.some((t) => t.topic_id === topicId);
-        if (!hasTopic) {
-          setTopicId(data[0].topic_id);
-        }
-      }
-    } catch (err) {
-      console.warn("Failed to fetch topics:", err);
-    }
-  }, [topicId]);
-
-  // 1. Health check & Fetch topics on load
+  // Health check on load
   useEffect(() => {
     async function checkBackend() {
       try {
@@ -98,248 +23,17 @@ function AppContent() {
         if (res.ok) {
           setBackendOnline(true);
           setBackendStatus("Backend Connected");
-          await fetchTopics();
         } else {
           throw new Error();
         }
       } catch {
         setBackendOnline(false);
         setBackendStatus("Backend Offline");
-        setStep1Message({
-          text: `Cannot connect to Node backend at ${BACKEND_URL}`,
-          type: "error",
-        });
+        setErrorMessage(`Cannot connect to Node backend at ${BACKEND_URL}`);
       }
     }
     checkBackend();
-  }, [fetchTopics]);
-
-  // 3. Cache state to LocalStorage when states change
-  useEffect(() => {
-    if (!backendOnline) return;
-    try {
-      localStorage.setItem(
-        "cogniweave_state",
-        JSON.stringify({
-          sessionId,
-          studentId,
-          topicId,
-          currentQuestion,
-          currentQuestionProgress,
-          weakestConceptId,
-          checkpointProblem,
-          activeCardId,
-          planData,
-        })
-      );
-    } catch (e) {
-      console.warn("Storage write blocked:", e);
-    }
-  }, [
-    sessionId,
-    studentId,
-    topicId,
-    currentQuestion,
-    currentQuestionProgress,
-    weakestConceptId,
-    checkpointProblem,
-    activeCardId,
-    planData,
-    backendOnline,
-  ]);
-
-  // Step 1 action: Start Baseline assessment
-  const startAssessment = async () => {
-    if (!backendOnline) {
-      setStep1Message({ text: "Backend must be online to start.", type: "error" });
-      return;
-    }
-
-    setIsLoading(true);
-    setStep1Message({ text: "", type: "info" });
-
-    try {
-      const res = await fetch(`${BACKEND_URL}/assessment/start`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          topic_id: topicId,
-          student_id: studentId,
-          goals: ["Solve adaptive study problems optimally"],
-          available_hours_per_week: 6,
-        }),
-      });
-
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.detail || "Failed to start assessment");
-
-      setSessionId(data.session_id);
-      setCurrentQuestion(data.question);
-      setCurrentQuestionProgress(data.progress);
-      setPlanData(null);
-      setWeakestConceptId("");
-      setCheckpointProblem(null);
-      setAssessmentMessage({ text: "", type: "info" });
-
-      setActiveCardId("step2Card");
-    } catch (err) {
-      setStep1Message({ text: err.message, type: "error" });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // Step 2 action: Submit Assessment Answer
-  const submitAssessmentAnswer = async (payload) => {
-    setIsLoading(true);
-    setAssessmentMessage({ text: "Submitting...", type: "info" });
-
-    try {
-      const res = await fetch(`${BACKEND_URL}/assessment/answer`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          session_id: sessionId,
-          problem_id: currentQuestion.id,
-          selected_option: payload.selected_option,
-          reported_issues: payload.reported_issues,
-          description: payload.description,
-        }),
-      });
-
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.detail || "Submission failed");
-
-      setAssessmentMessage({
-        text: data.explanation,
-        type: data.correct ? "success" : "info",
-      });
-
-      setTimeout(() => {
-        setAssessmentMessage({ text: "", type: "info" });
-        if (data.assessment_complete) {
-          generateLearningPlan();
-        } else {
-          setCurrentQuestion(data.next_question);
-          setCurrentQuestionProgress(data.progress);
-        }
-      }, 2200);
-    } catch (err) {
-      setAssessmentMessage({ text: err.message, type: "error" });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // Step 2 -> 3 transition: Generate Plan
-  const generateLearningPlan = async () => {
-    setAssessmentMessage({
-      text: "Analyzing baseline responses and building learning path...",
-      type: "info",
-    });
-
-    try {
-      const res = await fetch(`${BACKEND_URL}/assessment/plan`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          session_id: sessionId,
-          student_id: studentId,
-          goals: ["Solve adaptive study problems optimally"],
-          available_hours_per_week: 6,
-        }),
-      });
-
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.detail || "Planning failed");
-
-      setPlanData(data);
-      setWeakestConceptId(data.diagnosis.weakest_concept);
-      setActiveCardId("step3Card");
-    } catch (err) {
-      setAssessmentMessage({ text: err.message, type: "error" });
-    }
-  };
-
-  // Step 3 transition: Continue to Practice Checkpoint
-  const handleContinueToPractice = () => {
-    setActiveCardId("step4Card");
-    loadCheckpointProblem();
-  };
-
-  const loadCheckpointProblem = async () => {
-    setCheckpointMessage({ text: "", type: "info" });
-    try {
-      const res = await fetch(
-        `${BACKEND_URL}/evaluation/problems/${topicId}/${weakestConceptId}?student_id=${studentId}`
-      );
-      if (!res.ok) throw new Error("Could not find practice problem");
-
-      const data = await res.json();
-      setCheckpointProblem(data);
-    } catch (err) {
-      setCheckpointMessage({ text: err.message, type: "error" });
-    }
-  };
-
-  // Step 4 action: Submit Practice Outcome
-  const submitCheckpointOutcome = async (payload) => {
-    if (!checkpointProblem) return;
-
-    setIsLoading(true);
-    setCheckpointMessage({ text: "Evaluating...", type: "info" });
-
-    try {
-      const res = await fetch(`${BACKEND_URL}/evaluation/evaluate?topic_id=${topicId}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          student_id: studentId,
-          problem_id: checkpointProblem.id,
-          selected_option: payload.selected_option,
-          reported_issues: payload.reported_issues,
-          description: payload.description,
-        }),
-      });
-
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.detail || "Checkpoint evaluation failed");
-
-      if (data.mastery_achieved) {
-        setCheckpointMessage({ text: `Success! ${data.feedback}`, type: "success" });
-      } else if (data.replan_required) {
-        setCheckpointMessage({
-          text: `Replan Triggered: ${data.feedback}. We will adapt your learning plan.`,
-          type: "error",
-        });
-      } else {
-        setCheckpointMessage({ text: data.feedback, type: "info" });
-      }
-    } catch (err) {
-      setCheckpointMessage({ text: err.message, type: "error" });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const restartJourney = () => {
-    setSessionId(null);
-    setCurrentQuestion(null);
-    setCurrentQuestionProgress(null);
-    setWeakestConceptId("");
-    setCheckpointProblem(null);
-    setPlanData(null);
-    setStep1Message({ text: "", type: "info" });
-    setAssessmentMessage({ text: "", type: "info" });
-    setCheckpointMessage({ text: "", type: "info" });
-    setStudentId(`student_${Math.random().toString(36).substring(2, 7)}`);
-    setActiveCardId("step1Card");
-    try {
-      localStorage.removeItem("cogniweave_state");
-    } catch (error) {
-      console.warn("Failed to clear saved journey state:", error);
-    }
-  };
+  }, []);
 
   return (
     <>
@@ -358,7 +52,7 @@ function AppContent() {
         </svg>
       </div>
 
-      <div className={`container ${activeTab === "paper" ? "full-width" : ""}`}>
+      <div className="container full-width">
         {isLiveServer && (
           <Banner type="error" className="live-server-warning" style={{ marginBottom: "20px" }}>
             Warning: You are viewing this page via a VS Code Live Server port. To prevent database writes from triggering automatic browser reloads, please use the official Node server address:{" "}
@@ -368,9 +62,15 @@ function AppContent() {
           </Banner>
         )}
 
+        {errorMessage && (
+          <Banner type="error" style={{ marginBottom: "20px" }}>
+            {errorMessage}
+          </Banner>
+        )}
+
         <header>
           <h1>CogniWeave Portal</h1>
-          <p>Your AI-guided adaptive learning assistant</p>
+          <p>Your AI-guided research paper explorer</p>
           <div className={`connection-badge ${backendOnline ? "online" : "offline"}`}>
             <span className="dot"></span>
             <span>{backendStatus}</span>
@@ -378,77 +78,7 @@ function AppContent() {
           <ThemeToggle />
         </header>
 
-        {/* ── Tab Bar ── */}
-        <div className="tab-bar">
-          <button
-            id="tab-journey"
-            className={`tab-btn${activeTab === "journey" ? " tab-active" : ""}`}
-            onClick={() => setActiveTab("journey")}
-          >
-            Learning Journey
-          </button>
-          <button
-            id="tab-paper"
-            className={`tab-btn${activeTab === "paper" ? " tab-active" : ""}`}
-            onClick={() => setActiveTab("paper")}
-          >
-            Paper Explorer
-          </button>
-        </div>
-
-        {/* ── Paper Explorer Tab ── */}
-        {activeTab === "paper" && <PaperExplorer />}
-
-        {/* ── Learning Journey Tab ── */}
-        {activeTab === "journey" && (
-          <>
-            {activeCardId === "step1Card" && (
-              <Step1ChooseTopic
-                studentId={studentId}
-                setStudentId={setStudentId}
-                topicId={topicId}
-                setTopicId={setTopicId}
-                topics={topics}
-                onStart={startAssessment}
-                isLoading={isLoading}
-                message={step1Message}
-              />
-            )}
-
-            {activeCardId === "step2Card" && (
-              <Step2BaselineCheck
-                key={currentQuestion?.id ?? "step2Card"}
-                question={currentQuestion}
-                progress={currentQuestionProgress}
-                topicId={topicId}
-                onSubmitAnswer={submitAssessmentAnswer}
-                isLoading={isLoading}
-                message={assessmentMessage}
-              />
-            )}
-
-            {activeCardId === "step3Card" && (
-              <Step3StudyPlan
-                planData={planData}
-                onContinue={handleContinueToPractice}
-              />
-            )}
-
-            {activeCardId === "step4Card" && (
-              <Step4Checkpoint
-                key={checkpointProblem?.id ?? "step4Card"}
-                checkpointProblem={checkpointProblem}
-                topicId={topicId}
-                onSubmitCheckpoint={submitCheckpointOutcome}
-                onRestart={restartJourney}
-                isLoading={isLoading}
-                message={checkpointMessage}
-              />
-            )}
-
-            <DeveloperConsole payload={devState} />
-          </>
-        )}
+        <PaperExplorer />
       </div>
     </>
   );

@@ -77,6 +77,27 @@ def get_term_contexts(sections, term, max_contexts=4):
         
     return snippets, source_strings
 
+def get_topic_sentences(sections, keywords, max_sentences=20):
+    """
+    Offline helper to scan all sections and return sentences containing keywords for targeted Gemini queries.
+    """
+    hits = []
+    for sec in sections:
+        sec_label = sec["label"]
+        for page_num, page_text in sec["pages_data"]:
+            page_clean = clean_text(page_text)
+            sentences = re.split(r'(?<!\w\.\w.)(?<![A-Z][a-z]\.)(?<=\.|\?)\s', page_clean)
+            for idx, sent in enumerate(sentences):
+                sent_lower = sent.lower()
+                if any(re.search(r'\b' + re.escape(kw) + r'\b', sent_lower) for kw in keywords):
+                    before = sentences[idx - 1] if idx > 0 else ""
+                    after = sentences[idx + 1] if idx < len(sentences) - 1 else ""
+                    full = " ".join(filter(None, [before, sent, after])).strip()
+                    hits.append(f"(Page {page_num}, Section '{sec_label}'): {full}")
+                    if len(hits) >= max_sentences:
+                        return hits
+    return hits
+
 def generate_batch_definitions_via_ai(batch, title):
     """
     Sends a batch of terms and their corresponding contexts to Gemini in a single call.
@@ -88,7 +109,7 @@ def generate_batch_definitions_via_ai(batch, title):
 
     try:
         genai.configure(api_key=api_key)
-        model_name = os.environ.get("LLM_MODEL", "gemini-3.1-flash-lite")
+        model_name = os.environ.get("LLM_MODEL", "gemini-2.5-flash-lite")
         model = genai.GenerativeModel(model_name)
         
         # Build prompt listing each term and its contexts
@@ -101,21 +122,26 @@ def generate_batch_definitions_via_ai(batch, title):
         
         prompt = f"""You are an expert scientific dictionary editor and domain specialist.
 We are compiling study notes for a research paper titled "{title}".
-We need to extract precise, high-fidelity definitions for the following technical concepts:
+We need to extract precise, high-fidelity definitions and relational connections for the following technical concepts:
 
 {consolidated_prompt_list}
 
 Instructions:
 1. Examine the provided contexts for each concept carefully. Differentiate between casual mentions and descriptions that explain the concept's function, structure, mathematical definition, or operational role in the paper.
-2. Synthesize a concise, 1-3 sentence definition/explanation for each concept.
-3. Each definition MUST be strictly grounded in how the concept is described or used in the paper. Explain what role the concept plays, what modules use it, or how it is realized in this specific paper's circuits.
-4. Keep the tone academic, clear, and emoji-free.
+2. For each concept, extract:
+   - "definition": A concise 1-2 sentence definition/explanation.
+   - "role": What specific role does this play in this paper (e.g. baseline benchmark, customized component, masking, etc.)?
+   - "connections": A list of other technical terms (from the provided contexts) this concept directly interacts with or depends on.
+3. Keep the tone academic, clear, and emoji-free.
 
-Return your response strictly in JSON format as a dictionary of concept definitions:
+Return your response strictly in JSON format as:
 {{
   "definitions": {{
-    "concept_name_1": "Synthesized grounded definition 1.",
-    "concept_name_2": "Synthesized grounded definition 2."
+    "concept_name_1": {{
+      "definition": "Synthesized grounded definition 1.",
+      "role": "Grounded role explanation 1.",
+      "connections": ["concept_a", "concept_b"]
+    }}
   }}
 }}
 """
@@ -131,9 +157,24 @@ Return your response strictly in JSON format as a dictionary of concept definiti
         result = {}
         for term, _ in batch:
             found = False
+            term_clean = term.lower().strip()
             for k, v in definitions.items():
-                if k.lower().strip() == term.lower().strip():
-                    result[term] = v
+                if k.lower().strip() == term_clean:
+                    if isinstance(v, dict):
+                        # Format definitions with structured info for backwards compatibility
+                        def_text = v.get("definition", "")
+                        role_text = v.get("role", "")
+                        conn_list = v.get("connections", [])
+                        
+                        full_def = def_text
+                        if role_text:
+                            full_def += f" [Role: {role_text}]"
+                        if conn_list:
+                            full_def += f" [Connections: {', '.join(conn_list)}]"
+                        
+                        result[term] = full_def
+                    else:
+                        result[term] = str(v)
                     found = True
                     break
             if not found:
@@ -145,7 +186,7 @@ Return your response strictly in JSON format as a dictionary of concept definiti
 
 def generate_novelty_vs_prior_art_via_ai(sections, title, unique_key_terms):
     """
-    Calls Gemini to analyze the paper text and the key terms, and classify what is 
+    Calls Gemini to analyze targeted topic sentences and unique key terms, and classify what is 
     already present (prior art/baselines) versus what is newly introduced by this paper.
     """
     api_key = os.environ.get("GEMINI_API_KEY")
@@ -154,23 +195,33 @@ def generate_novelty_vs_prior_art_via_ai(sections, title, unique_key_terms):
 
     try:
         genai.configure(api_key=api_key)
-        model_name = os.environ.get("LLM_MODEL", "gemini-3.1-flash-lite")
+        model_name = os.environ.get("LLM_MODEL", "gemini-2.5-flash-lite")
         model = genai.GenerativeModel(model_name)
         
-        # Consolidate sections text
-        full_text = "\n\n".join([f"### Section: {sec['label']}\n{sec['raw_text']}" for sec in sections])
+        # Target prior art and novelty sentences
+        prior_art_keywords = ["baseline", "comparison", "classical", "prior art", "existing", "previous work", "traditional"]
+        novelty_keywords = ["proposed", "novel", "contribution", "our method", "we introduce", "we present", "in this paper"]
+        
+        prior_art_evidence = get_topic_sentences(sections, prior_art_keywords, max_sentences=20)
+        novelty_evidence = get_topic_sentences(sections, novelty_keywords, max_sentences=20)
+        
+        prior_art_text = "\n".join([f"- {s}" for s in prior_art_evidence]) if prior_art_evidence else "- No specific prior-art statements extracted."
+        novelty_text = "\n".join([f"- {s}" for s in novelty_evidence]) if novelty_evidence else "- No specific novelty statements extracted."
         terms_str = ", ".join(unique_key_terms)
         
         prompt = f"""You are an expert scientific editor and computer scientist.
 We are compiling detailed technical notes for a research paper titled "{title}".
-Here is the list of unique key concepts extracted from the paper:
-{terms_str}
+Here is the list of unique key concepts extracted from the paper: {terms_str}
 
-Here is the cleaned content of the paper:
-\"\"\"
-{full_text}
-\"\"\"
+We have pre-extracted sentences representing prior art and novelty evidence from the paper:
 
+=== PRIOR ART EVIDENCE ===
+{prior_art_text}
+
+=== NOVELTY EVIDENCE ===
+{novelty_text}
+
+=== INSTRUCTIONS ===
 Please generate a structured analysis in clean, premium GitHub-style markdown outlining:
 1. **Prior Art (Already Present)**: What models, gates, math operators, representations, or principles are cited as existing foundations or baselines (e.g. what the authors build upon or compare against)?
 2. **Proposed Novelty (Newly Introduced)**: What specific algorithms, customized circuit modules, masking designs, or complexity improvements are proposed as the paper's original contributions?
