@@ -24,7 +24,7 @@ from pipeline.research_paper.extract_paper_concepts import clean_text
 from pipeline.utils import parse_json_robust, call_gemini_with_retry
 
 # Load environment variables
-load_dotenv()
+load_dotenv(override=True)
 
 def get_section_for_page(page_num, valid_toc, total_pages, first_terminal_page):
     """

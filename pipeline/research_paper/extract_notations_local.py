@@ -20,7 +20,7 @@ if current_dir not in sys.path:
 from pipeline.utils import parse_json_robust, call_gemini_with_retry
 
 # Load environment variables
-load_dotenv()
+load_dotenv(override=True)
 
 # Enforce UTF-8 output encoding for Windows consoles
 sys.stdout.reconfigure(encoding='utf-8')

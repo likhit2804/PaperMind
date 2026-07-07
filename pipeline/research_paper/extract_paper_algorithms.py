@@ -22,7 +22,7 @@ if current_dir not in sys.path:
 # No pipeline.utils required for offline algorithms
 
 # Load environment variables
-load_dotenv()
+load_dotenv(override=True)
 
 def get_section_for_page(page_num, valid_toc, total_pages, first_terminal_page):
     """

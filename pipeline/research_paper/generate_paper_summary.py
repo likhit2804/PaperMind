@@ -25,7 +25,7 @@ from pipeline.research_paper.extract_paper_concepts import parse_pdf_into_sectio
 from pipeline.utils import parse_json_robust, call_gemini_with_retry
 
 # Load environment variables
-load_dotenv()
+load_dotenv(override=True)
 
 def extract_grounded_sentences(raw_text, canonical_seeds, max_sentences=8):
     """
