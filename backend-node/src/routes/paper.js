@@ -93,64 +93,17 @@ router.post("/paper/analyze", upload.single("file"), async (req, res, next) => {
   const archNotesMd = path.join(outDir, "architecture_notes.md");
 
   // Pipeline script paths (relative to project root)
-  const conceptsScript = path.join(
+  const unifiedScript = path.join(
     settings.baseDir,
     "pipeline",
     "research_paper",
-    "extract_paper_concepts.py"
-  );
-  const notesScript = path.join(
-    settings.baseDir,
-    "pipeline",
-    "research_paper",
-    "generate_paper_notes.py"
-  );
-  const referencesScript = path.join(
-    settings.baseDir,
-    "pipeline",
-    "research_paper",
-    "extract_paper_references.py"
-  );
-  const equationsScript = path.join(
-    settings.baseDir,
-    "pipeline",
-    "research_paper",
-    "extract_paper_equations.py"
-  );
-  const notationsScript = path.join(
-    settings.baseDir,
-    "pipeline",
-    "research_paper",
-    "extract_notations_local.py"
-  );
-  const summaryScript = path.join(
-    settings.baseDir,
-    "pipeline",
-    "research_paper",
-    "generate_paper_summary.py"
-  );
-  const archNotesScript = path.join(
-    settings.baseDir,
-    "pipeline",
-    "research_paper",
-    "generate_architecture_notes.py"
+    "unified_paper_pipeline.py"
   );
 
   try {
-    // Step 1: extract concepts
-    console.log(`[paper/analyze] Running concept extractor for session ${sessionId}…`);
-    await runPython([conceptsScript, pdfPath, conceptsJson], settings.baseDir);
-
-    // Step 2-7: run glossary, summary, architecture, references, equations, and local notations extraction in parallel
-    console.log(`[paper/analyze] Running glossary, summary, architecture, references, equations, and local notations extractors for session ${sessionId}…`);
-    await Promise.all([
-      runPython([notesScript, pdfPath, conceptsJson, notesMd], settings.baseDir),
-      runPython([summaryScript, pdfPath, summaryJson], settings.baseDir),
-      runPython([archNotesScript, pdfPath, conceptsJson, archNotesMd], settings.baseDir),
-      runPython([referencesScript, pdfPath, referencesJson], settings.baseDir),
-      runPython([equationsScript, pdfPath, equationsJson], settings.baseDir),
-      runPython([notationsScript, pdfPath, notationsJson], settings.baseDir)
-    ]);
+    // Run the consolidated, optimized paper processing pipeline
+    console.log(`[paper/analyze] Running unified paper pipeline for session ${sessionId}…`);
+    await runPython([unifiedScript, pdfPath, outDir], settings.baseDir);
 
     // Parse outputs
     const conceptsData = JSON.parse(fs.readFileSync(conceptsJson, "utf-8"));

@@ -231,7 +231,7 @@ Do NOT use emojis. Maintain a highly professional academic tone.
 
 Return your response directly as markdown.
 """
-        response = model.generate_content(prompt)
+        response = call_gemini_with_retry(model, prompt)
         return response.text.strip()
     except Exception as e:
         print(f"Error generating novelty analysis: {e}")

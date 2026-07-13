@@ -2,7 +2,26 @@ import json
 import re
 import time
 import random
+import threading
 import google.generativeai as genai
+
+class SimpleRateLimiter:
+    def __init__(self, min_interval=4.5):
+        self.min_interval = min_interval
+        self.last_call_time = 0.0
+        self.lock = threading.Lock()
+
+    def wait(self):
+        with self.lock:
+            now = time.time()
+            elapsed = now - self.last_call_time
+            if elapsed < self.min_interval:
+                sleep_time = self.min_interval - elapsed
+                time.sleep(sleep_time)
+            self.last_call_time = time.time()
+
+# Global rate limiter instance to coordinate calls across threads
+gemini_rate_limiter = SimpleRateLimiter(min_interval=4.5)
 
 def parse_json_robust(raw_text):
     """
@@ -55,6 +74,9 @@ def call_gemini_with_retry(model, prompt, generation_config=None, max_retries=5,
     Calls Gemini model.generate_content with exponential backoff and jitter.
     Supports handling of rate limits (HTTP 429) and transient errors.
     """
+    # Enforce minimum rate limit interval (15 RPM)
+    gemini_rate_limiter.wait()
+
     delay = initial_delay
     for attempt in range(max_retries + 1):
         try:

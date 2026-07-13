@@ -532,13 +532,13 @@ def main():
         
     # 0. Extract Dynamic Metadata from all clean, segment-extracted text
     logger.console_print("Phase 0: Extracting paper title and canonical seeds dynamically from all sections...")
-    full_cleaned_text = "\n".join([sec["raw_text"] for sec in sections])
+    intro_snippet = "\n".join([sec["raw_text"] for sec in sections[:2]])
     
     doc = fitz.open(pdf)
     metadata_title = doc.metadata.get("title") if hasattr(doc, 'metadata') else None
     doc.close()
     
-    title, canonical_seeds = extract_paper_metadata_via_ai(full_cleaned_text, metadata_title)
+    title, canonical_seeds = extract_paper_metadata_via_ai(intro_snippet, metadata_title)
     
     logger.console_print(f"  - Extracted Title: '{title}'")
     logger.console_print(f"  - Extracted Canonical Seeds ({len(canonical_seeds)}): {list(canonical_seeds)}")
