@@ -21,26 +21,13 @@ if current_dir not in sys.path:
     sys.path.insert(0, current_dir)
 
 from pipeline.research_paper.extract_paper_concepts import clean_text
-from pipeline.utils import parse_json_robust, call_gemini_with_retry
+from pipeline.utils import parse_json_robust, call_gemini_with_retry, get_gemini_model, get_pdf_title
+from pipeline.research_paper.pdf_utils import parse_toc, get_section_for_page, split_sentences
+from pipeline.research_paper.tex_utils import extract_tex_references, extract_tex_cite_contexts, get_tex_title
 
 # Load environment variables
 load_dotenv(override=True)
 
-def get_section_for_page(page_num, valid_toc, total_pages, first_terminal_page):
-    """
-    Determines which outline section a page number belongs to.
-    """
-    if page_num >= first_terminal_page:
-        return "References/Appendix"
-        
-    current_sec = "Introduction"
-    for level, heading, start_page in valid_toc:
-        if page_num >= start_page:
-            current_sec = heading
-        else:
-            break
-            
-    return current_sec
 
 def parse_citation_keys(bracket_text):
     """
@@ -75,20 +62,8 @@ def find_references_boundary(doc):
     Returns the 1-based page index.
     """
     total_pages = len(doc)
-    toc = doc.get_toc()
-    
-    first_terminal_page = total_pages + 1
-    terminal_keywords = ["references", "bibliography", "acknowledgments", "appendix"]
-    
-    # Check TOC first
-    if toc:
-        for level, title, page in toc:
-            title_lower = title.lower().strip()
-            for kw in terminal_keywords:
-                if kw in title_lower:
-                    first_terminal_page = min(first_terminal_page, page)
-                    break
-                    
+    _, first_terminal_page = parse_toc(doc)
+
     # Check page text for large section headings if TOC didn't yield a page
     if first_terminal_page > total_pages:
         ref_heading_pat = re.compile(
@@ -100,11 +75,11 @@ def find_references_boundary(doc):
             if ref_heading_pat.search(page_text):
                 first_terminal_page = p_idx + 1
                 break
-                
+
     # Fallback to last page if nothing found
     if first_terminal_page > total_pages:
         first_terminal_page = max(1, total_pages)
-        
+
     return first_terminal_page
 
 def extract_citation_contexts(doc, first_terminal_page, valid_toc):
@@ -128,7 +103,7 @@ def extract_citation_contexts(doc, first_terminal_page, valid_toc):
         page_clean = clean_text(page_text)
         
         # Split into sentences (heuristic boundary search)
-        sentences = re.split(r'(?<!\w\.\w.)(?<![A-Z][a-z]\.)(?<=\.|\?)\s', page_clean)
+        sentences = split_sentences(page_clean)
         
         for idx, sentence in enumerate(sentences):
             matches = citation_regex.findall(sentence)
@@ -164,14 +139,9 @@ def query_gemini_to_synthesize_references(raw_bib_text, contexts_map, title):
     Runs the final single-step Gemini API call to parse the bibliography text
     and synthesize citation role classification/contributions.
     """
-    api_key = os.environ.get("GEMINI_API_KEY")
-    if not api_key:
-        # Fallback empty structure
+    model, api_key = get_gemini_model("gemini-3.1-flash-lite")
+    if not model:
         return []
-
-    genai.configure(api_key=api_key)
-    model_name = os.environ.get("LLM_MODEL", "gemini-3.1-flash-lite")
-    model = genai.GenerativeModel(model_name)
     
     # Prepare the offline contexts map as a compact JSON string to inject into prompt
     compact_contexts = {}
@@ -254,65 +224,86 @@ Return your response strictly in JSON format as a list of references under the k
 
 def main():
     if len(sys.argv) < 3:
-        print("Usage: python extract_paper_references.py <pdf_path> <output_json_path>")
+        print("Usage: python extract_paper_references.py <pdf_or_tex_path> <output_json_path>")
         sys.exit(1)
-        
-    pdf_path = sys.argv[1]
+
+    input_path       = sys.argv[1]
     output_json_path = sys.argv[2]
-    
-    if not os.path.exists(pdf_path):
-        print(f"Error: PDF not found at {pdf_path}")
+
+    if not os.path.exists(input_path):
+        print(f"Error: input file not found at {input_path}")
         sys.exit(1)
-        
-    print(f"Opening PDF: {pdf_path}")
-    doc = fitz.open(pdf_path)
-    total_pages = len(doc)
-    toc = doc.get_toc()
-    
-    # 1. Identify where References section starts
-    first_terminal_page = find_references_boundary(doc)
-    print(f"References section starts at Page {first_terminal_page} (Total pages: {total_pages})")
-    
-    # 2. Extract bibliography raw text
-    print("Extracting raw bibliography text...")
-    bib_lines = []
-    for p in range(first_terminal_page - 1, total_pages):
-        page_text = doc[p].get_text("text")
-        bib_lines.append(page_text)
-    raw_bib_text = "\n".join(bib_lines)
-    
-    # Get valid TOC headers for section mapping
-    valid_toc = []
-    if toc:
-        for level, heading, page in toc:
-            if level <= 2 and page < first_terminal_page:
-                valid_toc.append((level, heading.strip(), page))
-    valid_toc.sort(key=lambda x: x[2])
-    
-    # 3. Scan body pages offline for citation sentence contexts
-    print("Scanning body text offline for citation contexts...")
-    contexts_map = extract_citation_contexts(doc, first_terminal_page, valid_toc)
-    print(f"Mapped contexts for {len(contexts_map)} citation keys.")
-    
-    # Extract Title using PyMuPDF metadata if available
-    title = doc.metadata.get("title") if hasattr(doc, 'metadata') else "Research Paper"
-    doc.close()
-    if not title or len(title.strip()) < 3:
-         title = "Quantum Image Processing Algorithm Using Line Detection Mask Based on NEQR"
-         
+
+    # ------------------------------------------------------------------ .tex path
+    if input_path.lower().endswith('.tex'):
+        print(f"[.tex mode] Extracting references locally from LaTeX source: {input_path}")
+        with open(input_path, encoding='utf-8', errors='replace') as _f:
+            _raw = _f.read()
+        title = get_tex_title(_raw)
+
+        # Build raw_bib_text from \bibitem entries
+        bib_entries = extract_tex_references(input_path)
+        if bib_entries:
+            raw_bib_text = "\n".join(
+                f"[{e['key']}] {e['text']}" for e in bib_entries
+            )
+            print(f"Found {len(bib_entries)} \\bibitem entries in .tex source.")
+        else:
+            raw_bib_text = ""
+            print("No \\bibitem entries found — Gemini will work from context only.")
+
+        # Build contexts_map from \cite usages
+        print("Scanning .tex body for \\cite contexts...")
+        raw_ctx = extract_tex_cite_contexts(input_path)
+        # Convert to the format expected by query_gemini_to_synthesize_references
+        contexts_map = {
+            key: [{'sentence': e['sentence'], 'full_context': e['full_context'],
+                   'page': 0, 'section': e['section']}
+                  for e in entries]
+            for key, entries in raw_ctx.items()
+        }
+        print(f"Mapped \\cite contexts for {len(contexts_map)} keys.")
+
+    else:
+        # ---------------------------------------------------------------- PDF path
+        pdf_path = input_path
+        print(f"Opening PDF: {pdf_path}")
+        doc         = fitz.open(pdf_path)
+        total_pages = len(doc)
+
+        # 1. Identify where References section starts
+        first_terminal_page = find_references_boundary(doc)
+        print(f"References section starts at Page {first_terminal_page} (Total pages: {total_pages})")
+
+        # 2. Extract bibliography raw text
+        print("Extracting raw bibliography text...")
+        bib_lines = []
+        for p in range(first_terminal_page - 1, total_pages):
+            page_text = doc[p].get_text("text")
+            bib_lines.append(page_text)
+        raw_bib_text = "\n".join(bib_lines)
+
+        # 3. Get TOC + scan body pages offline for citation sentence contexts
+        valid_toc, _ = parse_toc(doc)
+        title = get_pdf_title(doc, fallback="Quantum Image Processing Algorithm Using Line Detection Mask Based on NEQR")
+        print("Scanning body text offline for citation contexts...")
+        contexts_map = extract_citation_contexts(doc, first_terminal_page, valid_toc)
+        print(f"Mapped contexts for {len(contexts_map)} citation keys.")
+        doc.close()
+
     # 4. Final step: Call Gemini to parse bibliography and synthesize references
     print("Querying Gemini API at the last step to structure references and classify citation roles...")
     references = query_gemini_to_synthesize_references(raw_bib_text, contexts_map, title)
-    
+
     output_data = {
         "paper_title": title,
-        "references": references
+        "references":  references
     }
-    
+
     print(f"Writing structured JSON references output to: {output_json_path}")
     with open(output_json_path, "w", encoding="utf-8") as f:
         json.dump(output_data, f, indent=2)
-        
+
     print("\nSuccessfully finished references extraction!")
 
 if __name__ == "__main__":

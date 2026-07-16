@@ -17,7 +17,8 @@ if pipeline_dir not in sys.path:
 if current_dir not in sys.path:
     sys.path.insert(0, current_dir)
 
-from pipeline.utils import parse_json_robust, call_gemini_with_retry
+from pipeline.utils import parse_json_robust, call_gemini_with_retry, get_gemini_model, get_pdf_title
+from pipeline.research_paper.tex_utils import extract_tex_notations, get_tex_title
 
 # Load environment variables
 load_dotenv(override=True)
@@ -198,30 +199,26 @@ def extract_notations_via_ai(page_text, page_num, title, log_dir=None):
     """
     Extracts notations using Gemini API focusing purely on the table page.
     """
-    api_key = os.environ.get("GEMINI_API_KEY")
-    
     # Setup log file
     log_file = None
     if log_dir is not None:
         log_file = os.path.join(log_dir, "notations_extraction.log")
         with open(log_file, "a", encoding="utf-8") as lf:
             lf.write(f"--- AI Extraction Attempt on Page {page_num} ---\n")
-            lf.write(f"GEMINI_API_KEY present: {bool(api_key)}\n")
-            
-    if not api_key:
+            lf.write(f"GEMINI_API_KEY present: {bool(os.environ.get('GEMINI_API_KEY'))}\n")
+
+    model, _ = get_gemini_model("gemini-3.1-flash-lite")
+    if not model:
         if log_file:
             with open(log_file, "a", encoding="utf-8") as lf:
                 lf.write("Error: GEMINI_API_KEY env var is not set.\n")
         return None
-        
+
+    if log_file:
+        with open(log_file, "a", encoding="utf-8") as lf:
+            lf.write(f"Using model: {os.environ.get('LLM_MODEL', 'gemini-3.1-flash-lite')}\n")
+
     try:
-        genai.configure(api_key=api_key)
-        model_name = os.environ.get("LLM_MODEL", "gemini-3.1-flash-lite")
-        if log_file:
-            with open(log_file, "a", encoding="utf-8") as lf:
-                lf.write(f"Using model: {model_name}\n")
-                
-        model = genai.GenerativeModel(model_name)
         
         prompt = f"""You are an expert scientific peer reviewer and technical editor.
 We have extracted the text of a page from a research paper titled "{title}". This page contains a "Description of Used Symbols" or "Nomenclature" table.
@@ -299,16 +296,30 @@ Return your response strictly in JSON format matching this schema:
 
 def main():
     if len(sys.argv) < 3:
-        print("Usage: python extract_notations_local.py <pdf_path> <output_json_path>")
+        print("Usage: python extract_notations_local.py <pdf_or_tex_path> <output_json_path>")
         sys.exit(1)
-        
-    pdf_path = sys.argv[1]
+
+    input_path       = sys.argv[1]
     output_json_path = sys.argv[2]
-    
-    if not os.path.exists(pdf_path):
-        print(f"Error: PDF not found at {pdf_path}")
+
+    if not os.path.exists(input_path):
+        print(f"Error: input file not found at {input_path}")
         sys.exit(1)
-        
+
+    # ------------------------------------------------------------------ .tex path
+    if input_path.lower().endswith('.tex'):
+        print(f"[.tex mode] Extracting notations locally from LaTeX source: {input_path}")
+        title     = get_tex_title(open(input_path, encoding='utf-8', errors='replace').read())
+        notations = extract_tex_notations(input_path)
+        print(f"Extracted {len(notations)} notations total from .tex source.")
+        output_data = {"notations": notations}
+        with open(output_json_path, "w", encoding="utf-8") as f:
+            json.dump(output_data, f, indent=2)
+        print(f"Successfully wrote notations JSON output to: {output_json_path}")
+        return
+
+    # ------------------------------------------------------------------ PDF path
+    pdf_path = input_path
     print(f"Starting notations extraction for {pdf_path}...")
     doc = fitz.open(pdf_path)
     total_pages = len(doc)
@@ -319,9 +330,7 @@ def main():
     desc_keywords = ["description", "meaning", "definition"]
     
     # Get paper title for AI prompt
-    title = doc.metadata.get("title") if hasattr(doc, 'metadata') else "Research Paper"
-    if not title or len(title.strip()) < 3:
-         title = "A Single-Photon Threshold Quantum Secret Sharing Protocol for Secure Vehicular Communication"
+    title = get_pdf_title(doc, fallback="A Single-Photon Threshold Quantum Secret Sharing Protocol for Secure Vehicular Communication")
          
     force_manual = "--manual" in sys.argv or "--offline" in sys.argv
     if force_manual:

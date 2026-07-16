@@ -1,4 +1,5 @@
 import json
+import os
 import re
 import time
 import random
@@ -100,3 +101,38 @@ def call_gemini_with_retry(model, prompt, generation_config=None, max_retries=5,
                 
             time.sleep(sleep_time)
             delay *= 2.0
+
+
+# ---------------------------------------------------------------------------
+# Shared pipeline helpers — import these instead of duplicating per script
+# ---------------------------------------------------------------------------
+
+def clean_text(text):
+    """Normalize whitespace and standard ligatures."""
+    text = re.sub(r'\s+', ' ', text)
+    text = text.replace('\ufb01', 'fi').replace('\ufb02', 'fl')
+    return text.strip()
+
+
+def get_gemini_model(default_model="gemini-2.5-flash-lite"):
+    """
+    Read GEMINI_API_KEY and LLM_MODEL from environment, configure genai,
+    and return (model, api_key).  Returns (None, None) when key is absent.
+    """
+    api_key = os.environ.get("GEMINI_API_KEY")
+    if not api_key:
+        return None, None
+    genai.configure(api_key=api_key)
+    model_name = os.environ.get("LLM_MODEL", default_model)
+    model = genai.GenerativeModel(model_name)
+    return model, api_key
+
+
+def get_pdf_title(doc, fallback="Research Paper"):
+    """Extract title from a PyMuPDF document's metadata with a safe fallback."""
+    title = ""
+    if hasattr(doc, "metadata") and doc.metadata:
+        title = doc.metadata.get("title", "") or ""
+    if not title.strip() or len(title.strip()) < 3:
+        return fallback
+    return title.strip()

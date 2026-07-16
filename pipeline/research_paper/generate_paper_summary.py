@@ -22,7 +22,9 @@ if current_dir not in sys.path:
     sys.path.insert(0, current_dir)
 
 from pipeline.research_paper.extract_paper_concepts import parse_pdf_into_sections, clean_text, extract_paper_metadata_via_ai
-from pipeline.utils import parse_json_robust, call_gemini_with_retry
+from pipeline.utils import parse_json_robust, call_gemini_with_retry, get_gemini_model, get_pdf_title
+from pipeline.research_paper.pdf_utils import split_sentences
+from pipeline.research_paper.tex_utils import extract_tex_sections, get_tex_title
 
 # Load environment variables
 load_dotenv(override=True)
@@ -32,7 +34,7 @@ def extract_grounded_sentences(raw_text, canonical_seeds, max_sentences=8):
     Splits text into sentences, scores them using heuristic boosts for canonical seeds,
     and returns the top-scoring sentences as verified evidence.
     """
-    sentences = re.split(r'(?<!\w\dots)(?<![A-Z][a-z]\.)(?<=\.|\?)\s', clean_text(raw_text))
+    sentences = split_sentences(clean_text(raw_text))
     scored_sentences = []
     
     for sent in sentences:
@@ -186,18 +188,16 @@ def main():
         print(f"Error: PDF not found at: {pdf}")
         sys.exit(1)
         
-    api_key = os.environ.get("GEMINI_API_KEY")
-    if not api_key:
+    model, api_key = get_gemini_model("gemini-2.5-flash")
+    if not model:
         print("Error: GEMINI_API_KEY environment variable is not set.")
         sys.exit(1)
-        
-    # Configure Gemini
-    genai.configure(api_key=api_key)
-    model_name = os.environ.get("LLM_MODEL", "gemini-2.5-flash")
-    model = genai.GenerativeModel(model_name)
     
-    print("Step 1: Partitioning PDF into outline sections...")
-    sections = parse_pdf_into_sections(pdf, "")
+    print("Step 1: Partitioning outline sections...")
+    if pdf.lower().endswith('.tex'):
+        sections = extract_tex_sections(pdf)
+    else:
+        sections = parse_pdf_into_sections(pdf, "")
     
     # Consolidate sections if there are too many to respect API rate limits (RPM <= 15)
     if len(sections) > 6:
@@ -220,9 +220,14 @@ def main():
     print("Step 2: Extracting canonical seeds and title metadata...")
     intro_snippet = "\n".join([sec["raw_text"] for sec in sections[:2]])
     
-    doc = fitz.open(pdf)
-    metadata_title = doc.metadata.get("title") if hasattr(doc, 'metadata') else None
-    doc.close()
+    if pdf.lower().endswith('.tex'):
+        with open(pdf, encoding='utf-8', errors='replace') as _f:
+            _raw = _f.read()
+        metadata_title = get_tex_title(_raw)
+    else:
+        doc = fitz.open(pdf)
+        metadata_title = get_pdf_title(doc)
+        doc.close()
     
     title, canonical_seeds = extract_paper_metadata_via_ai(intro_snippet, metadata_title)
     print(f"  - Paper Title: '{title}'")

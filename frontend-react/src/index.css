@@ -43,7 +43,13 @@
   box-sizing: border-box;
   margin: 0;
   padding: 0;
-  transition: background-color 0.25s ease, border-color 0.25s ease, color 0.15s ease, box-shadow 0.25s ease;
+}
+
+body, header, footer, nav, aside, main, section, article, 
+.pe-dashboard, .pe-master-pane, .pe-detail-pane, .pe-detail-body,
+.tex-preview-container, .pdf-float, .pdf-float-bar, .pdf-float-body,
+.ktp-list, .ktp-item, .upload-zone {
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.15s ease, box-shadow 0.2s ease;
 }
 
 body {

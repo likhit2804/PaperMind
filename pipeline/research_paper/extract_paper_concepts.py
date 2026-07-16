@@ -18,7 +18,9 @@ if pipeline_dir not in sys.path:
 if current_dir not in sys.path:
     sys.path.insert(0, current_dir)
 
-from pipeline.utils import parse_json_robust, call_gemini_with_retry
+from pipeline.utils import parse_json_robust, call_gemini_with_retry, get_gemini_model, clean_text
+from pipeline.research_paper.pdf_utils import parse_toc
+from pipeline.research_paper.tex_utils import extract_tex_sections, get_tex_title
 
 # Load environment variables
 load_dotenv(override=True)
@@ -66,15 +68,12 @@ def extract_paper_metadata_via_ai(text_snippet, pdf_metadata_title=None):
     Queries Gemini to extract the official title and core canonical domain terms/acronyms 
     from the paper text.
     """
-    api_key = os.environ.get("GEMINI_API_KEY")
-    if not api_key:
+    model, api_key = get_gemini_model("gemini-3.1-flash-lite")
+    if not model:
         title = pdf_metadata_title if (pdf_metadata_title and len(pdf_metadata_title.strip()) > 3) else "Research Paper"
         return title, set()
 
     try:
-        genai.configure(api_key=api_key)
-        model_name = os.environ.get("LLM_MODEL", "gemini-3.1-flash-lite")
-        model = genai.GenerativeModel(model_name)
         
         prompt = f"""You are a research paper metadata extractor.
 Analyze the following text from a scientific research paper:
@@ -211,11 +210,7 @@ def extract_clean_text_from_page(page, title_clean=""):
     raw_page_text = "\n".join(blocks_text)
     return clean_page_text(raw_page_text, title_clean)
 
-def clean_text(text):
-    """Normalize whitespace and standard ligatures."""
-    text = re.sub(r'\s+', ' ', text)
-    text = text.replace('ﬁ', 'fi').replace('ﬂ', 'fl')
-    return text.strip()
+# clean_text is imported from pipeline.utils — defined there to avoid duplication.
 
 def singularize(word):
     """Simple rule-based singularization for common noun plurals."""
@@ -266,34 +261,14 @@ def parse_pdf_into_sections(pdf_path, title_clean=""):
     toc = doc.get_toc()
     total_pages = len(doc)
     
-    # 1. Identify outline nodes and terminal page
-    valid_toc = []
-    first_terminal_page = total_pages + 1
-    
-    terminal_keywords = ["references", "bibliography", "acknowledgments", "appendix"]
-    
-    if toc:
-        for level, title, page in toc:
-            title_lower = title.lower().strip()
-            is_terminal = False
-            for kw in terminal_keywords:
-                if kw in title_lower:
-                    is_terminal = True
-                    break
-            if is_terminal:
-                first_terminal_page = min(first_terminal_page, page)
-                break
-            if level <= 2:
-                valid_toc.append((level, title.strip(), page))
-                
+    valid_toc, first_terminal_page = parse_toc(doc)
+    first_terminal_page = min(first_terminal_page, total_pages + 1)
+
     if not valid_toc:
         print("TOC Outline not found inside PDF metadata. Falling back to page-by-page scan...")
         # Fallback: chunk by page ranges
         for p in range(1, min(14, total_pages + 1)):
             valid_toc.append((1, f"Section Page {p}", p))
-            
-    valid_toc.sort(key=lambda x: x[2])
-    first_terminal_page = min(first_terminal_page, total_pages + 1)
     
     print(f"Detected outlines/sections for Paper:")
     for level, heading, page in valid_toc:
@@ -422,15 +397,12 @@ def filter_terms_via_ai(candidates, title, canonical_seeds):
     Uses Gemini API to validate scientific research paper terms, filtering out math variables, 
     citations, boilerplates, common words, and grammar fragments.
     """
-    api_key = os.environ.get("GEMINI_API_KEY")
-    if not api_key:
+    model, api_key = get_gemini_model("gemini-3.1-flash-lite")
+    if not model:
         print("Warning: GEMINI_API_KEY not set. Skipping AI verification pass.")
         return candidates
 
     try:
-        genai.configure(api_key=api_key)
-        model_name = os.environ.get("LLM_MODEL", "gemini-3.1-flash-lite")
-        model = genai.GenerativeModel(model_name)
         
         prompt = f"""You are an expert scientific journal peer reviewer and academic editor.
 We have extracted a list of key term candidates from a research paper titled "{title}".
@@ -505,39 +477,48 @@ class TraceLogger:
 
 def main():
     if len(sys.argv) < 3:
-        print("Usage: python extract_paper_concepts.py <pdf_path> <output_json>")
+        print("Usage: python extract_paper_concepts.py <pdf_or_tex_path> <output_json>")
         sys.exit(1)
-        
-    pdf = sys.argv[1]
+
+    input_path  = sys.argv[1]
     output_path = sys.argv[2]
 
-    if not os.path.exists(pdf):
-        print(f"Error: PDF file not found at: {pdf}")
+    if not os.path.exists(input_path):
+        print(f"Error: input file not found at: {input_path}")
         sys.exit(1)
 
     output_dir = os.path.dirname(output_path)
-    log_path = os.path.join(output_dir, "paper_extraction_trace.log") if output_dir else "paper_extraction_trace.log"
-    logger = TraceLogger(log_path)
-    logger.console_print(f"Extracting key terms from Paper: {pdf}")
-    
+    log_path   = os.path.join(output_dir, "paper_extraction_trace.log") if output_dir else "paper_extraction_trace.log"
+    logger     = TraceLogger(log_path)
+    logger.console_print(f"Extracting key terms from: {input_path}")
+
     logger.start()
-    
+
     # 1. Segment text
     logger.console_print("Phase 1: Segmenting paper sections and pruning references...")
-    sections = parse_pdf_into_sections(pdf, "")
+
+    if input_path.lower().endswith('.tex'):
+        # --------------------------------------------------------- .tex path
+        logger.console_print("[.tex mode] Parsing LaTeX source for sections...")
+        sections = extract_tex_sections(input_path)
+        with open(input_path, encoding='utf-8', errors='replace') as _f:
+            _raw = _f.read()
+        metadata_title = get_tex_title(_raw)
+    else:
+        # --------------------------------------------------------- PDF path
+        sections = parse_pdf_into_sections(input_path, "")
+        doc = fitz.open(input_path)
+        metadata_title = doc.metadata.get("title") if hasattr(doc, 'metadata') else None
+        doc.close()
+
     if not sections:
         logger.stop()
         logger.console_print("Error: Could not extract paper sections.")
         sys.exit(1)
-        
-    # 0. Extract Dynamic Metadata from all clean, segment-extracted text
+
+    # 0. Extract Dynamic Metadata
     logger.console_print("Phase 0: Extracting paper title and canonical seeds dynamically from all sections...")
     intro_snippet = "\n".join([sec["raw_text"] for sec in sections[:2]])
-    
-    doc = fitz.open(pdf)
-    metadata_title = doc.metadata.get("title") if hasattr(doc, 'metadata') else None
-    doc.close()
-    
     title, canonical_seeds = extract_paper_metadata_via_ai(intro_snippet, metadata_title)
     
     logger.console_print(f"  - Extracted Title: '{title}'")

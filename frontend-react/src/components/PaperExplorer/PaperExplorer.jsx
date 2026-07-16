@@ -95,6 +95,7 @@ export default function PaperExplorer() {
   const [architectureNotes, setArchitectureNotes] = useState(saved?.architectureNotes || "");
   const [mainView, setMainView]       = useState("glossary"); // 'glossary' | 'summary' | 'architecture'
   const [sessionId, setSessionId]     = useState(saved?.sessionId || null);
+  const [fileType, setFileType]       = useState(saved?.fileType || "pdf");
   const [selectedNode, setSelectedNode] = useState(null);
   
   // Tabs & Search states for the master list
@@ -268,9 +269,9 @@ export default function PaperExplorer() {
   // ── Persist whenever session changes ────────────────────────────────────
   useEffect(() => {
     if (sessionId && nodes.length > 0) {
-      saveSession({ sessionId, paperTitle, nodes, summary, architectureNotes });
+      saveSession({ sessionId, paperTitle, nodes, summary, architectureNotes, fileType });
     }
-  }, [sessionId, paperTitle, nodes, summary, architectureNotes]);
+  }, [sessionId, paperTitle, nodes, summary, architectureNotes, fileType]);
 
   // ── Upload handler ───────────────────────────────────────────────────────
   const handleFileUpload = useCallback(async (file) => {
@@ -310,6 +311,7 @@ export default function PaperExplorer() {
       setSessionId(sid);
       setSummary(data.summary || null);
       setArchitectureNotes(data.architectureNotes || "");
+      setFileType(data.fileType || "pdf");
       setPdfPage(1);
       setPdfOpen(true);
       setStatus("ready");
@@ -319,7 +321,8 @@ export default function PaperExplorer() {
         paperTitle: data.paperTitle, 
         nodes: data.nodes || [], 
         summary: data.summary || null, 
-        architectureNotes: data.architectureNotes || "" 
+        architectureNotes: data.architectureNotes || "",
+        fileType: data.fileType || "pdf"
       });
     } catch (err) {
       setError(err.message);
@@ -347,6 +350,7 @@ export default function PaperExplorer() {
     setSelectedNode(null);
     setSummary(null);
     setArchitectureNotes("");
+    setFileType("pdf");
     setMainView("glossary");
     setPdfOpen(false);
     setAutoFilterPage(true);
@@ -997,6 +1001,7 @@ export default function PaperExplorer() {
                   onClose={() => setPdfOpen(false)}
                   docked={true}
                   onToggleDock={() => setPdfDocked(false)}
+                  fileType={fileType}
                 />
               </div>
             )}
@@ -1174,6 +1179,7 @@ export default function PaperExplorer() {
             onClose={() => setPdfOpen(false)}
             docked={false}
             onToggleDock={() => setPdfDocked(true)}
+            fileType={fileType}
           />
       )}
     </div>

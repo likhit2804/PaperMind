@@ -20,7 +20,9 @@ if current_dir not in sys.path:
     sys.path.insert(0, current_dir)
 
 from pipeline.research_paper.extract_paper_concepts import parse_pdf_into_sections, clean_text
-from pipeline.utils import parse_json_robust, call_gemini_with_retry
+from pipeline.utils import parse_json_robust, call_gemini_with_retry, get_gemini_model
+from pipeline.research_paper.pdf_utils import split_sentences
+from pipeline.research_paper.tex_utils import extract_tex_sections
 
 # Load environment variables
 load_dotenv(override=True)
@@ -74,7 +76,7 @@ def get_sentences_for_topic(sections, topic, max_sentences=6):
         for page_num, page_text in sec["pages_data"]:
             page_clean = clean_text(page_text)
             # Split on sentence boundaries (heuristic, same as paper_notes.py)
-            sentences = re.split(r'(?<!\w\.\w.)(?<![A-Z][a-z]\.)(?<=\.|\?)\s', page_clean)
+            sentences = split_sentences(page_clean)
             for idx, sent in enumerate(sentences):
                 if re.search(r'\b' + re.escape(topic_lower) + r'\b', sent.lower()):
                     # Include one sentence of context before and after
@@ -176,14 +178,11 @@ def generate_architecture_notes_via_ai(sections, title, key_terms):
     Gemini never has to "search" the full text — it only arranges and rephrases
     sentences we already know are in the paper with their page citations.
     """
-    api_key = os.environ.get("GEMINI_API_KEY")
-    if not api_key:
+    model, api_key = get_gemini_model("gemini-3.1-flash-lite")
+    if not model:
         return "Architecture notes not available (GEMINI_API_KEY not set)."
 
     try:
-        genai.configure(api_key=api_key)
-        model_name = os.environ.get("LLM_MODEL", "gemini-3.1-flash-lite")
-        model = genai.GenerativeModel(model_name)
 
         # ── Phase 1: Build offline evidence block ─────────────────────────
         evidence_block = build_grounded_evidence_block(sections, key_terms)
@@ -270,8 +269,12 @@ def main():
     title = concepts_data.get("paper_title", "Research Paper")
     unique_key_terms = concepts_data.get("unique_key_terms", [])
 
-    print("Parsing PDF text sections...")
-    sections = parse_pdf_into_sections(pdf, "")
+    if pdf.lower().endswith('.tex'):
+        print("Parsing LaTeX sections...")
+        sections = extract_tex_sections(pdf)
+    else:
+        print("Parsing PDF sections...")
+        sections = parse_pdf_into_sections(pdf, "")
 
     print("Phase 1: Pre-extracting grounded evidence locally (no LLM)...")
     arch_notes_raw = generate_architecture_notes_via_ai(sections, title, unique_key_terms)

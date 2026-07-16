@@ -21,26 +21,13 @@ if current_dir not in sys.path:
     sys.path.insert(0, current_dir)
 
 from pipeline.research_paper.extract_paper_concepts import clean_text
-from pipeline.utils import parse_json_robust, call_gemini_with_retry
+from pipeline.utils import parse_json_robust, call_gemini_with_retry, get_gemini_model, get_pdf_title
+from pipeline.research_paper.pdf_utils import parse_toc, get_section_for_page
+from pipeline.research_paper.tex_utils import extract_tex_equations, get_tex_title
 
 # Load environment variables
 load_dotenv(override=True)
 
-def get_section_for_page(page_num, valid_toc, total_pages, first_terminal_page):
-    """
-    Determines which outline section a page number belongs to.
-    """
-    if page_num >= first_terminal_page:
-        return "References/Appendix"
-        
-    current_sec = "Introduction"
-    for level, heading, start_page in valid_toc:
-        if page_num >= start_page:
-            current_sec = heading
-        else:
-            break
-            
-    return current_sec
 
 def sort_blocks_naturally(blocks):
     """
@@ -152,28 +139,7 @@ def scan_equations_via_blocks(pdf_path):
     """
     doc = fitz.open(pdf_path)
     total_pages = len(doc)
-    toc = doc.get_toc()
-    
-    # Identify terminal page
-    first_terminal_page = total_pages + 1
-    terminal_keywords = ["references", "bibliography", "acknowledgments", "appendix"]
-    valid_toc = []
-    
-    if toc:
-        for level, title, page in toc:
-            title_lower = title.lower().strip()
-            is_terminal = False
-            for kw in terminal_keywords:
-                if kw in title_lower:
-                    is_terminal = True
-                    break
-            if is_terminal:
-                first_terminal_page = min(first_terminal_page, page)
-                break
-            if level <= 2:
-                valid_toc.append((level, title.strip(), page))
-                
-    valid_toc.sort(key=lambda x: x[2])
+    valid_toc, first_terminal_page = parse_toc(doc)
     
     candidates = []
     
@@ -266,14 +232,11 @@ def format_equations_via_ai(candidates, title):
     """
     Sends the list of candidate equations to Gemini in a single call to typeset them into LaTeX and write descriptions.
     """
-    api_key = os.environ.get("GEMINI_API_KEY")
-    if not api_key:
+    model, api_key = get_gemini_model("gemini-3.1-flash-lite")
+    if not model:
         return {c["label"]: {"latex": f"$${c['raw_text']}$$", "description": "GEMINI_API_KEY not set."} for c in candidates}
 
     try:
-        genai.configure(api_key=api_key)
-        model_name = os.environ.get("LLM_MODEL", "gemini-3.1-flash-lite")
-        model = genai.GenerativeModel(model_name)
         
         prompt_list = []
         for idx, c in enumerate(candidates):
@@ -342,31 +305,39 @@ Return your response strictly in JSON format matching this schema:
 
 def main():
     if len(sys.argv) < 3:
-        print("Usage: python extract_paper_equations.py <pdf_path> <output_md>")
+        print("Usage: python extract_paper_equations.py <pdf_or_tex_path> <output_md>")
         sys.exit(1)
-        
-    pdf = sys.argv[1]
+
+    input_path     = sys.argv[1]
     output_md_path = sys.argv[2]
-    
-    if not os.path.exists(pdf):
-        print(f"Error: PDF file not found at: {pdf}")
+
+    if not os.path.exists(input_path):
+        print(f"Error: input file not found at: {input_path}")
         sys.exit(1)
-        
-    # Extract Title using PyMuPDF metadata if available
-    doc = fitz.open(pdf)
-    title = doc.metadata.get("title") if hasattr(doc, 'metadata') else "Research Paper"
-    doc.close()
-    if not title or len(title.strip()) < 3:
-         title = "Quantum Image Processing Algorithm Using Line Detection Mask Based on NEQR"
-         
-    # 1. Scan mathematical lines locally
-    print("Scanning PDF layout locally for block equations...")
-    candidates = scan_equations_via_blocks(pdf)
-    print(f"Detected {len(candidates)} candidate equations locally.")
-    
-    if not candidates:
-        print("No equations detected.")
-        sys.exit(0)
+
+    # ------------------------------------------------------------------ .tex path
+    if input_path.lower().endswith('.tex'):
+        print(f"[.tex mode] Extracting equations locally from LaTeX source: {input_path}")
+        with open(input_path, encoding='utf-8', errors='replace') as _f:
+            _raw = _f.read()
+        title      = get_tex_title(_raw)
+        candidates = extract_tex_equations(input_path)
+        print(f"Detected {len(candidates)} candidate equations from .tex source.")
+        if not candidates:
+            print("No equations detected.")
+            sys.exit(0)
+    else:
+        # ---------------------------------------------------------------- PDF path
+        pdf = input_path
+        doc   = fitz.open(pdf)
+        title = get_pdf_title(doc, fallback="Quantum Image Processing Algorithm Using Line Detection Mask Based on NEQR")
+        doc.close()
+        print("Scanning PDF layout locally for block equations...")
+        candidates = scan_equations_via_blocks(pdf)
+        print(f"Detected {len(candidates)} candidate equations locally.")
+        if not candidates:
+            print("No equations detected.")
+            sys.exit(0)
         
     # 2. Query Gemini in a single batched API call
     print("Formatting equations to LaTeX and generating annotations via a single Gemini batch call...")

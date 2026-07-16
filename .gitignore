@@ -34,3 +34,11 @@ db/cogniweave.db-wal
 backend-node/src/uploads/
 scratch/
 frontend-react/dist/
+/*.zip
+/*.tar.gz
+/*.tgz
+/*.pdf
+/*.tex
+/pipeline/research_paper/output/
+/CPN_tex_source/
+/*_source/

@@ -14,13 +14,17 @@ if (!fs.existsSync(PAPERS_DIR)) fs.mkdirSync(PAPERS_DIR, { recursive: true });
 
 const storage = multer.diskStorage({
   destination: (_req, _file, cb) => cb(null, PAPERS_DIR),
-  filename: (_req, _file, cb) => cb(null, `${uuidv4()}.pdf`),
+  filename: (_req, file, cb) => {
+    const ext = path.extname(file.originalname).toLowerCase();
+    cb(null, `${uuidv4()}${ext}`);
+  },
 });
 const upload = multer({
   storage,
   fileFilter: (_req, file, cb) => {
-    if (file.originalname.toLowerCase().endsWith(".pdf")) return cb(null, true);
-    cb(new Error("Only PDF files are accepted."));
+    const ext = path.extname(file.originalname).toLowerCase();
+    if (ext === ".pdf" || ext === ".tex") return cb(null, true);
+    cb(new Error("Only PDF and LaTeX (.tex) files are accepted."));
   },
 });
 
@@ -77,10 +81,11 @@ function parseGlossaryMd(mdText) {
 // ─── POST /paper/analyze ────────────────────────────────────────────────────
 router.post("/paper/analyze", upload.single("file"), async (req, res, next) => {
   const file = req.file;
-  if (!file) return res.status(400).json({ detail: "No PDF file uploaded." });
+  if (!file) return res.status(400).json({ detail: "No research paper file uploaded." });
 
-  const sessionId = path.basename(file.filename, ".pdf"); // the uuid
-  const pdfPath = file.path;
+  const ext = path.extname(file.filename).toLowerCase();
+  const sessionId = path.basename(file.filename, ext); // the uuid
+  const filePath = file.path;
   const outDir = path.join(PAPERS_DIR, sessionId);
   fs.mkdirSync(outDir, { recursive: true });
 
@@ -103,7 +108,7 @@ router.post("/paper/analyze", upload.single("file"), async (req, res, next) => {
   try {
     // Run the consolidated, optimized paper processing pipeline
     console.log(`[paper/analyze] Running unified paper pipeline for session ${sessionId}…`);
-    await runPython([unifiedScript, pdfPath, outDir], settings.baseDir);
+    await runPython([unifiedScript, path.resolve(filePath), outDir], settings.baseDir);
 
     // Parse outputs
     const conceptsData = JSON.parse(fs.readFileSync(conceptsJson, "utf-8"));
@@ -219,11 +224,12 @@ router.post("/paper/analyze", upload.single("file"), async (req, res, next) => {
       summary,
       architectureNotes,
       pdfUrl: `/paper/pdf/${sessionId}`,
+      fileType: ext === ".tex" ? "tex" : "pdf",
     });
   } catch (err) {
     console.error("[paper/analyze] Pipeline failed:", err);
-    // Clean up PDF on error to avoid orphan files
-    try { fs.unlinkSync(pdfPath); } catch (_) {}
+    // Clean up file on error to avoid orphan files
+    try { fs.unlinkSync(filePath); } catch (_) {}
     next(err);
   }
 });
@@ -237,12 +243,18 @@ router.get("/paper/pdf/:sessionId", (req, res, next) => {
       return res.status(400).json({ detail: "Invalid session ID." });
     }
     const pdfPath = path.join(PAPERS_DIR, `${sessionId}.pdf`);
-    if (!fs.existsSync(pdfPath)) {
-      return res.status(404).json({ detail: "PDF not found." });
+    const texPath = path.join(PAPERS_DIR, `${sessionId}.tex`);
+    if (fs.existsSync(pdfPath)) {
+      res.setHeader("Content-Type", "application/pdf");
+      res.setHeader("Content-Disposition", "inline");
+      fs.createReadStream(pdfPath).pipe(res);
+    } else if (fs.existsSync(texPath)) {
+      res.setHeader("Content-Type", "text/plain; charset=utf-8");
+      res.setHeader("Content-Disposition", "inline");
+      fs.createReadStream(texPath).pipe(res);
+    } else {
+      return res.status(404).json({ detail: "File not found." });
     }
-    res.setHeader("Content-Type", "application/pdf");
-    res.setHeader("Content-Disposition", "inline");
-    fs.createReadStream(pdfPath).pipe(res);
   } catch (err) {
     next(err);
   }
@@ -252,6 +264,7 @@ router.get("/paper/pdf/:sessionId", (req, res, next) => {
 function deleteSessionFiles(sessionId) {
   if (!/^[0-9a-f-]{36}$/.test(sessionId)) return;
   const pdfPath = path.join(PAPERS_DIR, `${sessionId}.pdf`);
+  const texPath = path.join(PAPERS_DIR, `${sessionId}.tex`);
   const outDir = path.join(PAPERS_DIR, sessionId);
 
   try {
@@ -259,8 +272,12 @@ function deleteSessionFiles(sessionId) {
       fs.unlinkSync(pdfPath);
       console.log(`[deleteSessionFiles] Deleted PDF: ${pdfPath}`);
     }
+    if (fs.existsSync(texPath)) {
+      fs.unlinkSync(texPath);
+      console.log(`[deleteSessionFiles] Deleted LaTeX: ${texPath}`);
+    }
   } catch (err) {
-    console.error(`[deleteSessionFiles] Failed to delete PDF ${pdfPath}:`, err);
+    console.error(`[deleteSessionFiles] Failed to delete file:`, err);
   }
 
   try {

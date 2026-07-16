@@ -20,7 +20,9 @@ if current_dir not in sys.path:
     sys.path.insert(0, current_dir)
 
 from pipeline.research_paper.extract_paper_concepts import parse_pdf_into_sections, clean_text
-from pipeline.utils import parse_json_robust, call_gemini_with_retry
+from pipeline.utils import parse_json_robust, call_gemini_with_retry, get_gemini_model
+from pipeline.research_paper.pdf_utils import split_sentences
+from pipeline.research_paper.tex_utils import extract_tex_sections
 
 # Load environment variables
 load_dotenv(override=True)
@@ -42,7 +44,7 @@ def get_term_contexts(sections, term, max_contexts=4):
             # Normalize whitespace in page text
             page_clean = clean_text(page_text)
             # Find sentence boundaries
-            sentences = re.split(r'(?<!\w\.\w.)(?<![A-Z][a-z]\.)(?<=\.|\?)\s', page_clean)
+            sentences = split_sentences(page_clean)
             
             for idx, sentence in enumerate(sentences):
                 # Check if term matches as word/phrase boundary
@@ -86,7 +88,7 @@ def get_topic_sentences(sections, keywords, max_sentences=20):
         sec_label = sec["label"]
         for page_num, page_text in sec["pages_data"]:
             page_clean = clean_text(page_text)
-            sentences = re.split(r'(?<!\w\.\w.)(?<![A-Z][a-z]\.)(?<=\.|\?)\s', page_clean)
+            sentences = split_sentences(page_clean)
             for idx, sent in enumerate(sentences):
                 sent_lower = sent.lower()
                 if any(re.search(r'\b' + re.escape(kw) + r'\b', sent_lower) for kw in keywords):
@@ -103,14 +105,11 @@ def generate_batch_definitions_via_ai(batch, title):
     Sends a batch of terms and their corresponding contexts to Gemini in a single call.
     batch is a list of tuples: (term, list_of_contexts)
     """
-    api_key = os.environ.get("GEMINI_API_KEY")
-    if not api_key:
+    model, api_key = get_gemini_model("gemini-2.5-flash-lite")
+    if not model:
         return {term: "Definition not available (GEMINI_API_KEY not set)." for term, _ in batch}
 
     try:
-        genai.configure(api_key=api_key)
-        model_name = os.environ.get("LLM_MODEL", "gemini-2.5-flash-lite")
-        model = genai.GenerativeModel(model_name)
         
         # Build prompt listing each term and its contexts
         terms_context_prompt = []
@@ -189,14 +188,11 @@ def generate_novelty_vs_prior_art_via_ai(sections, title, unique_key_terms):
     Calls Gemini to analyze targeted topic sentences and unique key terms, and classify what is 
     already present (prior art/baselines) versus what is newly introduced by this paper.
     """
-    api_key = os.environ.get("GEMINI_API_KEY")
-    if not api_key:
+    model, api_key = get_gemini_model("gemini-2.5-flash-lite")
+    if not model:
         return "Prior Art vs Novelty not available (GEMINI_API_KEY not set)."
 
     try:
-        genai.configure(api_key=api_key)
-        model_name = os.environ.get("LLM_MODEL", "gemini-2.5-flash-lite")
-        model = genai.GenerativeModel(model_name)
         
         # Target prior art and novelty sentences
         prior_art_keywords = ["baseline", "comparison", "classical", "prior art", "existing", "previous work", "traditional"]
@@ -262,7 +258,12 @@ def main():
     section_terms_map = concepts_data.get("sections", {})
     unique_key_terms = concepts_data.get("unique_key_terms", [])
     
-    sections = parse_pdf_into_sections(pdf, "")
+    if pdf.lower().endswith('.tex'):
+        print("Parsing LaTeX sections...")
+        sections = extract_tex_sections(pdf)
+    else:
+        print("Parsing PDF sections...")
+        sections = parse_pdf_into_sections(pdf, "")
     
     # 1. Search text contexts for each term and track sources
     print(f"Aggregating sentence contexts for {len(unique_key_terms)} key terms...")
