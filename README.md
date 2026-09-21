@@ -1,352 +1,470 @@
-# CogniWeave: Personalized Learning & Multi-Agent Intervention System
+<div align="center">
 
-CogniWeave is a grounded, multi-agent learning support system designed to support students tackling complex engineering topics. Unlike traditional tutoring systems or static chatbots, CogniWeave implements an adaptive **diagnose → intervene → plan → evaluate → replan** loop. It isolates a student's conceptual bottlenecks, designs custom study plans within their availability constraints, and tracks direct learning outcomes dynamically.
+# CogniWeave
+### *Personalized Learning Intervention & Research Paper Intelligence System*
+
+[![React](https://img.shields.io/badge/Frontend-React%2018%20%7C%20Vite-61DAFB?logo=react&logoColor=black)](https://react.dev/)
+[![Node.js](https://img.shields.io/badge/Backend-Node.js%20%7C%20Express-339933?logo=node.js&logoColor=white)](https://nodejs.org/)
+[![Python](https://img.shields.io/badge/Pipeline-Python%203.11+-3776AB?logo=python&logoColor=white)](https://www.python.org/)
+[![Gemini](https://img.shields.io/badge/AI-Google%20Gemini%202.5%2F3.1-8E75B2?logo=google&logoColor=white)](https://ai.google.dev/)
+[![KaTeX](https://img.shields.io/badge/Math-KaTeX-00d1b2)](https://katex.org/)
+[![Docker](https://img.shields.io/badge/Container-Docker%20Ready-2496ED?logo=docker&logoColor=white)](https://www.docker.com/)
+
+<p align="center">
+  CogniWeave transforms dense, complex academic research papers (PDF & LaTeX) into an interactive, multi-dimensional learning workbench. It breaks down foundational concepts, mathematical notation, equations, system architectures, and literature citations into an interconnected, contextual knowledge graph.
+</p>
 
 ---
 
-## Key Capabilities
+</div>
 
-1. **Multi-Agent Orchestration**: Coordinate five specialist agents (Diagnosis, Intervention, Planning, Evaluation, and Critic) in a generic, asynchronous loop powered by Gemini LLMs.
-2. **Grounded Topic Packs**: Domain knowledge is separated into structured JSON topic packs. Each pack represents a domain with concept graphs, misconceptions, interventions, and evaluation rules.
-3. **Automated Content Ingestion**: Ingest textbook chapters (raw text or PDF) and automatically extract concepts, construct prerequisites, generate misconceptions, and write practice problems.
-4. **Interactive Learner Portal**: A premium, responsive React SPA containing baseline assessments, real-time feedback, study-path visualization, and checkpoint evaluations.
-5. **Durable Persistence**: Track student profiles, attempts, mastery history, and intervention logs using a local SQLite instance, backed by Graph (Neo4j) and Document (MongoDB) schemas for scaling.
+## Table of Contents
+
+- [Overview](#overview)
+- [Key Features](#key-features)
+- [System Architecture](#system-architecture)
+- [Unified 7-Stage Extraction Pipeline](#unified-7-stage-extraction-pipeline)
+- [Tech Stack](#tech-stack)
+- [Project Directory Structure](#project-directory-structure)
+- [Getting Started](#getting-started)
+  - [Prerequisites](#prerequisites)
+  - [1. Clone Repository](#1-clone-repository)
+  - [2. Environment Configuration](#2-environment-configuration)
+  - [3. Python Environment Setup](#3-python-environment-setup)
+  - [4. Node Backend Setup](#4-node-backend-setup)
+  - [5. React Frontend Setup](#5-react-frontend-setup)
+- [Running the Application](#running-the-application)
+  - [Development Mode](#development-mode)
+  - [Production Mode](#production-mode)
+  - [Docker Deployment](#docker-deployment)
+- [API Reference](#api-reference)
+- [Keyboard Shortcuts & UI Navigation](#keyboard-shortcuts--ui-navigation)
+- [Configuration Reference](#configuration-reference)
+- [Roadmap](#roadmap)
+- [License](#license)
 
 ---
 
-## System Architecture & Runtime Topology
+## Overview
 
-CogniWeave decouples the UI representation, orchestration service, specialist LLM agents, and persistence layers.
+Reading modern scientific and machine learning research papers can be overwhelming due to dense mathematical nomenclature, intricate system architectures, and deep citation dependencies. 
 
-### High-Level Topology
+**CogniWeave** bridges this gap by functioning as an intelligent AI-guided research companion:
+- **Digests Both PDF and LaTeX Sources**: Ingests standard scientific PDFs or raw `.tex` source files.
+- **Deconstructs Paper Complexity**: Automatically extracts, classifies, and cross-references key concepts, math symbols, formulas, and references.
+- **Synchronized Three-Pane Workbench**: View the original paper alongside structured breakdowns with bi-directional navigation (click any concept or equation to highlight its exact page occurrences).
+
+---
+
+## Key Features
+
+### 1. Dual-Format Ingestion (PDF & LaTeX)
+Upload pre-compiled scientific papers (`.pdf`) or author source packages (`.tex`). The backend normalizes whitespace, strips compilation artifacts, extracts structured sections, and feeds clean text into downstream extractors.
+
+### 2. 7-Stage Autonomous AI Extraction Pipeline
+Orchestrated via a single unified workflow:
+- **Key Concept Extraction**: Hybrid N-Gram TF-IDF candidate selection + Gemini LLM semantic refinement.
+- **Context-Rich Glossary**: Synthesizes definitions, cross-concept relationship tags, and section citations.
+- **Executive Summaries**: Synthesizes TL;DR, core research questions, major contributions, and section timelines.
+- **System & Model Architecture**: Generates structured technical breakdowns with Markdown tables and algorithmic flowcharts.
+- **Citation & Literature Graph**: Classifies cited works by influence role (*Foundational, Baseline, Comparison, Theoretical Support*).
+- **Mathematical Nomenclature**: Compiles a dedicated notation dictionary mapping every Greek symbol/variable to its paper definition.
+- **LaTeX Formula Solver**: Extracts equations into clean LaTeX markup and links variables directly to the notation glossary.
+
+### 3. Interactive 3-Pane Research Workbench
+- **Left Pane (Document Viewer)**: PDF renderer with page-by-page scrolling, jump-to-page anchors, and responsive scaling.
+- **Center Pane (Master Explorer)**: Filter by node type (*All, Concepts, Notations, Equations, References*), live search, and auto-filter to current page view.
+- **Right Pane (Detail & Knowledge Inspector)**: Deep-dive inspector with KaTeX math rendering, influence badges, inter-concept links, and clickable page occurrences.
+- **Executive Summary & Architecture Views**: One-click toggle between granular entity cards, full-paper executive summaries, and system design specifications.
+
+### 4. VS Code-Inspired Productivity Controls
+- **Adjustable Split Panes**: Smooth draggable borders between PDF viewer, entity list, and detail inspector.
+- **Hotkey Support**: Toggle panes instantly using `Alt + 1` (PDF), `Alt + 2` (Master list), and `Alt + 3` (Detail pane).
+- **Persistent State**: Seamless `localStorage` caching ensures you never lose extracted paper sessions across refreshes.
+
+---
+
+## System Architecture
 
 ```mermaid
-flowchart TD
-    U[User in Browser] --> FE[React SPA<br/>frontend-react]
-    FE --> API[Node.js Express API<br/>backend-node]
-    
-    API --> ORCH[Orchestrator Service]
-    API --> ASSESS[Assessment Service]
-    API --> EVAL[Evaluation Routes]
-    API --> INGEST[Ingestion Routes]
-    
-    ORCH --> AGENTS[Agent Pipeline]
-    subgraph Agent Pipeline [Specialist Agents]
-        D[Diagnosis Agent]
-        I[Intervention Agent]
-        P[Planning Agent]
-        Ev[Evaluation Agent]
-        C[Critic Agent]
-    end
-    
-    AGENTS --> LLM[Gemini LLM Client]
-    ORCH --> KB[Knowledge Base Loader]
-    ASSESS --> KB
-    EVAL --> KB
-    INGEST --> EXTRACT[Topic Extractor + Pack Builder]
-    
-    EXTRACT --> KBFS[(knowledge_base/topics/*)]
-    ORCH --> DB[(SQLite db/cogniweave.db)]
-    ORCH -.-> Neo[(Neo4j Graph)]
-    ORCH -.-> Mongo[(MongoDB State)]
-```
-
-### Request Lifecycle (Assessment to Study Plan)
-
-The following sequence details how baseline student attempts flow through the service to trigger multi-agent planning:
-
-```mermaid
-sequenceDiagram
-    participant UI as React Frontend
-    participant AR as /assessment routes
-    participant AS as assessmentService
-    participant OR as orchestratorService
-    participant AG as Agent Pipeline
-    participant DB as SQLite / MongoDB
-
-    UI->>AR: POST /assessment/start
-    AR->>AS: startAssessment(topic_id, student_id)
-    AS-->>UI: session_id + question
-    
-    loop Baseline Assessment (4-5 questions)
-        UI->>AR: POST /assessment/answer
-        AR->>AS: submitAnswer(...)
-        AS-->>UI: correctness + explanation + next question (or complete)
+flowchart TB
+    subgraph Client["Frontend (React 18 + Vite)"]
+        UI["PaperExplorer UI"]
+        PDF["PDF Canvas Viewer"]
+        KaTeX["KaTeX Formula Engine"]
+        Storage["LocalStorage State Cache"]
     end
 
-    UI->>AR: POST /assessment/plan
-    AR->>AS: buildSnapshot(session_id)
-    AS->>OR: Snapshot (Profile + Attempts)
-    OR->>AG: Run Loop (Diagnosis -> Intervention -> Planning -> Evaluation -> Critic)
-    AG-->>OR: Final Synthesized Plan & Trace
-    OR->>DB: Save Student Profile, Attempts, Mastery, & Plan
-    OR-->>UI: Plan JSON (diagnosis, selected_intervention, study_plan, evaluation_plan, agent_trace)
+    subgraph Backend["Backend (Node.js + Express)"]
+        Server["Express API Server (Port 8000)"]
+        Multer["Multer File Handler"]
+        Runner["Python ChildProcess Runner"]
+    end
+
+    subgraph Pipeline["Python 3.11 AI Pipeline"]
+        Orchestrator["unified_paper_pipeline.py"]
+        FitZ["PyMuPDF / TeX Parser"]
+        Gemini["Google Gemini LLM (with Rate Limiting & Backoff)"]
+        
+        P1["1. Concept Extractor (TF-IDF + LLM)"]
+        P2["2. Paper Notes & Glossary"]
+        P3["3. Executive Summary"]
+        P4["4. Architecture Notes"]
+        P5["5. Citation & Reference Analyzer"]
+        P6["6. Notation & Nomenclature Engine"]
+        P7["7. Equation & Math Extractor"]
+    end
+
+    UI -->|Upload .pdf / .tex| Multer
+    Multer --> Server
+    Server -->|Spawn pipeline| Runner
+    Runner --> Orchestrator
+
+    Orchestrator --> FitZ
+    FitZ --> P1 & P2 & P3 & P4 & P5 & P6 & P7
+    P1 & P2 & P3 & P4 & P5 & P6 & P7 --> Gemini
+
+    Orchestrator -->|Output JSON & MD Artifacts| Server
+    Server -->|Structured JSON Response| UI
+    UI --> PDF
+    UI --> KaTeX
+    UI --> Storage
 ```
 
 ---
 
-## Repository Directory Layout
+## Unified 7-Stage Extraction Pipeline
+
+The Python pipeline is located in `pipeline/research_paper/` and coordinated by `unified_paper_pipeline.py`:
+
+| Stage | Script | Purpose / Output |
+| :--- | :--- | :--- |
+| **1. Concepts** | [`extract_paper_concepts.py`](pipeline/research_paper/extract_paper_concepts.py) | Generates `concepts.json` using smoothed TF-IDF scoring and LLM candidate filtering. |
+| **2. Notes & Glossary** | [`generate_paper_notes.py`](pipeline/research_paper/generate_paper_notes.py) | Generates `notes.md` with definitions, cross-concept linkages, and section citations. |
+| **3. Summary** | [`generate_paper_summary.py`](pipeline/research_paper/generate_paper_summary.py) | Generates `summary.json` with TL;DR, research questions, contributions, and timeline. |
+| **4. Architecture** | [`generate_architecture_notes.py`](pipeline/research_paper/generate_architecture_notes.py) | Generates `architecture_notes.md` detailing system modules, pipeline specs, and dataflow tables. |
+| **5. References** | [`extract_paper_references.py`](pipeline/research_paper/extract_paper_references.py) | Generates `references.json` with citation keys, titles, roles, and contextual sentences. |
+| **6. Notations** | [`extract_notations_local.py`](pipeline/research_paper/extract_notations_local.py) | Generates `notations.json` containing mathematical symbols, Greek letters, and meanings. |
+| **7. Equations** | [`extract_paper_equations.py`](pipeline/research_paper/extract_paper_equations.py) | Generates `equations.json` with LaTeX markup, raw OCR/scanned text, and math descriptions. |
+
+---
+
+## Tech Stack
+
+### Frontend
+- **Framework**: React 18 + Vite
+- **Math Typesetting**: KaTeX (CDN with fast LaTeX formula parsing)
+- **Styling**: Vanilla CSS3 (Custom design system, glassmorphism, responsive CSS grid/flexbox, Dark/Light theme context)
+- **State**: React Hooks + LocalStorage session persistence
+
+### Backend
+- **Runtime**: Node.js (ES Modules, Express 4.x)
+- **File Ingestion**: Multer (disk storage with session UUID partitioning)
+- **Pipeline Bridge**: Asynchronous Node.js `child_process.spawn`
+- **Security & Utilities**: CORS, dotenv, Zod, UUID
+
+### AI & Data Pipeline
+- **Python**: 3.11+
+- **PDF & Document Parsing**: PyMuPDF (`fitz`), `pdfplumber`, regex-based LaTeX AST parsing
+- **LLM Engine**: Google Generative AI (`google-generativeai`), Gemini 2.5 / 3.1 Flash Lite
+- **Resilience**: Thread-safe rate limiter (15 RPM compliant), exponential backoff with jitter for HTTP 429/503
+
+---
+
+## Project Directory Structure
 
 ```text
 CogniWeave-Personalized-Learning-Intervention-System/
-├── backend/                       # Legacy Python/FastAPI Backend (useful for reference)
-│   └── app/                       # Configs, APIs, Services, and Python agents
-├── backend-node/                  # Active Node.js Backend (Express)
+├── backend-node/                 # Express.js Backend
 │   ├── src/
-│   │   ├── server.js              # Server entry point & middleware initialization
-│   │   ├── config.js              # Environment settings parser & defaults
-│   │   ├── routes/                # Express API endpoints
-│   │   │   ├── health.js          # Health check endpoints
-│   │   │   ├── assessment.js      # Baseline and student journey routes
-│   │   │   ├── orchestrator.js    # Run loop orchestrator
-│   │   │   ├── evaluation.js      # Checkpoint evaluation & mastery updates
-│   │   │   └── ingest.js          # Textbook and PDF extraction handlers
-│   │   ├── services/              # Core business logic
-│   │   │   ├── database.js        # SQLite persistence client
-│   │   │   ├── orchestratorService.js # Agent pipeline loop orchestration
-│   │   │   ├── assessmentService.js   # Volatile session assessment manager
-│   │   │   └── llmClient.js       # LLM fallback, retry, and request handler
-│   │   ├── agents/                # Asynchronous specialist agent functions
-│   │   │   ├── prompts.js         # Standardized agent instruction strings
-│   │   │   ├── agentSchemas.js    # Zod output verification schemas
-│   │   │   ├── diagnosisAgent.js  # Diagnoses concept bottlenecks
-│   │   │   ├── interventionAgent.js # Generates targeted intervention options
-│   │   │   ├── planningAgent.js   # Adapts plans to available student hours
-│   │   │   ├── evaluationAgent.js # Designs outcome check rules
-│   │   │   └── criticAgent.js     # Validates plan pedagogical soundness
-│   │   └── ingestion/             # File parsing & pack builders
-│   └── package.json
-├── frontend-react/                # Main React + Vite SPA
+│   │   ├── routes/
+│   │   │   ├── health.js         # Health check endpoint (/health)
+│   │   │   └── paper.js          # Paper upload, pipeline execution & PDF streaming
+│   │   ├── uploads/papers/       # Session storage for uploaded papers & extracted JSON
+│   │   ├── config.js             # Environment and path settings
+│   │   └── server.js             # Application entry point & static asset serving
+│   ├── package.json
+│   └── nodemon.json
+├── frontend-react/               # React 18 + Vite Frontend
 │   ├── src/
-│   │   ├── App.jsx                # UI step controller & State machine
-│   │   ├── index.css              # Glassmorphic component styles
-│   │   ├── context/               # Dark/Light theme state
-│   │   └── components/            # UI components (Banner, Console, Steps)
-│   └── package.json
-├── knowledge_base/                # Structured topic knowledge packages
-│   └── topics/
-│       ├── sql_query_reasoning/   # SQL Query topic directory
-│       │   ├── manifest.json      # Topic metadata
-│       │   ├── concept_graph.json # Prerequisites & descriptions
-│       │   ├── misconceptions.json# Catalog of common student errors
-│       │   ├── interventions.json # Remediations library
-│       │   ├── problems.json      # Predefined assessment problems
-│       │   └── evaluation_rules.json # Mastery assessment thresholds
-│       ├── os_synchronization/
-│       └── dbms_normalization/
-├── db/
-│   ├── schema.sql                 # SQLite schema declaration
-│   └── cogniweave.db              # SQLite active database
-├── docs/                          # Detailed architecture, flows, and guidelines
-│   ├── DETAILED_ARCHITECTURE.md   # Architectural breakdown
-│   ├── COMPONENT_GUIDE.md         # Express & React Component breakdown
-│   ├── FLOW_DIAGRAMS.md           # Learner journey and orchestration flows
-│   ├── TEXTBOOK_TOPIC_CREATION_GUIDE.md # Tutorial for adding new topics
-│   ├── KB_NEO4J_MONGODB_PLAN.md   # Neo4j and MongoDB migration strategy
-│   └── API_USAGE_OPTIMIZATION.md  # LLM caching, retries, and constraints
-├── .env                           # Local environment keys configuration
-├── setup_packs.py                 # CLI script to bootstrap starter topic packs
-└── requirements.txt               # Legacy Python pip packages list
+│   │   ├── components/
+│   │   │   ├── PaperExplorer/
+│   │   │   │   ├── PaperExplorer.jsx   # 3-Pane master workbench & KaTeX renderer
+│   │   │   │   ├── PdfViewer.jsx       # Integrated PDF viewer with page navigation
+│   │   │   │   └── UploadZone.jsx      # Drag & drop upload target (.pdf & .tex)
+│   │   │   ├── Banner.jsx              # Status alert component
+│   │   │   ├── Card.jsx                # UI container card
+│   │   │   └── ThemeToggle.jsx         # Dark / Light theme switcher
+│   │   ├── context/
+│   │   │   └── ThemeContext.jsx        # Theme persistence provider
+│   │   ├── App.jsx                     # Top-level portal layout & connection badge
+│   │   ├── App.css                     # Primary workspace styles
+│   │   ├── index.css                   # Core tokens, themes & layout CSS
+│   │   └── main.jsx                    # React DOM root
+│   ├── package.json
+│   └── vite.config.js
+├── pipeline/                     # Python AI & Document Extraction Pipeline
+│   ├── research_paper/
+│   │   ├── extract_paper_concepts.py      # TF-IDF + Gemini concept extraction
+│   │   ├── generate_paper_notes.py        # Glossary & connection compiler
+│   │   ├── generate_paper_summary.py      # TL;DR & section breakdown
+│   │   ├── generate_architecture_notes.py # System architecture & Markdown tables
+│   │   ├── extract_paper_references.py    # Citation role classifier
+│   │   ├── extract_notations_local.py     # Math notation dictionary builder
+│   │   ├── extract_paper_equations.py     # LaTeX equation extractor
+│   │   ├── pdf_utils.py                   # PyMuPDF TOC and section segmenter
+│   │   ├── tex_utils.py                   # LaTeX section & equation parser
+│   │   └── unified_paper_pipeline.py      # Master runner for all 7 stages
+│   ├── extraction_parameters.md           # Parameter documentation for scoring
+│   └── utils.py                           # Gemini retry client, JSON repair & rate limiter
+├── Dockerfile                    # Dual Python 3.11 + Node 20 container definition
+├── requirements.txt              # Python dependencies
+└── .env                          # Environment variables & API keys
 ```
 
 ---
 
-## Specialist Agent Design
-
-CogniWeave breaks down the learning intervention pipeline into five distinct agents. They communicate by writing and reading from a **shared memory state** object.
-
-| Agent | Focus Area | Source File | Responsibilities |
-| :--- | :--- | :--- | :--- |
-| **Diagnosis Agent** | Concept Bottleneck Identification | [`diagnosisAgent.js`](file:///c:/Users/likhi/OneDrive/Pictures/Desktop/CollabProj/CogniWeave-Personalized-Learning-Intervention-System/backend-node/src/agents/diagnosisAgent.js) | Analyzes student attempts, error tags, self-reported issues, and confidence levels to find the root concept failing. |
-| **Intervention Agent** | Custom Remediation Selection | [`interventionAgent.js`](file:///c:/Users/likhi/OneDrive/Pictures/Desktop/CollabProj/CogniWeave-Personalized-Learning-Intervention-System/backend-node/src/agents/interventionAgent.js) | Scans the grounded intervention database to choose a pedagogical activity matching the diagnosed misconception. |
-| **Planning Agent** | Calendar & Study Scheduler | [`planningAgent.js`](file:///c:/Users/likhi/OneDrive/Pictures/Desktop/CollabProj/CogniWeave-Personalized-Learning-Intervention-System/backend-node/src/agents/planningAgent.js) | Builds a day-by-day roadmap scheduling practice and readings, respecting the student's weekly hour limitations. |
-| **Evaluation Agent** | Outcome Verification Rules | [`evaluationAgent.js`](file:///c:/Users/likhi/OneDrive/Pictures/Desktop/CollabProj/CogniWeave-Personalized-Learning-Intervention-System/backend-node/src/agents/evaluationAgent.js) | Determines what assessment signals (solving time, retry thresholds) show that the intervention was successful. |
-| **Critic Agent** | Plan Quality Inspector | [`criticAgent.js`](file:///c:/Users/likhi/OneDrive/Pictures/Desktop/CollabProj/CogniWeave-Personalized-Learning-Intervention-System/backend-node/src/agents/criticAgent.js) | Evaluates the overall output for logic, flow correctness, and pedagogical standards, recommending repairs if needed. |
-
----
-
-## Persistence & Schema Design
-
-CogniWeave uses an SQLite instance to store student metrics. The tables are described in [`db/schema.sql`](file:///c:/Users/likhi/OneDrive/Pictures/Desktop/CollabProj/CogniWeave-Personalized-Learning-Intervention-System/db/schema.sql):
-
-### Database Tables
-
-1. **`student_profile`**: Basic student information and workload capabilities.
-   - `student_id` (TEXT PRIMARY KEY)
-   - `subject` (TEXT)
-   - `available_hours_per_week` (INTEGER)
-2. **`concept_mastery`**: Track a student's estimated mastery score for individual concepts over time.
-   - `student_id` (TEXT)
-   - `concept` (TEXT)
-   - `confidence_score` (REAL)
-   - `updated_at` (TEXT)
-3. **`attempts`**: History of all baseline and practice answers.
-   - `attempt_id` (INTEGER PRIMARY KEY AUTOINCREMENT)
-   - `student_id` (TEXT)
-   - `problem_id` (TEXT)
-   - `concept` (TEXT)
-   - `correct` (INTEGER)
-   - `error_tags` (TEXT JSON array)
-   - `time_seconds` (INTEGER)
-   - `hints_used` (INTEGER)
-   - `retries` (INTEGER)
-4. **`intervention_history`**: History of generated plans and outcomes.
-   - `intervention_id` (INTEGER PRIMARY KEY AUTOINCREMENT)
-   - `student_id` (TEXT)
-   - `concept` (TEXT)
-   - `strategy` (TEXT)
-   - `outcome_summary` (TEXT)
-   - `created_at` (TEXT)
-
----
-
-## Getting Started & Setup
+## Getting Started
 
 ### Prerequisites
-
-- **Node.js** v22.5.0+ (Required for native `node:sqlite` execution)
-- **npm** or **yarn**
-- **Python 3.10+** (Required if running legacy components or package setup)
-- A **Gemini API Key** from Google AI Studio
+Make sure you have the following installed on your machine:
+- [Node.js](https://nodejs.org/) (v18.x or v20.x recommended)
+- [Python](https://www.python.org/) (v3.10, v3.11, or v3.12)
+- [Git](https://git-scm.com/)
+- A [Google Gemini API Key](https://aistudio.google.com/app/apikey)
 
 ---
 
-### Step 1: Clone the Repo & Configure Environment
-
-Create a `.env` file in the root directory:
-
+### 1. Clone Repository
 ```bash
-# Gemini LLM Keys
-GEMINI_API_KEY=your_gemini_api_key_here
-LLM_MODEL=gemini-2.5-flash-lite
-AGENT_MODEL=gemini-2.5-flash-lite
-LLM_FALLBACK_MODELS=gemini-2.5-flash-lite,gemini-2.5-flash
+git clone https://github.com/likhit2804/CogniWeave-Personalized-Learning-Intervention-System.git
+cd CogniWeave-Personalized-Learning-Intervention-System
+```
 
-# API Server Port
+---
+
+### 2. Environment Configuration
+Create a `.env` file in the project root (or update the existing one):
+
+```env
+# Gemini API Key for Extraction Pipeline
+GEMINI_API_KEY=your_gemini_api_key_here
+
+# LLM Model Selection
+LLM_MODEL=gemini-3.1-flash-lite
+AGENT_MODEL=gemini-3.1-flash-lite
+LLM_FALLBACK_MODELS=gemini-3.1-flash-lite,gemini-2.5-flash-lite
+
+# Server Configuration
 PORT=8000
 
-# (Optional) Graph and document endpoints
-NEO4J_URI=neo4j+s://your-instance.databases.neo4j.io
-NEO4J_USER=neo4j
-NEO4J_PASSWORD=your_password
-MONGO_URI=mongodb://localhost:27017/
-MONGO_DB_NAME=CogniWeave
+# Path to Python executable (Relative to project root)
+# Windows:
+PYTHON_PATH=.\venv\Scripts\python.exe
+# Linux / macOS:
+# PYTHON_PATH=./venv/bin/python
 ```
 
 ---
 
-### Step 2: Install Dependencies & Initialize Database
-
-First, set up the database and default topic packages using python:
+### 3. Python Environment Setup
+Set up a Python virtual environment and install dependencies:
 
 ```bash
-# Create topic folders and default JSON configurations
-python setup_packs.py
+# Create virtual environment
+python -m venv venv
+
+# Activate virtual environment
+# Windows:
+.\venv\Scripts\activate
+# macOS / Linux:
+source venv/bin/activate
+
+# Install requirements
+pip install -r requirements.txt
 ```
 
-Now, navigate to the active Node.js server to install modules:
+---
+
+### 4. Node Backend Setup
+Install backend dependencies:
 
 ```bash
 cd backend-node
 npm install
+cd ..
 ```
-
-When you boot the server for the first time, it automatically reads [`db/schema.sql`](file:///c:/Users/likhi/OneDrive/Pictures/Desktop/CollabProj/CogniWeave-Personalized-Learning-Intervention-System/db/schema.sql) and builds [`db/cogniweave.db`](file:///c:/Users/likhi/OneDrive/Pictures/Desktop/CollabProj/CogniWeave-Personalized-Learning-Intervention-System/db/cogniweave.db).
 
 ---
 
-### Step 3: Run the Development Servers
-
-#### 1. Start the Express Backend API
-
-In `backend-node/`:
-```bash
-npm run dev
-```
-The server starts on `http://localhost:8000`. You can test the connection by opening:
-- Healthcheck: `http://localhost:8000/health`
-- Registered topics: `http://localhost:8000/ingest/topics`
-
-#### 2. Start the React Frontend
-
-Open a new terminal window, navigate to `frontend-react/`, install packages, and boot Vite:
+### 5. React Frontend Setup
+Install frontend dependencies:
 
 ```bash
 cd frontend-react
 npm install
+cd ..
+```
+
+---
+
+## Running the Application
+
+### Development Mode
+
+Run the backend and frontend in separate terminal windows for live reloading:
+
+#### Terminal 1 — Start Backend:
+```bash
+cd backend-node
 npm run dev
 ```
+*Backend runs on `http://localhost:8000`*
 
-Vite will serve the frontend. Open `http://localhost:5173` (or the terminal-provided address) in your browser.
+#### Terminal 2 — Start Frontend:
+```bash
+cd frontend-react
+npm run dev
+```
+*Frontend dev server runs on `http://localhost:5173` (proxies requests to port 8000)*
 
 ---
 
-## Ingesting New Topics
+### Production Mode
 
-You can easily generate and load completely new engineering topic packs from digital textbooks or PDF files. 
-
-### Ingestion Flow
-
-```mermaid
-flowchart LR
-    PDF[Digital Textbook PDF] --> |POST /ingest/pdf| Parser[textbookParser]
-    Parser --> |Extracts Chapter Text| Extractor[topicExtractor]
-    Extractor --> |Multi-Pass LLM Extraction| Builder[packBuilder]
-    Builder --> |Validation & Structuring| Write[Write to knowledge_base/topics/]
-```
-
-### Ingestion API Usage
-
-You can call the ingestion endpoint directly to process textbook content:
+Build the frontend static assets and let Express serve everything:
 
 ```bash
-curl -X POST http://localhost:8000/ingest/text \
-  -H "Content-Type: application/json" \
-  -d '{
-    "topic_id": "compiler_design",
-    "title": "Lexical Analysis",
-    "content": "A compiler translates high-level code... Lexical analysis represents the first phase... Common errors include invalid token combinations...",
-    "overwrite": true
-  }'
+# 1. Build React app
+cd frontend-react
+npm run build
+cd ..
+
+# 2. Start Node server
+cd backend-node
+npm start
+```
+*Open your browser and visit: `http://localhost:8000`*
+
+---
+
+### Docker Deployment
+
+You can build and deploy the entire multi-runtime application using Docker:
+
+```bash
+# Build Docker image
+docker build -t cogniweave:latest .
+
+# Run container with environment variables
+docker run -p 8000:8000 --env-file .env cogniweave:latest
+```
+*Visit `http://localhost:8000` in your browser.*
+
+---
+
+## API Reference
+
+### 1. Upload and Analyze Research Paper
+- **Endpoint**: `POST /paper/analyze`
+- **Content-Type**: `multipart/form-data`
+- **Body**: `file` (File buffer, `.pdf` or `.tex`)
+- **Response**:
+```json
+{
+  "sessionId": "26bc2418-4a11-4327-836a-2748f6684683",
+  "paperTitle": "Deep Residual Learning for Image Recognition",
+  "fileType": "pdf",
+  "pdfUrl": "/paper/pdf/26bc2418-4a11-4327-836a-2748f6684683",
+  "summary": {
+    "executive": "...",
+    "tldr": "...",
+    "research_question": "...",
+    "contributions": ["..."],
+    "sections": [{ "title": "Introduction", "summary": "..." }]
+  },
+  "architectureNotes": "# System Architecture\n...",
+  "nodes": [
+    {
+      "id": "residual_mapping",
+      "label": "Residual Mapping",
+      "definition": "A formulation where layers fit a residual mapping...",
+      "type": "concept",
+      "sources": [{ "page": 2, "section": "3. Deep Residual Learning" }]
+    },
+    {
+      "id": "equation_0",
+      "label": "Equation 1",
+      "definition": "Residual block formulation",
+      "latex": "y = \\mathcal{F}(x, \\{W_i\\}) + x",
+      "type": "equation",
+      "sources": [{ "page": 3, "section": "3.1 Formulation" }]
+    }
+  ]
+}
 ```
 
-This starts a **multi-pass extraction pipeline** that automatically writes the following files to `knowledge_base/topics/compiler_design/`:
-1. `manifest.json`: Metadata about the compiler design module.
-2. `concept_graph.json`: Tracks concepts (e.g. Finite Automata, Regular Expressions) and prerequisite hierarchies.
-3. `misconceptions.json`: Maps errors to specific concept targets.
-4. `interventions.json`: Writes custom drills and explanations.
-5. `problems.json`: Creates diagnostic multiple-choice questions.
-6. `evaluation_rules.json`: Sets confidence thresholds for checkpoints.
+### 2. Stream Original Document
+- **Endpoint**: `GET /paper/pdf/:sessionId`
+- **Response**: `application/pdf` or `text/plain` stream.
+
+### 3. Clear Paper Session
+- **Endpoint**: `DELETE /paper/:sessionId`
+- **Response**: `{ "detail": "Session files deleted successfully." }`
+
+### 4. Health Check
+- **Endpoint**: `GET /health`
+- **Response**: `{ "status": "ok" }`
 
 ---
 
-## Evaluation & Checkpoint Re-Planning
+## Keyboard Shortcuts & UI Navigation
 
-During the student journey, after completing a study plan:
-1. The student is redirected to the **Practice Checkpoint**.
-2. The UI fetches a problem targeting the student's weakest concept via:
-   `GET /evaluation/problems/:topicId/:conceptId`
-3. The student submits their answer to:
-   `POST /evaluation/evaluate?topic_id=:topicId`
-4. The system updates the mastery database and evaluates performance:
-   - **Correct Answer**: Confidence score rises. If all thresholds are met, mastery is marked achieved.
-   - **Incorrect Answer**: Confidence score falls. A replan flag is set to `true`. The UI detects the replan flag, prompts the user, and automatically invokes the Orchestrator Service to create a modified, adjusted study plan based on their fresh mistakes.
+| Shortcut | Action |
+| :--- | :--- |
+| <kbd>Alt</kbd> + <kbd>1</kbd> | Toggle Document / PDF Viewer Pane |
+| <kbd>Alt</kbd> + <kbd>2</kbd> | Toggle Master Entities List Pane |
+| <kbd>Alt</kbd> + <kbd>3</kbd> | Toggle Entity Detail & Inspector Pane |
+| **Draggable Splitters** | Click and drag vertical borders to customize pane widths |
+| **Page Occurrence Links** | Click any `Page X` occurrence to instantly scroll the PDF to that page |
+| **Equation Symbols** | Click any highlighted math variable in an equation to jump directly to its notation definition |
 
 ---
 
-## Documentation Index
+## Configuration Reference
 
-For deeper investigations into system design, refer to the documentation inside the [`docs/`](file:///c:/Users/likhi/OneDrive/Pictures/Desktop/CollabProj/CogniWeave-Personalized-Learning-Intervention-System/docs) directory:
+| Variable | Type | Default | Description |
+| :--- | :--- | :--- | :--- |
+| `GEMINI_API_KEY` | String | *Required* | Google AI Studio API key for Gemini models. |
+| `LLM_MODEL` | String | `gemini-3.1-flash-lite` | Primary LLM model for concept and math extraction. |
+| `AGENT_MODEL` | String | `gemini-3.1-flash-lite` | Secondary/Agent LLM model identifier. |
+| `LLM_FALLBACK_MODELS` | CSV | `gemini-3.1-flash-lite,gemini-2.5-flash-lite` | Comma-separated list of fallback models on quota/timeout. |
+| `PORT` | Number | `8000` | Port for the Express backend server. |
+| `PYTHON_PATH` | String | `python` | Path to the Python executable with pipeline dependencies. |
+| `NEO4J_URI` | URI | *Optional* | Neo4j Aura connection URI for graph database persistence. |
+| `MONGO_URI` | URI | *Optional* | MongoDB connection URI for persistent user learning sessions. |
 
-- [Detailed Architecture Guide](file:///c:/Users/likhi/OneDrive/Pictures/Desktop/CollabProj/CogniWeave-Personalized-Learning-Intervention-System/docs/DETAILED_ARCHITECTURE.md)
-- [Component Responsibilities Guide](file:///c:/Users/likhi/OneDrive/Pictures/Desktop/CollabProj/CogniWeave-Personalized-Learning-Intervention-System/docs/COMPONENT_GUIDE.md)
-- [UI Flow & State Diagrams](file:///c:/Users/likhi/OneDrive/Pictures/Desktop/CollabProj/CogniWeave-Personalized-Learning-Intervention-System/docs/FLOW_DIAGRAMS.md)
-- [Step-by-Step Textbook Ingestion Guide](file:///c:/Users/likhi/OneDrive/Pictures/Desktop/CollabProj/CogniWeave-Personalized-Learning-Intervention-System/docs/TEXTBOOK_TOPIC_CREATION_GUIDE.md)
-- [Graph Database Integration Plan (Neo4j/MongoDB)](file:///c:/Users/likhi/OneDrive/Pictures/Desktop/CollabProj/CogniWeave-Personalized-Learning-Intervention-System/docs/KB_NEO4J_MONGODB_PLAN.md)
-- [LLM Client Performance & Retry Optimizations](file:///c:/Users/likhi/OneDrive/Pictures/Desktop/CollabProj/CogniWeave-Personalized-Learning-Intervention-System/docs/API_USAGE_OPTIMIZATION.md)
+---
+
+## Roadmap
+
+- [x] Full PDF & LaTeX source ingestion
+- [x] 7-Stage autonomous extraction pipeline (Concepts, Summary, Architecture, Citations, Notations, Equations)
+- [x] KaTeX mathematical formula rendering & notation linking
+- [x] Multi-pane responsive research workbench with hotkeys
+- [ ] Interactive 2D/3D Knowledge Graph Visualization (Force-directed graph canvas)
+- [ ] Multi-Paper Comparative Explorer (diffing methodologies and benchmark results)
+- [ ] Audio Synthesis / AI Podcast generation for paper summaries
+- [ ] Export to Anki flashcards & Notion workspace pages
 
 ---
 
 ## License
 
-Distributed under the MIT License. See `LICENSE` for more details.
+This project is licensed under the [MIT License](LICENSE).
+
+---
+
+<div align="center">
+  <sub>Built for researchers, engineers, and lifelong learners.</sub>
+</div>
