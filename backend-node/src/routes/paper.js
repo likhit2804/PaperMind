@@ -29,11 +29,32 @@ const upload = multer({
 });
 
 // ─── Python runner ──────────────────────────────────────────────────────────
+function getPythonExecutable() {
+  if (process.env.PYTHON_PATH) {
+    const customPath = path.resolve(settings.baseDir, process.env.PYTHON_PATH);
+    if (fs.existsSync(customPath)) {
+      return customPath;
+    }
+  }
+
+  const winVenv = path.join(settings.baseDir, "venv", "Scripts", "python.exe");
+  if (fs.existsSync(winVenv)) return winVenv;
+
+  const winDotVenv = path.join(settings.baseDir, ".venv", "Scripts", "python.exe");
+  if (fs.existsSync(winDotVenv)) return winDotVenv;
+
+  const nixVenv = path.join(settings.baseDir, "venv", "bin", "python");
+  if (fs.existsSync(nixVenv)) return nixVenv;
+
+  const nixDotVenv = path.join(settings.baseDir, ".venv", "bin", "python");
+  if (fs.existsSync(nixDotVenv)) return nixDotVenv;
+
+  return process.platform === "win32" ? "python" : "python3";
+}
+
 function runPython(args, cwd) {
   return new Promise((resolve, reject) => {
-    const pythonExe = process.env.PYTHON_PATH
-      ? path.resolve(settings.baseDir, process.env.PYTHON_PATH)
-      : "python";
+    const pythonExe = getPythonExecutable();
 
     const proc = spawn(pythonExe, ["-u", ...args], { cwd, env: { ...process.env } });
     let stdout = "";
