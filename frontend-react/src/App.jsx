@@ -4,6 +4,8 @@ import ThemeToggle from "./components/ThemeToggle";
 import Banner from "./components/Banner";
 import PaperExplorer from "./components/PaperExplorer/PaperExplorer";
 
+import HexagonIcon from "./components/HexagonIcon";
+
 const BACKEND_URL = import.meta.env.DEV 
   ? "http://localhost:8000" 
   : window.location.origin;
@@ -72,7 +74,10 @@ function AppContent() {
         )}
 
         <header>
-          <h1>PaperMind</h1>
+          <h1>
+            <HexagonIcon size={32} />
+            <span>PaperMind</span>
+          </h1>
           <p>Read less. Understand more.</p>
           {showDevStatus && (
             <div className={`connection-badge ${backendOnline ? "online" : "offline"}`}>

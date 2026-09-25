@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 220" width="220" height="220">
+  <title>Stationary Hexagon Icon - White Edition</title>
+
+  <!-- Outer Ring (White) -->
+  <polygon fill="none"
+           stroke="#FFFFFF"
+           stroke-width="7"
+           stroke-linejoin="round"
+           points="110,38 172.4,74 172.4,146 110,182 47.6,146 47.6,74" />
+
+  <!-- Inner Solid Hexagon Core (White) -->
+  <polygon fill="#FFFFFF"
+           points="110,64 149.8,87 149.8,133 110,156 70.2,133 70.2,87" />
+</svg>

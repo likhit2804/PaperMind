@@ -2,46 +2,38 @@ import { useState, useEffect } from "react";
 
 const STAGES = [
   {
-    id: "upload",
-    title: "Document Ingestion & Text Parsing",
-    desc: "Reading PDF structure, section headers, and raw text layout...",
-    weight: 15,
-    icon: ""
+    id: "parser",
+    title: "PDF & TEXT EXTRACTION",
+    desc: "Reading document structure, section headers & raw text layout",
   },
   {
     id: "concepts",
-    title: "Core Concept & Taxonomy Extraction",
-    desc: "Identifying key technical terms, domain concepts, and dependencies...",
-    weight: 30,
-    icon: ""
+    title: "CONCEPT & DEFINITION MAPPING",
+    desc: "Extracting core technical terms, domain concepts & key ideas",
   },
   {
-    id: "parallel",
-    title: "Parallel AI Synthesis & Notation Mapping",
-    desc: "Generating notes, executive summary, cited references & LaTeX math...",
-    weight: 40,
-    icon: ""
+    id: "summary",
+    title: "EXECUTIVE SUMMARY & METHODOLOGY",
+    desc: "Synthesizing abstract, main findings & research claims",
   },
   {
-    id: "graph",
-    title: "Finalizing Dashboard & Session",
-    desc: "Connecting citations, setting up glossary & initializing viewer...",
-    weight: 15,
-    icon: ""
+    id: "notations",
+    title: "LATEX EQUATIONS & NOTATIONS",
+    desc: "Parsing mathematical formulas, symbols & variable definitions",
+  },
+  {
+    id: "architecture",
+    title: "SYSTEM ARCHITECTURE & ALGORITHMS",
+    desc: "Extracting model diagrams, procedures & algorithmic steps",
+  },
+  {
+    id: "references",
+    title: "CITATIONS & LITERATURE MAPPING",
+    desc: "Connecting cited papers, authors & reference dependencies",
   }
 ];
 
-const SUB_TASKS = [
-  { id: "notes", label: "Detailed Notes", icon: "" },
-  { id: "summary", label: "Executive Summary", icon: "" },
-  { id: "arch", label: "Architecture Notes", icon: "" },
-  { id: "refs", label: "Cited Literature", icon: "" },
-  { id: "notations", label: "Math Notations", icon: "" },
-  { id: "equations", label: "Key Equations", icon: "" }
-];
-
 export default function AnalysisTimeline({ fileName, onCancel }) {
-  const [progress, setProgress] = useState(5);
   const [elapsed, setElapsed] = useState(0);
   const [activeStageIdx, setActiveStageIdx] = useState(0);
 
@@ -53,32 +45,22 @@ export default function AnalysisTimeline({ fileName, onCancel }) {
     return () => clearInterval(timer);
   }, []);
 
-  // Smooth progress increment simulation
+  // Sync active stage based on elapsed seconds
   useEffect(() => {
-    const interval = setInterval(() => {
-      setProgress((prev) => {
-        if (prev >= 92) return 92; // cap at 92% until server responds
-        // Slow down as progress increases
-        const delta = prev < 20 ? 4 : prev < 50 ? 2 : prev < 80 ? 1 : 0.4;
-        return Math.min(92, +(prev + delta).toFixed(1));
-      });
-    }, 400);
-
-    return () => clearInterval(interval);
-  }, []);
-
-  // Sync active stage based on current progress percentage
-  useEffect(() => {
-    if (progress < 15) {
+    if (elapsed < 4) {
       setActiveStageIdx(0);
-    } else if (progress < 45) {
+    } else if (elapsed < 10) {
       setActiveStageIdx(1);
-    } else if (progress < 85) {
+    } else if (elapsed < 18) {
       setActiveStageIdx(2);
-    } else {
+    } else if (elapsed < 26) {
       setActiveStageIdx(3);
+    } else if (elapsed < 34) {
+      setActiveStageIdx(4);
+    } else {
+      setActiveStageIdx(5);
     }
-  }, [progress]);
+  }, [elapsed]);
 
   const formatTime = (secs) => {
     const m = Math.floor(secs / 60);
@@ -87,104 +69,86 @@ export default function AnalysisTimeline({ fileName, onCancel }) {
   };
 
   return (
-    <div className="analysis-timeline-container">
-      <div className="at-card">
-        {/* Top Header */}
-        <div className="at-header">
-          <div className="at-file-info">
-            <div>
-              <h3 className="at-filename">{fileName || "Research Paper"}</h3>
-              <p className="at-subtitle">Analyzing paper structure & preparing paper explorer...</p>
-            </div>
-          </div>
-          <div className="at-timer-badge">
-            <span className="at-pulse-dot"></span>
-            <span className="at-timer-label">Elapsed:</span>
-            <span className="at-timer-val">{formatTime(elapsed)}</span>
-          </div>
+    <div className="pipeline-studio-container">
+      {/* ── LEFT SIDEBAR: PIPELINE EXECUTION STATE ── */}
+      <div className="pipeline-state-panel glass-panel">
+        <div className="pipeline-panel-header">
+          <span className="pipeline-panel-title">PIPELINE EXECUTION STATE</span>
         </div>
 
-        {/* Glowing Progress Bar */}
-        <div className="at-progress-section">
-          <div className="at-progress-bar-bg">
-            <div
-              className="at-progress-bar-fill"
-              style={{ width: `${progress}%` }}
-            >
-              <div className="at-progress-glow"></div>
-            </div>
-          </div>
-          <div className="at-progress-meta">
-            <span className="at-stage-status">
-              Stage {activeStageIdx + 1} of {STAGES.length}: {STAGES[activeStageIdx].title}
-            </span>
-            <span className="at-pct">{Math.round(progress)}%</span>
-          </div>
-        </div>
-
-        {/* Stepper Timeline */}
-        <div className="at-stepper">
+        <div className="pipeline-timeline">
+          {/* Vertical continuous connector line */}
+          <div className="pipeline-timeline-line"></div>
           {STAGES.map((stage, idx) => {
             const isDone = idx < activeStageIdx;
             const isActive = idx === activeStageIdx;
-            const isPending = idx > activeStageIdx;
+            const isWaiting = idx > activeStageIdx;
 
             return (
               <div
                 key={stage.id}
-                className={`at-step ${isDone ? "is-done" : ""} ${isActive ? "is-active" : ""} ${isPending ? "is-pending" : ""}`}
+                className={`pipeline-stage-item ${isDone ? "is-done" : ""} ${
+                  isActive ? "is-active" : ""
+                } ${isWaiting ? "is-waiting" : ""}`}
               >
-                <div className="at-step-indicator">
-                  {isDone ? (
-                    <span className="at-check">✓</span>
-                  ) : isActive ? (
-                    <div className="at-active-spinner"></div>
-                  ) : (
-                    <span className="at-step-num">{idx + 1}</span>
-                  )}
+                {/* Centered Diamond Node Column */}
+                <div className="pipeline-node-col">
+                  <span className="pipeline-diamond">{isDone || isActive ? "◆" : "◇"}</span>
                 </div>
 
-                <div className="at-step-content">
-                  <div className="at-step-title-row">
-                    <span className="at-step-icon">{stage.icon}</span>
-                    <span className="at-step-title">{stage.title}</span>
-                    {isActive && <span className="at-live-pill">Processing</span>}
-                    {isDone && <span className="at-done-pill">Done</span>}
+                {/* Stage Details */}
+                <div className="pipeline-stage-body">
+                  <div className="pipeline-stage-title-row">
+                    <span className="pipeline-stage-title">{stage.title}</span>
+                    <span className={`pipeline-badge ${isDone ? "badge-done" : isActive ? "badge-active" : "badge-waiting"}`}>
+                      {isDone ? "DONE" : isActive ? "ACTIVE" : "WAITING"}
+                    </span>
                   </div>
-                  <p className="at-step-desc">{stage.desc}</p>
-
-                  {/* Sub-tasks grid inside Parallel stage */}
-                  {stage.id === "parallel" && (isActive || isDone) && (
-                    <div className="at-subtasks-grid">
-                      {SUB_TASKS.map((sub) => {
-                        const subActive = isDone || (isActive && progress >= 50);
-                        return (
-                          <div
-                            key={sub.id}
-                            className={`at-subtask-badge ${subActive ? "sub-active" : "sub-pending"}`}
-                          >
-                            <span className="at-subtask-icon">{sub.icon}</span>
-                            <span className="at-subtask-label">{sub.label}</span>
-                            {subActive && <span className="at-sub-check">✓</span>}
-                          </div>
-                        );
-                      })}
-                    </div>
-                  )}
+                  <p className="pipeline-stage-desc">{stage.desc}</p>
                 </div>
               </div>
             );
           })}
         </div>
+      </div>
 
-        {/* Action Footer */}
-        {onCancel && (
-          <div className="at-footer">
-            <button className="at-cancel-btn" onClick={onCancel} title="Cancel processing and return to upload">
-              ✕ Cancel Pipeline
-            </button>
+      {/* ── CENTER MAIN CANVAS: LOADER & WORKBENCH ── */}
+      <div className="pipeline-center-canvas glass-panel">
+        {/* Top Header Bar */}
+        <div className="pipeline-center-header">
+          <div className="pipeline-file-info">
+            <span className="pipeline-file-label">FILE:</span>
+            <span className="pipeline-filename">{fileName || "RESEARCH_PAPER.PDF"}</span>
           </div>
-        )}
+
+          <div className="pipeline-header-right">
+            <div className="pipeline-timer-badge">
+              <span className="pipeline-pulse-dot"></span>
+              <span className="pipeline-timer-val">ELAPSED: {formatTime(elapsed)}</span>
+            </div>
+            {onCancel && (
+              <button className="pipeline-cancel-btn" onClick={onCancel} title="Cancel processing">
+                ✕ CANCEL
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Center Loader Display */}
+        <div className="pipeline-center-body">
+          <div className="pipeline-loader-wrapper">
+            <img src="/hexagon-loader.svg" alt="Processing..." className="pipeline-hex-loader" />
+          </div>
+
+          <div className="pipeline-current-status">
+            <span className="pipeline-status-heading">
+              {STAGES[activeStageIdx].title}
+            </span>
+            <p className="pipeline-status-subtext">
+              {STAGES[activeStageIdx].desc}
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   );
