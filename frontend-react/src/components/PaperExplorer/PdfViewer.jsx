@@ -202,6 +202,7 @@ export default function PdfViewer({ url, page, onPageChange, onClose, docked = f
 
   const containerRef = useRef(null);
   const [containerWidth, setContainerWidth] = useState(DEFAULT_W);
+  const [containerHeight, setContainerHeight] = useState(DEFAULT_H);
 
   // LaTeX support states
   const [texText, setTexText] = useState("");
@@ -228,16 +229,15 @@ export default function PdfViewer({ url, page, onPageChange, onClose, docked = f
       });
   }, [url, fileType]);
 
-  // ResizeObserver to dynamically track docked container width
+  // ResizeObserver to dynamically track docked container width AND height
   useEffect(() => {
     if (!docked || !containerRef.current) return;
 
     const observer = new ResizeObserver((entries) => {
       if (!entries || entries.length === 0) return;
-      const { width } = entries[0].contentRect;
-      if (width > 0) {
-        setContainerWidth(width);
-      }
+      const { width, height } = entries[0].contentRect;
+      if (width > 0) setContainerWidth(width);
+      if (height > 0) setContainerHeight(height);
     });
 
     observer.observe(containerRef.current);
@@ -271,25 +271,53 @@ export default function PdfViewer({ url, page, onPageChange, onClose, docked = f
     document.addEventListener("mouseup", up);
   };
 
-  const onResizeMouseDown = (e) => {
+  const onResizeMouseDown = (e, dir) => {
     e.preventDefault();
     e.stopPropagation();
     const startX = e.clientX;
     const startY = e.clientY;
-    const startWidth = size.w;
-    const startHeight = size.h;
+    const startW = size.w;
+    const startH = size.h;
+    const startPosX = pos.x;
+    const startPosY = pos.y;
 
-    const move = (event) => {
-      setSize({
-        w: Math.max(340, startWidth + event.clientX - startX),
-        h: Math.max(260, startHeight + event.clientY - startY),
-      });
+    const move = (ev) => {
+      const dx = ev.clientX - startX;
+      const dy = ev.clientY - startY;
+
+      let newW = startW;
+      let newH = startH;
+      let newX = startPosX;
+      let newY = startPosY;
+
+      // Horizontal
+      if (dir.includes('e')) newW = Math.max(320, startW + dx);
+      if (dir.includes('w')) {
+        newW = Math.max(320, startW - dx);
+        newX = startPosX + (startW - newW);
+      }
+      // Vertical
+      if (dir.includes('s')) newH = Math.max(240, startH + dy);
+      if (dir.includes('n')) {
+        newH = Math.max(240, startH - dy);
+        newY = startPosY + (startH - newH);
+      }
+
+      setSize({ w: newW, h: newH });
+      setPos({ x: Math.max(0, newX), y: Math.max(0, newY) });
     };
 
     const up = () => {
       document.removeEventListener("mousemove", move);
       document.removeEventListener("mouseup", up);
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
     };
+
+    // Set cursor on body so it stays consistent during drag
+    const cursors = { n:'ns-resize', s:'ns-resize', e:'ew-resize', w:'ew-resize', ne:'nesw-resize', sw:'nesw-resize', nw:'nwse-resize', se:'nwse-resize' };
+    document.body.style.cursor = cursors[dir] || 'nwse-resize';
+    document.body.style.userSelect = 'none';
 
     document.addEventListener("mousemove", move);
     document.addEventListener("mouseup", up);
@@ -451,66 +479,87 @@ export default function PdfViewer({ url, page, onPageChange, onClose, docked = f
       `}</style>
       <div className="pdf-float-bar" onMouseDown={onDragMouseDown}>
         <span className="pdf-float-icon" style={fileType === "tex" ? { backgroundColor: "#47a" } : {}}>{fileType === "tex" ? "TEX" : "PDF"}</span>
-        <span className="pdf-float-title">{fileType === "tex" ? (texMode === "preview" ? "LaTeX Preview" : "LaTeX Source") : `PDF Preview · p.${safePage}`}</span>
+        <span className="pdf-float-title">
+          {docked
+            ? (fileType === "tex" ? "LaTeX Preview" : `p.${safePage}${numPages ? ` / ${numPages}` : ""}`)
+            : (fileType === "tex" ? (texMode === "preview" ? "LaTeX Preview" : "LaTeX Source") : `PDF Preview · p.${safePage}`)
+          }
+        </span>
         <div className="pdf-float-controls">
-          {fileType === "tex" && (
-            <button
-              className="pdf-ctrl-btn"
-              onClick={() => setTexMode(prev => prev === "preview" ? "source" : "preview")}
-              title={texMode === "preview" ? "Show raw LaTeX source" : "Show formatted preview"}
-              type="button"
-              style={{ width: "auto", padding: "0 8px", fontSize: "0.68rem", marginRight: 8, height: 26, background: "rgba(255,255,255,0.08)", borderRadius: 3, border: "1px solid rgba(255,255,255,0.15)" }}
-            >
-              {texMode === "preview" ? "📄 Raw Source" : "📖 Preview"}
-            </button>
+          {/* ── DOCKED mode: minimal toolbar — just navigation + float ── */}
+          {docked ? (
+            <>
+              {fileType === "tex" && (
+                <button
+                  className="pdf-ctrl-btn"
+                  onClick={() => setTexMode(prev => prev === "preview" ? "source" : "preview")}
+                  title={texMode === "preview" ? "Show raw source" : "Show preview"}
+                  type="button"
+                  style={{ width: "auto", padding: "0 8px", fontSize: "0.68rem" }}
+                >
+                  {texMode === "preview" ? "Source" : "Preview"}
+                </button>
+              )}
+              {onToggleDock && (
+                <button
+                  className="pdf-ctrl-btn pdf-float-only-btn"
+                  onClick={onToggleDock}
+                  title="View paper in floating window"
+                  type="button"
+                >
+                  ⤢ Float
+                </button>
+              )}
+            </>
+          ) : (
+            /* ── FLOATING mode: full controls ── */
+            <>
+              {fileType === "tex" && (
+                <button
+                  className="pdf-ctrl-btn"
+                  onClick={() => setTexMode(prev => prev === "preview" ? "source" : "preview")}
+                  title={texMode === "preview" ? "Show raw LaTeX source" : "Show formatted preview"}
+                  type="button"
+                  style={{ width: "auto", padding: "0 8px", fontSize: "0.68rem" }}
+                >
+                  {texMode === "preview" ? "Raw Source" : "Preview"}
+                </button>
+              )}
+              <button
+                className="pdf-ctrl-btn"
+                onClick={() => setScale(s => Math.max(0.6, +(s - 0.1).toFixed(1)))}
+                title="Zoom out"
+                type="button"
+              >−</button>
+              <span className="pdf-zoom-label">{Math.round(scale * 100)}%</span>
+              <button
+                className="pdf-ctrl-btn"
+                onClick={() => setScale(s => Math.min(2.5, +(s + 0.1).toFixed(1)))}
+                title="Zoom in"
+                type="button"
+              >+</button>
+              {onToggleDock && (
+                <button
+                  className="pdf-ctrl-btn"
+                  onClick={onToggleDock}
+                  title="Dock to split view"
+                  type="button"
+                  style={{ width: "auto", padding: "0 8px", fontSize: "0.68rem" }}
+                >
+                  🗗 Dock
+                </button>
+              )}
+              <button
+                className="pdf-ctrl-btn"
+                onClick={() => setMinimized(v => !v)}
+                title={minimized ? "Restore" : "Minimise"}
+                type="button"
+              >
+                {minimized ? "▲" : "▼"}
+              </button>
+              <button className="pdf-ctrl-btn" onClick={onClose} title="Close" type="button">✕</button>
+            </>
           )}
-
-          <button
-            className="pdf-ctrl-btn"
-            onClick={() => setScale((currentScale) => Math.max(0.6, +(currentScale - 0.1).toFixed(1)))}
-            title="Zoom out"
-            type="button"
-          >
-            −
-          </button>
-          <span className="pdf-zoom-label">{Math.round(scale * 100)}%</span>
-          <button
-            className="pdf-ctrl-btn"
-            onClick={() => setScale((currentScale) => Math.min(2.5, +(currentScale + 0.1).toFixed(1)))}
-            title="Zoom in"
-            type="button"
-          >
-            +
-          </button>
-
-          {/* Toggle Dock/Float */}
-          {onToggleDock && (
-            <button
-              className="pdf-ctrl-btn toggle-dock-btn"
-              onClick={onToggleDock}
-              title={docked ? "Float window" : "Dock to side"}
-              type="button"
-              style={{ width: "auto", padding: "0 8px", fontSize: "0.68rem", display: "flex", gap: "3px", alignItems: "center" }}
-            >
-              <span>{docked ? "🗗 Float" : "🗗 Dock"}</span>
-            </button>
-          )}
-
-          {!docked && (
-            <button
-              className="pdf-ctrl-btn"
-              onClick={() => setMinimized((currentValue) => !currentValue)}
-              title={minimized ? "Restore" : "Minimise"}
-              style={{ marginLeft: 6 }}
-              type="button"
-            >
-              {minimized ? "Restore" : "Min"}
-            </button>
-          )}
-          
-          <button className="pdf-ctrl-btn" onClick={onClose} title="Close" type="button">
-            X
-          </button>
         </div>
       </div>
 
@@ -560,7 +609,8 @@ export default function PdfViewer({ url, page, onPageChange, onClose, docked = f
                   scale={scale}
                   renderTextLayer
                   renderAnnotationLayer
-                  width={docked ? containerWidth - 20 : size.w - 2}
+                  height={docked ? containerHeight - 46 : undefined}
+                  width={docked ? undefined : size.w - 2}
                 />
               </Document>
 
@@ -590,7 +640,18 @@ export default function PdfViewer({ url, page, onPageChange, onClose, docked = f
             </>
           )}
 
-          {!docked && <div className="pdf-resize-handle" onMouseDown={onResizeMouseDown} />}
+          {!docked && (
+            <>
+              <div className="pdf-rh pdf-rh-n"  onMouseDown={e => onResizeMouseDown(e,'n')} />
+              <div className="pdf-rh pdf-rh-s"  onMouseDown={e => onResizeMouseDown(e,'s')} />
+              <div className="pdf-rh pdf-rh-e"  onMouseDown={e => onResizeMouseDown(e,'e')} />
+              <div className="pdf-rh pdf-rh-w"  onMouseDown={e => onResizeMouseDown(e,'w')} />
+              <div className="pdf-rh pdf-rh-ne" onMouseDown={e => onResizeMouseDown(e,'ne')} />
+              <div className="pdf-rh pdf-rh-nw" onMouseDown={e => onResizeMouseDown(e,'nw')} />
+              <div className="pdf-rh pdf-rh-se" onMouseDown={e => onResizeMouseDown(e,'se')} />
+              <div className="pdf-rh pdf-rh-sw" onMouseDown={e => onResizeMouseDown(e,'sw')} />
+            </>
+          )}
         </div>
       )}
     </div>

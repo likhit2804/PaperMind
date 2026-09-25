@@ -68,7 +68,7 @@ def extract_paper_metadata_via_ai(text_snippet, pdf_metadata_title=None):
     Queries Gemini to extract the official title and core canonical domain terms/acronyms 
     from the paper text.
     """
-    model, api_key = get_gemini_model("gemini-3.1-flash-lite")
+    model, api_key = get_gemini_model()
     if not model:
         title = pdf_metadata_title if (pdf_metadata_title and len(pdf_metadata_title.strip()) > 3) else "Research Paper"
         return title, set()
@@ -397,7 +397,7 @@ def filter_terms_via_ai(candidates, title, canonical_seeds):
     Uses Gemini API to validate scientific research paper terms, filtering out math variables, 
     citations, boilerplates, common words, and grammar fragments.
     """
-    model, api_key = get_gemini_model("gemini-3.1-flash-lite")
+    model, api_key = get_gemini_model()
     if not model:
         print("Warning: GEMINI_API_KEY not set. Skipping AI verification pass.")
         return candidates
@@ -458,22 +458,30 @@ class TraceLogger:
     def __init__(self, log_path="paper_extraction_trace.log"):
         self.log_path = log_path
         self.log_file = None
-        self.original_stdout = sys.stdout
 
     def start(self):
-        self.log_file = open(self.log_path, "w", encoding="utf-8")
-        self.log_file.write("=== Research Paper Extraction Trace ===\n\n")
-        self.log_file.flush()
-        sys.stdout = self.log_file
+        try:
+            self.log_file = open(self.log_path, "w", encoding="utf-8")
+            self.log_file.write("=== Research Paper Extraction Trace ===\n\n")
+            self.log_file.flush()
+        except Exception:
+            pass
 
     def stop(self):
-        sys.stdout = self.original_stdout
         if self.log_file:
-            self.log_file.close()
+            try:
+                self.log_file.close()
+            except Exception:
+                pass
 
     def console_print(self, message):
-        self.original_stdout.write(message + "\n")
-        self.original_stdout.flush()
+        print(message, flush=True)
+        if self.log_file:
+            try:
+                self.log_file.write(message + "\n")
+                self.log_file.flush()
+            except Exception:
+                pass
 
 def main():
     if len(sys.argv) < 3:

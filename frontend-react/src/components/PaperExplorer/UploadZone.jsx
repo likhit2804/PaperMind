@@ -32,7 +32,7 @@ export default function UploadZone({ onFile }) {
       <div className="uz-inner">
         <div className="uz-icon">File</div>
         <h3 className="uz-heading">Drop your research paper here</h3>
-        <p className="uz-sub">PDF or LaTeX (.tex) format · The pipeline will extract all key concepts and build the knowledge graph</p>
+        <p className="uz-sub">PDF or LaTeX (.tex) format · The pipeline will extract all key concepts, math notations & references</p>
         <label className="uz-btn" htmlFor="pdf-upload-input">
           Choose File
           <input

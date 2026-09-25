@@ -232,7 +232,7 @@ def format_equations_via_ai(candidates, title):
     """
     Sends the list of candidate equations to Gemini in a single call to typeset them into LaTeX and write descriptions.
     """
-    model, api_key = get_gemini_model("gemini-3.1-flash-lite")
+    model, api_key = get_gemini_model()
     if not model:
         return {c["label"]: {"latex": f"$${c['raw_text']}$$", "description": "GEMINI_API_KEY not set."} for c in candidates}
 

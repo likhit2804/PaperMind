@@ -6,7 +6,7 @@ const ThemeContext = createContext();
 export function ThemeProvider({ children }) {
   const [theme, setTheme] = useState(() => {
     try {
-      const saved = localStorage.getItem("cogniweave_theme");
+      const saved = localStorage.getItem("papermind_theme");
       if (saved === "light" || saved === "dark") return saved;
     } catch (error) {
       console.warn("Failed to read saved theme:", error);
@@ -17,7 +17,7 @@ export function ThemeProvider({ children }) {
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", theme);
     try {
-      localStorage.setItem("cogniweave_theme", theme);
+      localStorage.setItem("papermind_theme", theme);
     } catch (error) {
       console.warn("Failed to persist theme:", error);
     }

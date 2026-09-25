@@ -8,6 +8,9 @@ const BACKEND_URL = import.meta.env.DEV
   ? "http://localhost:8000" 
   : window.location.origin;
 
+const isProduction = import.meta.env.PROD || import.meta.env.VITE_APP_ENV === "production";
+const showDevStatus = !isProduction && import.meta.env.VITE_SHOW_DEV_STATUS !== "false";
+
 function AppContent() {
   const [backendOnline, setBackendOnline] = useState(false);
   const [backendStatus, setBackendStatus] = useState("Checking Backend...");
@@ -53,7 +56,7 @@ function AppContent() {
       </div>
 
       <div className="container full-width">
-        {isLiveServer && (
+        {showDevStatus && isLiveServer && (
           <Banner type="error" className="live-server-warning" style={{ marginBottom: "20px" }}>
             Warning: You are viewing this page via a VS Code Live Server port. To prevent database writes from triggering automatic browser reloads, please use the official Node server address:{" "}
             <a href="http://localhost:8000" style={{ color: "inherit", fontWeight: 700 }}>
@@ -69,12 +72,14 @@ function AppContent() {
         )}
 
         <header>
-          <h1>CogniWeave Portal</h1>
-          <p>Your AI-guided research paper explorer</p>
-          <div className={`connection-badge ${backendOnline ? "online" : "offline"}`}>
-            <span className="dot"></span>
-            <span>{backendStatus}</span>
-          </div>
+          <h1>PaperMind</h1>
+          <p>Read less. Understand more.</p>
+          {showDevStatus && (
+            <div className={`connection-badge ${backendOnline ? "online" : "offline"}`}>
+              <span className="dot"></span>
+              <span>{backendStatus}</span>
+            </div>
+          )}
           <ThemeToggle />
         </header>
 

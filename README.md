@@ -1,7 +1,7 @@
 <div align="center">
 
-# CogniWeave
-### *Personalized Learning Intervention & Research Paper Intelligence System*
+# PaperMind
+### *Read less. Understand more.*
 
 [![React](https://img.shields.io/badge/Frontend-React%2018%20%7C%20Vite-61DAFB?logo=react&logoColor=black)](https://react.dev/)
 [![Node.js](https://img.shields.io/badge/Backend-Node.js%20%7C%20Express-339933?logo=node.js&logoColor=white)](https://nodejs.org/)
@@ -11,7 +11,7 @@
 [![Docker](https://img.shields.io/badge/Container-Docker%20Ready-2496ED?logo=docker&logoColor=white)](https://www.docker.com/)
 
 <p align="center">
-  CogniWeave transforms dense, complex academic research papers (PDF & LaTeX) into an interactive, multi-dimensional learning workbench. It breaks down foundational concepts, mathematical notation, equations, system architectures, and literature citations into an interconnected, contextual knowledge graph.
+  PaperMind transforms dense, complex academic research papers (PDF & LaTeX) into an interactive, multi-dimensional learning workbench. It breaks down foundational concepts, mathematical notation, equations, system architectures, and literature citations into an interconnected, contextual knowledge graph.
 </p>
 
 ---

@@ -1,4 +1,4 @@
-﻿"""
+"""
 unified_paper_pipeline.py - Orchestrates the execution of all 7 individual scripts
 in the research paper processing pipeline.
 
@@ -10,14 +10,24 @@ import os
 import subprocess
 
 
+import warnings
+warnings.filterwarnings("ignore")
+
 def run_script(script_name, args):
     script_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), script_name)
-    cmd = [sys.executable, script_path] + args
-    print(f"\n---> Running: {' '.join(cmd)}")
+    cmd = [sys.executable, "-u", "-W", "ignore", script_path] + args
+    print(f"\n---> Running: {' '.join(cmd)}", flush=True)
     
-    result = subprocess.run(cmd, capture_output=False, text=True)
+    env = dict(os.environ)
+    env["PYTHONWARNINGS"] = "ignore"
+    
+    result = subprocess.run(cmd, capture_output=True, text=True, env=env)
+    if result.stdout:
+        print(result.stdout)
     if result.returncode != 0:
-        print(f"Error: {script_name} failed with exit code {result.returncode}")
+        print(f"Error: {script_name} failed with exit code {result.returncode}:")
+        if result.stderr:
+            print(result.stderr)
         return False
     return True
 
@@ -55,23 +65,32 @@ def main():
         print("Fatal: Concept extraction failed. Aborting pipeline.")
         sys.exit(1)
 
-    # 2. Paper notes and glossary (depends on concepts.json)
-    run_script("generate_paper_notes.py", [input_path, concepts_json, notes_md])
+    # Steps 2-7 are independent (once concepts.json exists) and can run in parallel
+    print("\n---> Running remaining 6 pipeline steps concurrently in parallel...")
+    from concurrent.futures import ThreadPoolExecutor, as_completed
 
-    # 3. Paper summary
-    run_script("generate_paper_summary.py", [input_path, summary_json])
+    tasks = [
+        ("generate_paper_notes.py", [input_path, concepts_json, notes_md]),
+        ("generate_paper_summary.py", [input_path, summary_json]),
+        ("generate_architecture_notes.py", [input_path, concepts_json, architecture_notes_md]),
+        ("extract_paper_references.py", [input_path, references_json]),
+        ("extract_notations_local.py", [input_path, notations_json]),
+        ("extract_paper_equations.py", [input_path, equations_json]),
+    ]
 
-    # 4. Architecture notes (depends on concepts.json)
-    run_script("generate_architecture_notes.py", [input_path, concepts_json, architecture_notes_md])
-
-    # 5. References and citations
-    run_script("extract_paper_references.py", [input_path, references_json])
-
-    # 6. Notations and Nomenclature table
-    run_script("extract_notations_local.py", [input_path, notations_json])
-
-    # 7. Equations and math
-    run_script("extract_paper_equations.py", [input_path, equations_json])
+    with ThreadPoolExecutor(max_workers=6) as executor:
+        future_to_script = {
+            executor.submit(run_script, script_name, args): script_name
+            for script_name, args in tasks
+        }
+        for future in as_completed(future_to_script):
+            script_name = future_to_script[future]
+            try:
+                success = future.result()
+                if not success:
+                    print(f"Warning: Step {script_name} encountered an issue.")
+            except Exception as exc:
+                print(f"Error: Step {script_name} generated an exception: {exc}")
 
     print(f"\n======================================================================")
     print(f"Unified Paper Processing Pipeline Completed Successfully!")

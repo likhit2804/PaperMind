@@ -105,7 +105,7 @@ def generate_batch_definitions_via_ai(batch, title):
     Sends a batch of terms and their corresponding contexts to Gemini in a single call.
     batch is a list of tuples: (term, list_of_contexts)
     """
-    model, api_key = get_gemini_model("gemini-2.5-flash-lite")
+    model, api_key = get_gemini_model()
     if not model:
         return {term: "Definition not available (GEMINI_API_KEY not set)." for term, _ in batch}
 
@@ -188,7 +188,7 @@ def generate_novelty_vs_prior_art_via_ai(sections, title, unique_key_terms):
     Calls Gemini to analyze targeted topic sentences and unique key terms, and classify what is 
     already present (prior art/baselines) versus what is newly introduced by this paper.
     """
-    model, api_key = get_gemini_model("gemini-2.5-flash-lite")
+    model, api_key = get_gemini_model()
     if not model:
         return "Prior Art vs Novelty not available (GEMINI_API_KEY not set)."
 
@@ -275,8 +275,8 @@ def main():
         term_sources[term] = sources
         
     # 2. Batch definition generation
-    print("Generating grounded definitions via Gemini (batch size: 10)...")
-    batch_size = 10
+    print("Generating grounded definitions via Gemini (batch size: 30)...")
+    batch_size = 30
     glossary = {}
     
     term_list = list(unique_key_terms)

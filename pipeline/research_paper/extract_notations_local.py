@@ -207,7 +207,7 @@ def extract_notations_via_ai(page_text, page_num, title, log_dir=None):
             lf.write(f"--- AI Extraction Attempt on Page {page_num} ---\n")
             lf.write(f"GEMINI_API_KEY present: {bool(os.environ.get('GEMINI_API_KEY'))}\n")
 
-    model, _ = get_gemini_model("gemini-3.1-flash-lite")
+    model, _ = get_gemini_model()
     if not model:
         if log_file:
             with open(log_file, "a", encoding="utf-8") as lf:
@@ -216,7 +216,7 @@ def extract_notations_via_ai(page_text, page_num, title, log_dir=None):
 
     if log_file:
         with open(log_file, "a", encoding="utf-8") as lf:
-            lf.write(f"Using model: {os.environ.get('LLM_MODEL', 'gemini-3.1-flash-lite')}\n")
+            lf.write(f"Using model: {os.environ.get('LLM_MODEL', 'gemini-3.7-flash')}\n")
 
     try:
         

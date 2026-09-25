@@ -23,6 +23,8 @@ frontend/dist/
 
 # Logs
 *.log
+logs/
+
 
 *.md
 *.txt

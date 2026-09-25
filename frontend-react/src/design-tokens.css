@@ -1,0 +1,436 @@
+/* ── THEME & DESIGN SYSTEM (NEO-BRUTALIST DARK & LIGHT THEMES) ── */
+
+html {
+  font-size: clamp(12.5px, 0.4vw + 12px, 18px); /* Fluid responsive scaling */
+}
+
+/* ── LIGHT THEME (DEFAULT) ── */
+:root, [data-theme="light"] {
+  --font-sans: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  
+  --bg-color: #fbfbfb;
+  --bg-panel: rgba(255, 255, 255, 0.85);
+  --border-color: #000000;
+  --border-color-muted: #4b5563; /* grey-600 */
+  --text-primary: #000000;
+  --text-secondary: #1f2937; /* grey-800 */
+  --text-muted: #4b5563; /* grey-600 */
+  --accent-color: #000000;
+  --accent-bg-active: #e5e7eb; /* grey-200 */
+  --shadow-color: #000000;
+  --dot-color: rgba(0, 0, 0, 0.08);
+  --bg-geom-opacity: 0.09;
+  --bg-crosshair-opacity: 0.25;
+
+  /* Aliases for index.css */
+  --bg: var(--bg-color);
+  --surface: var(--bg-panel);
+  --text-main: var(--text-primary);
+  --border: var(--border-color);
+  --border-muted: var(--border-color-muted);
+  --primary: var(--text-primary);
+  --primary-hover: var(--text-secondary);
+  --accent: #000000;
+  --accent-bg: #e5e7eb;
+  --danger: #dc2626;
+  --danger-bg: #fee2e2;
+  --shadow: 3px 3px 0px 0px var(--border-color);
+  --shadow-md: 5px 5px 0px 0px var(--border-color);
+  --radius: 0px;
+  --backdrop: blur(12px);
+  --scroll-shadow: rgba(0, 0, 0, 0.15);
+}
+
+/* ── DARK THEME OVERRIDES ── */
+.dark, [data-theme="dark"] {
+  --bg-color: #0a0a0a;
+  --bg-panel: rgba(15, 15, 15, 0.85);
+  --border-color: #ffffff;
+  --border-color-muted: #9ca3af; /* grey-400 */
+  --text-primary: #ffffff;
+  --text-secondary: #e5e7eb; /* grey-200 */
+  --text-muted: #9ca3af; /* grey-400 */
+  --accent-color: #ffffff;
+  --accent-bg-active: #262626; /* grey-800 */
+  --shadow-color: #ffffff;
+  --dot-color: rgba(255, 255, 255, 0.08);
+  --bg-geom-opacity: 0.05;
+  --bg-crosshair-opacity: 0.15;
+
+  /* Aliases for index.css */
+  --bg: var(--bg-color);
+  --surface: var(--bg-panel);
+  --text-main: var(--text-primary);
+  --border: var(--border-color);
+  --border-muted: var(--border-color-muted);
+  --primary: var(--text-primary);
+  --primary-hover: var(--text-secondary);
+  --accent: #ffffff;
+  --accent-bg: #262626;
+  --danger: #ef4444;
+  --danger-bg: rgba(239, 68, 68, 0.2);
+  --shadow: 3px 3px 0px 0px var(--border-color);
+  --shadow-md: 5px 5px 0px 0px var(--border-color);
+  --radius: 0px;
+  --backdrop: blur(12px);
+  --scroll-shadow: rgba(0, 0, 0, 0.65);
+}
+
+body {
+  background-color: var(--bg-color);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  min-height: 100vh;
+  margin: 0;
+  transition: background-color 0.2s ease, color 0.2s ease;
+  line-height: 1.6;
+  word-spacing: 0.05em;
+  letter-spacing: 0.015em;
+}
+
+/* ── NEO-BRUTALIST GLASS PANEL CONTAINER ── */
+.glass-panel {
+  background: var(--bg-panel);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 2px solid var(--border-color);
+  border-radius: 0px;
+  position: relative;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: var(--shadow);
+}
+
+/* Corner Brackets */
+.glass-panel::before {
+  content: "";
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  width: 16px;
+  height: 16px;
+  border-top: 4px solid var(--border-color);
+  border-left: 4px solid var(--border-color);
+  pointer-events: none;
+  z-index: 2;
+}
+
+.glass-panel::after {
+  content: "";
+  position: absolute;
+  bottom: -2px;
+  right: -2px;
+  width: 16px;
+  height: 16px;
+  border-bottom: 4px solid var(--border-color);
+  border-right: 4px solid var(--border-color);
+  pointer-events: none;
+  z-index: 2;
+}
+
+.glass-panel:hover {
+  transform: translate(-1px, -1px);
+  box-shadow: var(--shadow-md);
+}
+
+/* ── Typography & Headings ── */
+.text-gradient {
+  background: none;
+  -webkit-text-fill-color: initial;
+  color: var(--text-primary);
+  font-weight: 900;
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: -0.025em;
+}
+
+/* ── Form Inputs ── */
+.form-input {
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid var(--border-color);
+  border-radius: 0px;
+  padding: 8px 4px;
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+  transition: border-bottom-color 0.2s ease;
+  width: 100%;
+}
+
+.form-input:focus {
+  outline: none;
+  border-bottom: 3px solid var(--border-color);
+}
+
+.form-label {
+  display: block;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+  color: var(--text-primary);
+  letter-spacing: 0.05em;
+}
+
+/* ── Neo-Brutalist Buttons ── */
+.btn-gradient {
+  background: var(--text-primary);
+  border: 2px solid var(--border-color);
+  border-radius: 0px;
+  color: var(--bg-color);
+  font-family: var(--font-mono);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 10px 20px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: transform 0.1s ease, box-shadow 0.1s ease, background-color 0.2s ease;
+  box-shadow: 3px 3px 0px 0px var(--border-color);
+}
+
+.btn-gradient:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 5px 5px 0px 0px var(--border-color);
+  background: var(--bg-color);
+  color: var(--text-primary);
+}
+
+.btn-gradient:active {
+  transform: translate(0px, 0px);
+  box-shadow: 1px 1px 0px 0px var(--border-color);
+}
+
+.btn-secondary {
+  background: transparent;
+  border: 2px solid var(--border-color);
+  border-radius: 0px;
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 8px 16px;
+  cursor: pointer;
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+  box-shadow: 2px 2px 0px 0px var(--border-color);
+}
+
+.btn-secondary:hover {
+  transform: translate(-1px, -1px);
+  box-shadow: 3px 3px 0px 0px var(--border-color);
+  background: var(--accent-bg-active);
+}
+
+/* ── Custom Switch Toggle ── */
+.toggle-switch {
+  position: relative;
+  display: inline-block;
+  width: 48px;
+  height: 24px;
+}
+
+.toggle-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.toggle-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: transparent;
+  transition: .2s;
+  border-radius: 0px;
+  border: 2px solid var(--border-color);
+}
+
+.toggle-slider:before {
+  position: absolute;
+  content: "";
+  height: 14px;
+  width: 14px;
+  left: 3px;
+  bottom: 3px;
+  background-color: var(--text-primary);
+  transition: .2s;
+  border-radius: 0px;
+}
+
+input:checked + .toggle-slider {
+  background-color: var(--text-primary);
+}
+
+input:checked + .toggle-slider:before {
+  transform: translateX(24px);
+  background-color: var(--bg-color);
+}
+
+/* ── Technical Button ── */
+.btn-tech {
+  background: var(--text-primary);
+  border: 2px solid var(--border-color);
+  border-radius: 0px;
+  color: var(--bg-color);
+  font-family: var(--font-mono);
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 6px 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-block;
+}
+
+.btn-tech:hover {
+  background: var(--bg-color);
+  color: var(--text-primary);
+}
+
+/* ── Markdown Report Rendering ── */
+.markdown-report {
+  line-height: 1.7;
+}
+
+.markdown-report h1 {
+  font-size: 1.6rem;
+  font-family: var(--font-mono);
+  font-weight: 900;
+  text-transform: uppercase;
+  margin-top: 24px;
+  margin-bottom: 14px;
+  border-bottom: 2px solid var(--border-color);
+  padding-bottom: 8px;
+  color: var(--text-primary);
+}
+
+.markdown-report h2 {
+  font-size: 1.25rem;
+  font-family: var(--font-mono);
+  font-weight: 800;
+  text-transform: uppercase;
+  margin-top: 20px;
+  margin-bottom: 10px;
+  color: var(--text-primary);
+  border-bottom: 2px solid var(--border-color);
+  padding-bottom: 4px;
+}
+
+.markdown-report h3 {
+  font-size: 1.05rem;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  text-transform: uppercase;
+  margin-top: 16px;
+  margin-bottom: 8px;
+  color: var(--text-primary);
+}
+
+.markdown-report p {
+  margin-bottom: 14px;
+  color: var(--text-secondary);
+}
+
+.markdown-report ul, .markdown-report ol {
+  margin-bottom: 14px;
+  padding-left: 20px;
+  color: var(--text-secondary);
+}
+
+.markdown-report li {
+  margin-bottom: 6px;
+  list-style-type: square;
+}
+
+.markdown-report code {
+  background: var(--accent-bg-active);
+  border: 1px solid var(--border-color);
+  padding: 2px 6px;
+  border-radius: 0px;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  color: var(--text-primary);
+}
+
+.markdown-report pre {
+  background: var(--bg-color);
+  border: 2px solid var(--border-color);
+  padding: 16px;
+  border-radius: 0px;
+  overflow-x: auto;
+  margin-bottom: 16px;
+  box-shadow: 3px 3px 0px var(--border-color);
+}
+
+.markdown-report pre code {
+  background: transparent;
+  border: none;
+  padding: 0;
+  color: var(--text-primary);
+}
+
+.markdown-report a {
+  color: var(--text-primary);
+  text-decoration: none;
+  border-bottom: 2px solid var(--border-color);
+  font-weight: 700;
+  transition: background-color 0.2s ease;
+}
+
+.markdown-report a:hover {
+  background: var(--accent-bg-active);
+}
+
+.markdown-report blockquote {
+  border-left: 4px solid var(--border-color);
+  padding-left: 16px;
+  margin-left: 0;
+  margin-bottom: 16px;
+  font-style: italic;
+  color: var(--text-secondary);
+  background: var(--accent-bg-active);
+  padding-top: 8px;
+  padding-bottom: 8px;
+}
+
+/* ── Tabs & Navigation ── */
+.tab-btn {
+  background: transparent;
+  border: 2px solid transparent;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 8px 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-block;
+}
+
+.tab-btn.active, .tab-btn.tab-active {
+  color: var(--text-primary);
+  border: 2px solid var(--border-color);
+  background: var(--bg-color);
+  box-shadow: 2px 2px 0px var(--border-color);
+}
+
+.tab-btn:hover:not(.active):not(.tab-active) {
+  color: var(--text-primary);
+  background: var(--accent-bg-active);
+}
+
+/* ── Animations ── */
+.fade-in {
+  animation: fadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}

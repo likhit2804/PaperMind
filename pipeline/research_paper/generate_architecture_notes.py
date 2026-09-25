@@ -178,7 +178,7 @@ def generate_architecture_notes_via_ai(sections, title, key_terms):
     Gemini never has to "search" the full text — it only arranges and rephrases
     sentences we already know are in the paper with their page citations.
     """
-    model, api_key = get_gemini_model("gemini-3.1-flash-lite")
+    model, api_key = get_gemini_model()
     if not model:
         return "Architecture notes not available (GEMINI_API_KEY not set)."
 

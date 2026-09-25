@@ -1,11 +1,12 @@
 import { useState, useCallback, useEffect, useRef } from "react";
 import PdfViewer from "./PdfViewer";
 import UploadZone from "./UploadZone";
+import AnalysisTimeline from "./AnalysisTimeline";
 
 const BACKEND_URL = import.meta.env.DEV 
   ? "http://localhost:8000" 
   : window.location.origin;
-const STORAGE_KEY = "cogniweave_paper_session";
+const STORAGE_KEY = "papermind_paper_session";
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 function loadSavedSession() {
@@ -89,6 +90,7 @@ export default function PaperExplorer() {
 
   const [status, setStatus]           = useState(saved ? "ready" : "idle");
   const [error, setError]             = useState("");
+  const [uploadingFileName, setUploadingFileName] = useState("");
   const [paperTitle, setPaperTitle]   = useState(saved?.paperTitle || "");
   const [nodes, setNodes]             = useState(saved?.nodes || []);
   const [summary, setSummary]         = useState(saved?.summary || null);
@@ -132,28 +134,27 @@ export default function PaperExplorer() {
       setPdfOpen(true);
       setShowPdf(true);
     } else {
-      const visibleCount = [pdfOpen && pdfDocked && showPdf, showMaster, showDetail].filter(Boolean).length;
-      if (visibleCount > 1 || !showPdf) {
-        setShowPdf(prev => !prev);
-      }
+      setShowPdf(prev => !prev);
     }
-  }, [pdfOpen, pdfDocked, showPdf, showMaster, showDetail]);
+  }, [pdfOpen]);
 
   const toggleMaster = useCallback(() => {
-    const isPdfVisibleLoc = !!(pdfOpen && pdfDocked && showPdf);
-    const visibleCount = [isPdfVisibleLoc, showMaster, showDetail].filter(Boolean).length;
-    if (visibleCount > 1 || !showMaster) {
-      setShowMaster(prev => !prev);
+    if (mainView !== "glossary") {
+      setMainView("glossary");
+      setShowMaster(true);
+      return;
     }
-  }, [pdfOpen, pdfDocked, showPdf, showMaster, showDetail]);
+    setShowMaster(prev => !prev);
+  }, [mainView]);
 
   const toggleDetail = useCallback(() => {
-    const isPdfVisibleLoc = !!(pdfOpen && pdfDocked && showPdf);
-    const visibleCount = [isPdfVisibleLoc, showMaster, showDetail].filter(Boolean).length;
-    if (visibleCount > 1 || !showDetail) {
-      setShowDetail(prev => !prev);
+    if (mainView !== "glossary") {
+      setMainView("glossary");
+      setShowDetail(true);
+      return;
     }
-  }, [pdfOpen, pdfDocked, showPdf, showMaster, showDetail]);
+    setShowDetail(prev => !prev);
+  }, [mainView]);
 
   const startResizePdf = useCallback((e) => {
     e.preventDefault();
@@ -284,6 +285,7 @@ export default function PaperExplorer() {
       }
     }
 
+    setUploadingFileName(file.name || "Research Paper");
     setStatus("uploading");
     setError("");
     setNodes([]);
@@ -609,7 +611,6 @@ export default function PaperExplorer() {
                   onClick={() => handleReferenceClick(src.page)}
                   title={`Jump to Page ${src.page}`}
                 >
-                  <span className="nd-occurrence-icon">📍</span>
                   <span className="nd-occurrence-text">
                     It is mentioned in{" "}
                     <strong>
@@ -767,13 +768,13 @@ export default function PaperExplorer() {
         <div className="pe-summary-grid">
           {summary.research_question && (
             <div className="pe-summary-card">
-              <h4>🎯 Core Research Question</h4>
+              <h4>Core Research Question</h4>
               <p>{summary.research_question}</p>
             </div>
           )}
           {summary.tldr && (
             <div className="pe-summary-card">
-              <h4>⚡ TL;DR</h4>
+              <h4>TL;DR</h4>
               <p>{summary.tldr}</p>
             </div>
           )}
@@ -876,21 +877,21 @@ export default function PaperExplorer() {
                   className={`pe-view-btn ${mainView === "glossary" ? "active" : ""}`}
                   onClick={() => setMainView("glossary")}
                 >
-                  📖 Glossary
+                  Glossary
                 </button>
                 <button 
                   className={`pe-view-btn ${mainView === "summary" ? "active" : ""}`}
                   onClick={() => setMainView("summary")}
                   disabled={!summary}
                 >
-                  📝 Summary
+                  Summary
                 </button>
                 <button 
                   className={`pe-view-btn ${mainView === "architecture" ? "active" : ""}`}
                   onClick={() => setMainView("architecture")}
                   disabled={!architectureNotes}
                 >
-                  🏗️ Architecture
+                  Architecture
                 </button>
               </div>
 
@@ -902,7 +903,7 @@ export default function PaperExplorer() {
                   className={`pe-layout-btn ${isPdfVisible ? "active" : ""}`} 
                   onClick={togglePdf}
                   title="Toggle PDF Panel (Alt+1)"
-                  disabled={!pdfUrl || mainView !== "glossary"}
+                  disabled={!pdfUrl}
                 >
                   <svg className="layout-icon" viewBox="0 0 16 16" width="14" height="14">
                     <rect x="1" y="2" width="14" height="12" rx="1.5" fill="none" stroke="currentColor" strokeWidth="1.5"/>
@@ -911,28 +912,26 @@ export default function PaperExplorer() {
                   </svg>
                 </button>
                 <button 
-                  className={`pe-layout-btn ${isMasterVisible ? "active" : ""}`} 
+                  className={`pe-layout-btn ${mainView === "glossary" && isMasterVisible ? "active" : ""}`} 
                   onClick={toggleMaster}
                   title="Toggle Glossary List (Alt+2)"
-                  disabled={mainView !== "glossary"}
                 >
                   <svg className="layout-icon" viewBox="0 0 16 16" width="14" height="14">
                     <rect x="1" y="2" width="14" height="12" rx="1.5" fill="none" stroke="currentColor" strokeWidth="1.5"/>
                     <line x1="5" y1="2" x2="5" y2="14" stroke="currentColor" strokeWidth="1.5"/>
                     <line x1="10" y1="2" x2="10" y2="14" stroke="currentColor" strokeWidth="1.5"/>
-                    {isMasterVisible && <rect x="5.5" y="2.5" width="4" height="11" fill="currentColor" opacity="0.35"/>}
+                    {mainView === "glossary" && isMasterVisible && <rect x="5.5" y="2.5" width="4" height="11" fill="currentColor" opacity="0.35"/>}
                   </svg>
                 </button>
                 <button 
-                  className={`pe-layout-btn ${isDetailVisible ? "active" : ""}`} 
+                  className={`pe-layout-btn ${mainView === "glossary" && isDetailVisible ? "active" : ""}`} 
                   onClick={toggleDetail}
                   title="Toggle Detail Pane (Alt+3)"
-                  disabled={mainView !== "glossary"}
                 >
                   <svg className="layout-icon" viewBox="0 0 16 16" width="14" height="14">
                     <rect x="1" y="2" width="14" height="12" rx="1.5" fill="none" stroke="currentColor" strokeWidth="1.5"/>
                     <line x1="10.5" y1="2" x2="10.5" y2="14" stroke="currentColor" strokeWidth="1.5"/>
-                    {isDetailVisible && <rect x="11" y="2.5" width="3.5" height="11" fill="currentColor" opacity="0.35"/>}
+                    {mainView === "glossary" && isDetailVisible && <rect x="11" y="2.5" width="3.5" height="11" fill="currentColor" opacity="0.35"/>}
                   </svg>
                 </button>
               </div>
@@ -945,7 +944,7 @@ export default function PaperExplorer() {
                 </button>
               )}
               <button className="pe-btn-clear" onClick={handleClear} title="Upload a new paper">
-                ↺ New Paper
+                New Paper
               </button>
             </>
           )}
@@ -955,9 +954,8 @@ export default function PaperExplorer() {
       {/* ── Upgrade Cache Banner ── */}
       {showUpgradeBanner && (
         <div className="pe-upgrade-banner">
-          <span className="pe-upgrade-icon">💡</span>
           <div className="pe-upgrade-content">
-            <strong>Dashboard Upgrade Available:</strong> This saved session only contains concept nodes. Click <strong>↺ New Paper</strong> to re-upload and unlock math notations and cited literature in the details glossary!
+            <strong>Dashboard Upgrade Available:</strong> This saved session only contains concept nodes. Click <strong>New Paper</strong> to re-upload and unlock math notations and cited literature in the details glossary!
           </div>
           <button className="pe-upgrade-dismiss" onClick={() => setShowUpgradeBanner(false)}>Dismiss</button>
         </div>
@@ -970,11 +968,13 @@ export default function PaperExplorer() {
         )}
 
         {status === "uploading" && (
-          <div className="pe-loading">
-            <img src="/hexagon-loader.svg" alt="Loading…" className="pe-hex-loader" />
-            <p>Extracting paper details & notations…</p>
-            <p className="pe-loading-sub">Running Python pipeline & Gemini filters (may take 60-90s)</p>
-          </div>
+          <AnalysisTimeline
+            fileName={uploadingFileName}
+            onCancel={() => {
+              setStatus("idle");
+              setUploadingFileName("");
+            }}
+          />
         )}
 
         {status === "error" && (
@@ -1023,7 +1023,6 @@ export default function PaperExplorer() {
                   <div className="pe-master-pane">
                     {/* Search */}
                     <div className="ktp-search-wrap">
-                      <span className="ktp-search-icon">🔍</span>
                       <input
                         className="ktp-search"
                         type="text"
@@ -1038,7 +1037,6 @@ export default function PaperExplorer() {
                     {pdfOpen && (
                       <div className="pe-active-page-header-guide">
                         <div className="pe-active-page-guide-info">
-                          <span className="pe-active-page-guide-icon">📖</span>
                           <span className="pe-active-page-guide-text">
                             Glossary active on <strong>Page {pdfPage}</strong>
                           </span>
@@ -1149,7 +1147,6 @@ export default function PaperExplorer() {
                       renderDetailContent(selectedNode)
                     ) : (
                       <div className="pe-detail-empty">
-                        <span className="pe-empty-icon">📄</span>
                         <h4>No Item Selected</h4>
                         <p>Select a concept, mathematical equation, literature reference, or research context parameter from the left sidebar to view detailed descriptions and page occurrences.</p>
                       </div>
@@ -1158,11 +1155,11 @@ export default function PaperExplorer() {
                 )}
               </>
             ) : mainView === "summary" ? (
-              <div className="pe-summary-pane">
+              <div className="pe-summary-pane" style={{ overflow: "hidden", display: "flex", flexDirection: "column", height: "100%" }}>
                 {renderSummaryView()}
               </div>
             ) : (
-              <div className="pe-architecture-pane">
+              <div className="pe-architecture-pane" style={{ overflow: "hidden", display: "flex", flexDirection: "column", height: "100%" }}>
                 {renderArchitectureView()}
               </div>
             )}

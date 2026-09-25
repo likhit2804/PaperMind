@@ -188,7 +188,7 @@ def main():
         print(f"Error: PDF not found at: {pdf}")
         sys.exit(1)
         
-    model, api_key = get_gemini_model("gemini-2.5-flash")
+    model, api_key = get_gemini_model()
     if not model:
         print("Error: GEMINI_API_KEY environment variable is not set.")
         sys.exit(1)

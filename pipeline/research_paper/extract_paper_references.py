@@ -139,7 +139,7 @@ def query_gemini_to_synthesize_references(raw_bib_text, contexts_map, title):
     Runs the final single-step Gemini API call to parse the bibliography text
     and synthesize citation role classification/contributions.
     """
-    model, api_key = get_gemini_model("gemini-3.1-flash-lite")
+    model, api_key = get_gemini_model()
     if not model:
         return []
     

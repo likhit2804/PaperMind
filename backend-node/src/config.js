@@ -12,11 +12,11 @@ const baseDir = path.resolve(__dirname, "..", "..");
 config({ path: path.join(baseDir, ".env") });
 
 const settings = {
-  appName: "CogniWeave",
+  appName: "PaperMind",
   port: parseInt(process.env.PORT || "8000", 10),
   baseDir,
   knowledgeBaseDir: path.join(baseDir, "knowledge_base"),
-  dbPath: path.join(baseDir, "db", "cogniweave.db"),
+  dbPath: path.join(baseDir, "db", "papermind.db"),
   schemaPath: path.join(baseDir, "db", "schema.sql"),
 
   // LLM Settings
@@ -24,9 +24,9 @@ const settings = {
   openaiApiKey: process.env.OPENAI_API_KEY || null,
   // Your current quota screenshot shows Gemini 2 Flash / 2 Flash Lite at 0/0,
   // while Gemini 2.5 Flash Lite still has available request capacity.
-  llmModel: process.env.LLM_MODEL || "gemini-2.5-flash-lite",
-  agentModel: process.env.AGENT_MODEL || process.env.LLM_MODEL || "gemini-2.5-flash-lite",
-  llmFallbackModels: (process.env.LLM_FALLBACK_MODELS || "gemini-2.5-flash-lite,gemini-2.5-flash")
+  llmModel: process.env.LLM_MODEL || "gemini-3.7-flash",
+  agentModel: process.env.AGENT_MODEL || process.env.LLM_MODEL || "gemini-3.7-flash",
+  llmFallbackModels: (process.env.LLM_FALLBACK_MODELS || "gemini-3.7-flash,gemini-3.6-flash,gemini-3.5-flash")
     .split(",")
     .map((item) => item.trim())
     .filter(Boolean),
@@ -41,7 +41,7 @@ const settings = {
   neo4jPassword: process.env.NEO4J_PASSWORD || null,
   neo4jDatabase: process.env.NEO4J_DATABASE || "neo4j",
   mongoUri: process.env.MONGO_URI || null,
-  mongoDbName: process.env.MONGO_DB_NAME || "cogniweave",
+  mongoDbName: process.env.MONGO_DB_NAME || "papermind",
 };
 
 export default settings;

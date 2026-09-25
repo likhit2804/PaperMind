@@ -1,7 +1,7 @@
 {
-  "name": "cogniweave-backend",
+  "name": "papermind-backend",
   "version": "0.2.0",
-  "description": "CogniWeave — Node.js backend for the multi-agent learning support system",
+  "description": "PaperMind — Node.js backend for the AI-powered research paper intelligence system",
   "main": "src/server.js",
   "type": "module",
   "scripts": {
