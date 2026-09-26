@@ -1808,7 +1808,9 @@ button.secondary:hover:not(:disabled) {
   display: flex;
   gap: 16px;
   width: 100%;
-  min-height: 440px;
+  height: calc(100vh - 120px);
+  min-height: 0;
+  overflow: hidden;
   font-family: var(--font-mono);
   animation: fadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
@@ -1816,6 +1818,7 @@ button.secondary:hover:not(:disabled) {
 @media (max-width: 900px) {
   .pipeline-studio-container {
     flex-direction: column;
+    height: calc(100vh - 90px);
   }
 
   .pipeline-state-panel {
@@ -1826,6 +1829,7 @@ button.secondary:hover:not(:disabled) {
 .pipeline-state-panel {
   width: 320px;
   flex-shrink: 0;
+  align-self: flex-start;
   padding: 16px;
   display: flex;
   flex-direction: column;
@@ -1846,25 +1850,27 @@ button.secondary:hover:not(:disabled) {
 }
 
 .pipeline-timeline {
-  position: relative;
+  --pipeline-node-column-width: 32px;
 }
 
 .pipeline-node-col {
-  width: 32px;
-  /* whatever width you're using */
+  width: var(--pipeline-node-column-width);
+  flex: 0 0 var(--pipeline-node-column-width);
   display: flex;
   justify-content: center;
   position: relative;
   z-index: 1;
-  /* keep diamonds above the line */
+  align-self: stretch;
+  /* Keep diamonds above the connector while sharing its center coordinate. */
 }
 
-.pipeline-timeline-line {
+.pipeline-stage-item:not(:last-child) .pipeline-node-col::after {
+  content: "";
   position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 16px;
-  /* must equal HALF of .pipeline-node-col's width, not a guessed value */
+  top: 8px;
+  bottom: -8px;
+  left: calc(var(--pipeline-node-column-width) / 2);
+  transform: translateX(-50%);
   width: 2px;
   background: currentColor;
   z-index: 0;
@@ -1888,9 +1894,17 @@ button.secondary:hover:not(:disabled) {
 }
 
 .pipeline-diamond {
-  font-size: 0.88rem;
-  color: var(--text-main);
-  line-height: 1;
+  width: 10px;
+  height: 10px;
+  margin: 3px 0 0;
+  border: 2px solid var(--text-main);
+  transform: rotate(45deg);
+  box-sizing: border-box;
+  background: var(--surface);
+}
+
+.pipeline-diamond.is-filled {
+  background: var(--text-main);
 }
 
 .pipeline-stage-body {
@@ -1963,8 +1977,6 @@ button.secondary:hover:not(:disabled) {
   display: flex;
   flex-direction: column;
   padding: 20px;
-  justify-content: space-between;
-  min-height: 440px;
 }
 
 .pipeline-center-header {
@@ -2064,6 +2076,10 @@ button.secondary:hover:not(:disabled) {
   width: 80px;
   height: 80px;
   display: block;
+}
+
+[data-theme="dark"] .pipeline-hex-loader {
+  filter: invert(1);
 }
 
 .pipeline-current-status {

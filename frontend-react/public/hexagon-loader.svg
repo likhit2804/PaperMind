@@ -67,10 +67,6 @@
         animation: ripple2 1.9s ease-out infinite;
       }
 
-      @media (prefers-color-scheme: dark) {
-        .inner { fill: #FFFFFF; }
-        .outer-ring, .ripple1, .ripple2 { stroke: #FFFFFF; }
-      }
     </style>
   </defs>
 

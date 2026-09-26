@@ -62,12 +62,6 @@ export default function AnalysisTimeline({ fileName, onCancel }) {
     }
   }, [elapsed]);
 
-  const formatTime = (secs) => {
-    const m = Math.floor(secs / 60);
-    const s = secs % 60;
-    return `${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
-  };
-
   return (
     <div className="pipeline-studio-container">
       {/* ── LEFT SIDEBAR: PIPELINE EXECUTION STATE ── */}
@@ -77,8 +71,6 @@ export default function AnalysisTimeline({ fileName, onCancel }) {
         </div>
 
         <div className="pipeline-timeline">
-          {/* Vertical continuous connector line */}
-          <div className="pipeline-timeline-line"></div>
           {STAGES.map((stage, idx) => {
             const isDone = idx < activeStageIdx;
             const isActive = idx === activeStageIdx;
@@ -93,7 +85,10 @@ export default function AnalysisTimeline({ fileName, onCancel }) {
               >
                 {/* Centered Diamond Node Column */}
                 <div className="pipeline-node-col">
-                  <span className="pipeline-diamond">{isDone || isActive ? "◆" : "◇"}</span>
+                  <span
+                    className={`pipeline-diamond ${isDone || isActive ? "is-filled" : "is-empty"}`}
+                    aria-label={isDone || isActive ? "Completed or active stage" : "Waiting stage"}
+                  />
                 </div>
 
                 {/* Stage Details */}
@@ -122,10 +117,6 @@ export default function AnalysisTimeline({ fileName, onCancel }) {
           </div>
 
           <div className="pipeline-header-right">
-            <div className="pipeline-timer-badge">
-              <span className="pipeline-pulse-dot"></span>
-              <span className="pipeline-timer-val">ELAPSED: {formatTime(elapsed)}</span>
-            </div>
             {onCancel && (
               <button className="pipeline-cancel-btn" onClick={onCancel} title="Cancel processing">
                 ✕ CANCEL
