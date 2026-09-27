@@ -21,6 +21,10 @@ function MathRenderer({ math, block = false }) {
         } else if (cleanMath.startsWith("$") && cleanMath.endsWith("$")) {
           cleanMath = cleanMath.slice(1, -1).trim();
         }
+        if (/[^-\uFFFF]/.test(cleanMath) === false && /[\u0080-\uFFFF]/.test(cleanMath) && !/[\\a-zA-Z]/.test(cleanMath)) {
+          ref.current.textContent = math;
+          return;
+        }
         window.katex.render(cleanMath, ref.current, {
           displayMode: block,
           throwOnError: false,
