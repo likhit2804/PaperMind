@@ -4,6 +4,7 @@ import json
 import re
 import google.generativeai as genai
 from dotenv import load_dotenv
+from pydantic import BaseModel, ConfigDict, Field
 
 # Enforce UTF-8 output encoding for Windows consoles
 sys.stdout.reconfigure(encoding='utf-8')
@@ -26,6 +27,22 @@ from pipeline.research_paper.tex_utils import extract_tex_sections
 
 # Load environment variables
 load_dotenv(override=True)
+
+
+class ConceptDefinition(BaseModel):
+    """Validated shape of one Gemini-generated concept definition."""
+
+    model_config = ConfigDict(extra="ignore")
+    definition: str = ""
+    role: str = ""
+    connections: list[str] = Field(default_factory=list)
+
+
+class ConceptDefinitionsResponse(BaseModel):
+    """Validated envelope returned by the concept-definition prompt."""
+
+    model_config = ConfigDict(extra="ignore")
+    definitions: dict[str, ConceptDefinition] = Field(default_factory=dict)
 
 def get_term_contexts(sections, term, max_contexts=4):
     """
@@ -150,7 +167,8 @@ Return your response strictly in JSON format as:
             generation_config={"response_mime_type": "application/json"}
         )
         data = parse_json_robust(response.text)
-        definitions = data.get("definitions", {})
+        validated = ConceptDefinitionsResponse.model_validate(data)
+        definitions = validated.definitions
         
         # Ensure lowercase keys for lookups
         result = {}
@@ -159,21 +177,14 @@ Return your response strictly in JSON format as:
             term_clean = term.lower().strip()
             for k, v in definitions.items():
                 if k.lower().strip() == term_clean:
-                    if isinstance(v, dict):
-                        # Format definitions with structured info for backwards compatibility
-                        def_text = v.get("definition", "")
-                        role_text = v.get("role", "")
-                        conn_list = v.get("connections", [])
-                        
-                        full_def = def_text
-                        if role_text:
-                            full_def += f" [Role: {role_text}]"
-                        if conn_list:
-                            full_def += f" [Connections: {', '.join(conn_list)}]"
-                        
-                        result[term] = full_def
-                    else:
-                        result[term] = str(v)
+                    # Format validated definitions with structured info for
+                    # backwards compatibility with the existing glossary UI.
+                    full_def = v.definition
+                    if v.role:
+                        full_def += f" [Role: {v.role}]"
+                    if v.connections:
+                        full_def += f" [Connections: {', '.join(v.connections)}]"
+                    result[term] = full_def
                     found = True
                     break
             if not found:
