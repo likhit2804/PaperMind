@@ -68,14 +68,6 @@ function MathRenderer({ math, block = false }) {
         } else if (cleanMath.startsWith("$") && cleanMath.endsWith("$")) {
           cleanMath = cleanMath.slice(1, -1).trim();
         }
-        // PDF extraction can contain native-script glyphs (for example Tamil)
-        // that are valid text but not valid KaTeX input. Show those equations
-        // as text instead of producing noisy KaTeX warnings or broken markup.
-        const hasNonLatexUnicode = /[^\x00-\x7F]/.test(cleanMath) && !/[\\a-zA-Z]/.test(cleanMath);
-        if (hasNonLatexUnicode) {
-          ref.current.textContent = math;
-          return;
-        }
         window.katex.render(cleanMath, ref.current, {
           displayMode: block,
           throwOnError: false,
