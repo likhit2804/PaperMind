@@ -65,8 +65,9 @@ def main():
         print("Fatal: Concept extraction failed. Aborting pipeline.")
         sys.exit(1)
 
-    # Steps 2-7 are independent (once concepts.json exists) and can run in parallel
-    print("\n---> Running remaining 6 pipeline steps concurrently in parallel...")
+    # Steps 2-7 are independent (once concepts.json exists), but keep the
+    # worker count bounded so a small deployment instance is not overwhelmed
+    # by six Python processes and their concurrent LLM requests.
     from concurrent.futures import ThreadPoolExecutor, as_completed
 
     tasks = [
@@ -78,7 +79,10 @@ def main():
         ("extract_paper_equations.py", [input_path, equations_json]),
     ]
 
-    with ThreadPoolExecutor(max_workers=6) as executor:
+    max_workers = min(3, len(tasks))
+    print(f"\n---> Running remaining {len(tasks)} pipeline steps with max {max_workers} concurrent workers...")
+
+    with ThreadPoolExecutor(max_workers=max_workers) as executor:
         future_to_script = {
             executor.submit(run_script, script_name, args): script_name
             for script_name, args in tasks
