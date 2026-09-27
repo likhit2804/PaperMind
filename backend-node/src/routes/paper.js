@@ -5,6 +5,7 @@ import path from "path";
 import { spawn } from "child_process";
 import { v4 as uuidv4 } from "uuid";
 import settings from "../config.js";
+import { logger } from "../logger.js";
 
 const router = Router();
 
@@ -77,6 +78,13 @@ function runPython(args, cwd) {
   });
 }
 
+function runPythonWithTimeout(args, cwd, timeoutMs = 15 * 60 * 1000) {
+  return Promise.race([
+    runPython(args, cwd),
+    new Promise((_, reject) => setTimeout(() => reject(new Error(`Paper pipeline timed out after ${timeoutMs}ms`)), timeoutMs)),
+  ]);
+}
+
 // ─── Glossary parser ─────────────────────────────────────────────────────────
 // Parses lines like:
 //   * **term** *(Sources: Page 3 (Section 'Foo'), Page 5 (Section 'Bar'))*: definition text
@@ -137,7 +145,7 @@ router.post("/paper/analyze", upload.single("file"), async (req, res, next) => {
   try {
     // Run the consolidated, optimized paper processing pipeline
     console.log(`[paper/analyze] Running unified paper pipeline for session ${sessionId}…`);
-    await runPython([unifiedScript, path.resolve(filePath), outDir], settings.baseDir);
+    await runPythonWithTimeout([unifiedScript, path.resolve(filePath), outDir], settings.baseDir);
 
     // Parse outputs
     const conceptsData = JSON.parse(fs.readFileSync(conceptsJson, "utf-8"));
@@ -256,10 +264,16 @@ router.post("/paper/analyze", upload.single("file"), async (req, res, next) => {
       fileType: ext === ".tex" ? "tex" : "pdf",
     });
   } catch (err) {
-    console.error("[paper/analyze] Pipeline failed:", err);
-    // Clean up file on error to avoid orphan files
-    try { fs.unlinkSync(filePath); } catch (_) {}
-    next(err);
+    logger.error(`[paper/analyze] Pipeline failed for session ${sessionId}`, err);
+    // Preserve the source PDF and output directory so the failure can be
+    // diagnosed or retried. Deleting it made the subsequent PDF request look
+    // like an unrelated 404.
+    res.status(502).json({
+      detail: "The paper analysis pipeline failed. The uploaded file was preserved for retry/debugging.",
+      sessionId,
+      pdfUrl: `/paper/pdf/${sessionId}`,
+      error: process.env.NODE_ENV === "production" ? undefined : err.message,
+    });
   }
 });
 
