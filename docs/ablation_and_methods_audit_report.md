@@ -2,7 +2,7 @@
 
 ## Executive Summary
 
-This report documents the evolutionary lineage, mathematical formulations, and step-by-step **Ablation Study** across all 6 concept extraction methodologies evaluated on scientific research papers in **CogniWeave-Personalized-Learning-Intervention-System**.
+This report documents the evolutionary lineage, mathematical formulations, and step-by-step **Ablation Study** across all 6 concept extraction methodologies evaluated on scientific research papers in **PaperMind**.
 
 By transitioning from a primitive TF-IDF baseline to a **Tri-Hybrid Candidate Net (POS Chunking + YAKE Graph Centrality + Section TF-IDF)** coupled with a **Gemini AI Semantic Verification Pass**, the pipeline achieved a **98.2% Precision** and **98.2% Recall** while maintaining near-zero API costs (< $0.0001 per paper).
 
@@ -104,7 +104,7 @@ The matrix below displays the **number of common terms shared** between every pa
 | **A5 (Tri-Hybrid Net)** | 25 | 89 | 106 | 129 | **279** | 220 |
 | **A6 (AI Verified Gold)**| 20 | 73 | 87 | 106 | 220 | **220** |
 
-*Note: The raw $6 \times 6$ matrix is saved as JSON in [`CogniWeave-Personalized-Learning-Intervention-System/ablation_results/matrix_6x6_overlap.json`](ablation_results/matrix_6x6_overlap.json).*
+*Note: The raw $6 \times 6$ matrix is saved as JSON in [`ablation_results/matrix_6x6_overlap.json`](ablation_results/matrix_6x6_overlap.json).*
 
 ---
 

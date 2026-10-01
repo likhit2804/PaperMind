@@ -49,7 +49,7 @@
 
 Reading modern scientific and machine learning research papers can be overwhelming due to dense mathematical nomenclature, intricate system architectures, and deep citation dependencies. 
 
-**CogniWeave** bridges this gap by functioning as an intelligent AI-guided research companion:
+**PaperMind** bridges this gap by functioning as an intelligent AI-guided research companion:
 - **Digests Both PDF and LaTeX Sources**: Ingests standard scientific PDFs or raw `.tex` source files.
 - **Deconstructs Paper Complexity**: Automatically extracts, classifies, and cross-references key concepts, math symbols, formulas, and references.
 - **Synchronized Three-Pane Workbench**: View the original paper alongside structured breakdowns with bi-directional navigation (click any concept or equation to highlight its exact page occurrences).
@@ -174,7 +174,7 @@ The Python pipeline is located in `pipeline/research_paper/` and coordinated by 
 ## Project Directory Structure
 
 ```text
-CogniWeave-Personalized-Learning-Intervention-System/
+PaperMind/
 ├── backend-node/                 # Express.js Backend
 │   ├── src/
 │   │   ├── routes/
@@ -237,8 +237,8 @@ Make sure you have the following installed on your machine:
 
 ### 1. Clone Repository
 ```bash
-git clone https://github.com/likhit2804/CogniWeave-Personalized-Learning-Intervention-System.git
-cd CogniWeave-Personalized-Learning-Intervention-System
+git clone https://github.com/likhit2804/PaperMind.git
+cd PaperMind
 ```
 
 ---
@@ -354,10 +354,10 @@ You can build and deploy the entire multi-runtime application using Docker:
 
 ```bash
 # Build Docker image
-docker build -t cogniweave:latest .
+docker build -t papermind:latest .
 
 # Run container with environment variables
-docker run -p 8000:8000 --env-file .env cogniweave:latest
+docker run -p 8000:8000 --env-file .env papermind:latest
 ```
 *Visit `http://localhost:8000` in your browser.*
 
