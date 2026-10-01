@@ -6,9 +6,8 @@ import PaperExplorer from "./components/PaperExplorer/PaperExplorer";
 
 import HexagonIcon from "./components/HexagonIcon";
 
-const BACKEND_URL = import.meta.env.DEV 
-  ? "http://localhost:8000" 
-  : window.location.origin;
+const BACKEND_URL = import.meta.env.VITE_API_BASE_URL 
+  || (import.meta.env.DEV ? "http://localhost:8000" : window.location.origin);
 
 const isProduction = import.meta.env.PROD || import.meta.env.VITE_APP_ENV === "production";
 const showDevStatus = !isProduction && import.meta.env.VITE_SHOW_DEV_STATUS !== "false";

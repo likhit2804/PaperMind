@@ -3,9 +3,8 @@ import PdfViewer from "./PdfViewer";
 import UploadZone from "./UploadZone";
 import AnalysisTimeline from "./AnalysisTimeline";
 
-const BACKEND_URL = import.meta.env.DEV 
-  ? "http://localhost:8000" 
-  : window.location.origin;
+const BACKEND_URL = import.meta.env.VITE_API_BASE_URL 
+  || (import.meta.env.DEV ? "http://localhost:8000" : window.location.origin);
 const STORAGE_KEY = "papermind_paper_session";
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
