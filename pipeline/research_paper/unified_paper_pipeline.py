@@ -79,7 +79,12 @@ def main():
         ("extract_paper_equations.py", [input_path, equations_json]),
     ]
 
-    max_workers = min(3, len(tasks))
+    try:
+        env_workers = int(os.environ.get("MAX_WORKERS") or os.environ.get("PIPELINE_WORKERS") or os.environ.get("NUM_WORKERS") or 3)
+    except (ValueError, TypeError):
+        env_workers = 3
+
+    max_workers = max(1, min(env_workers, len(tasks)))
     print(f"\n---> Running remaining {len(tasks)} pipeline steps with max {max_workers} concurrent workers...")
 
     with ThreadPoolExecutor(max_workers=max_workers) as executor:

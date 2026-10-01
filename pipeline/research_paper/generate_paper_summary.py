@@ -250,7 +250,13 @@ def main():
             "key_points": sec_summary["key_points"]
         }
         
-    with ThreadPoolExecutor(max_workers=3) as executor:
+    try:
+        max_workers = int(os.environ.get("MAX_WORKERS") or os.environ.get("PIPELINE_WORKERS") or os.environ.get("NUM_WORKERS") or 3)
+        max_workers = max(1, max_workers)
+    except (ValueError, TypeError):
+        max_workers = 3
+
+    with ThreadPoolExecutor(max_workers=max_workers) as executor:
         sections_summary_data = list(executor.map(process_section, enumerate(sections)))
         
     # Step 4: Executive synthesis
