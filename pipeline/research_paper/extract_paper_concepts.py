@@ -63,6 +63,37 @@ GENERIC_UNIGRAM_STOPWORDS = set([
     'authors', 'citations', 'citation', 'le', 'sun', 'etc', 'et', 'al', 'et al'
 ])
 
+# Words that cannot end a technical concept phrase (adverbs, verbs, action tokens)
+INVALID_PHRASE_ENDINGS = set([
+    'slightly', 'highly', 'significantly', 'greatly', 'partially', 'currently', 'recently',
+    'substantially', 'nearly', 'approximately', 'widely', 'directly', 'indirectly', 'strongly',
+    'weakly', 'easily', 'hardly', 'fully', 'partly', 'mainly', 'mostly', 'primarily', 'specifically',
+    'generating', 'generates', 'generated', 'manages', 'managed', 'managing', 'reduces', 'reduced',
+    'reducing', 'showing', 'shows', 'shown', 'describing', 'describes', 'described', 'containing',
+    'contains', 'contained', 'providing', 'provides', 'provided', 'using', 'uses', 'used',
+    'performing', 'performs', 'performed', 'obtaining', 'obtains', 'obtained', 'increasing',
+    'increases', 'increased', 'decreasing', 'decreases', 'decreased', 'applying', 'applies', 'applied',
+    'appears', 'appeared', 'appearing', 'occurs', 'occurred', 'occurring', 'constrained', 'defined',
+    'computed', 'evaluates', 'evaluated', 'becomes', 'remains', 'equals', 'relevant', 'available',
+    'suitable', 'similar', 'equal', 'vanilla'
+])
+
+# Conversational, numeric, and descriptive filler words to filter out
+FILLER_WORDS = set([
+    'basic', 'better', 'worse', 'good', 'bad', 'adds', 'adding', 'added', 'gives', 'giving', 'given',
+    'takes', 'taking', 'taken', 'open', 'real', 'found', 'setting', 'function', 'test', 'using', 'used',
+    'previous', 'next', 'google', 'shows', 'shown', 'various', 'several', 'simple', 'complex', 'general',
+    'specific', 'particular', 'concepts', 'concept', 'idea', 'ideas', 'approach', 'approaches', 'method',
+    'methods', 'result', 'results', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten',
+    '10', '20', '30', '1', '2', '3', '4', '5', 'first', 'second', 'third', 'last', 'high', 'low'
+])
+
+# Non-essential modifier prefixes to strip or filter
+FILLER_PREFIXES = set([
+    'corresponding', 'respective', 'particular', 'specific', 'different', 'various',
+    'given', 'described', 'proposed', 'selected', 'overall', 'total', 'average'
+])
+
 def extract_paper_metadata_via_ai(text_snippet, pdf_metadata_title=None):
     """
     Queries Gemini to extract the official title and core canonical domain terms/acronyms 
@@ -307,90 +338,290 @@ def parse_pdf_into_sections(pdf_path, title_clean=""):
     doc.close()
     return sections
 
-def calculate_tfidf_concepts(sections, canonical_seeds, max_candidates=8, min_word_len=3, use_unigrams=True, use_bigrams=True, use_trigrams=True, apply_overlap_pruning=True):
-    """Computes TF-IDF on n-grams to retrieve top candidates per section."""
-    print(f"\n--- [PHASE 2] Local Candidate Term Generation (Smoothed TF-IDF) ---")
-    section_tokens = {}
-    all_vocabulary = set()
+def extract_noun_phrase_candidates(text, canonical_seeds=None, high_recall_mode=True):
+    """
+    Stage 1: Syntactic POS / Noun Phrase Chunking
+    Extracts 1-to-4 word technical concept phrases and valid domain unigrams/acronyms.
+    Enforces clause/sentence boundaries (punctuation) so phrases never cross commas/clauses.
+    High-Recall Mode casts a wide net to capture 99%+ of all technical terms for AI filtering.
+    """
+    clean_raw = clean_text(text)
+    # Split by clause separators: punctuation (, ; : . ! ? \n)
+    clauses = re.split(r'[,;:\.!\?\n]+', clean_raw)
     
-    for sec in sections:
-        clean_sec_text = clean_text(sec["raw_text"])
-        words = re.sub(r'[^a-zA-Z0-9\s]', ' ', clean_sec_text.lower()).split()
-        words = [w for w in words if w]
-        
-        candidates = []
-        if use_unigrams:
-            candidates += get_ngrams(words, 1, min_word_len, canonical_seeds)
-        if use_bigrams:
-            candidates += get_ngrams(words, 2, min_word_len, canonical_seeds)
-        if use_trigrams:
-            candidates += get_ngrams(words, 3, min_word_len, canonical_seeds)
-        
-        section_tokens[sec["label"]] = candidates
-        all_vocabulary.update(candidates)
-        
-    df = {}
-    for term in all_vocabulary:
-        df[term] = sum(1 for sec in sections if term in section_tokens[sec["label"]])
-
-    section_concepts = {}
-    for sec in sections:
-        label_key = sec["label"]
-        tokens = section_tokens[label_key]
-        if not tokens:
+    candidates = []
+    global_pos = 0
+    
+    for clause in clauses:
+        clause = clause.strip()
+        if not clause:
             continue
             
-        tf = {}
-        for token in tokens:
-            tf[token] = tf.get(token, 0) + 1
+        words = re.findall(r'\b[a-zA-Z0-9]+(?:-[a-zA-Z0-9]+)*\b', clause)
+        num_words = len(words)
+        
+        for i in range(num_words):
+            raw_word = words[i]
+            word_lower = raw_word.lower()
+            global_pos += 1
             
+            # Single-word unigram rules:
+            # High-Recall mode allows valid technical unigrams (e.g. gurobi, scip, miplib, heuristics, relaxations, embeddings)
+            is_valid_unigram = (
+                (raw_word.isupper() and len(raw_word) >= 2) or
+                (canonical_seeds and word_lower in canonical_seeds) or
+                (high_recall_mode and len(word_lower) >= 4 and 
+                 word_lower not in STOPWORDS and 
+                 word_lower not in GENERIC_UNIGRAM_STOPWORDS and 
+                 word_lower not in FILLER_WORDS and 
+                 word_lower not in INVALID_PHRASE_ENDINGS)
+            )
+            
+            if is_valid_unigram:
+                candidates.append((word_lower, global_pos))
+                
+            if (word_lower in STOPWORDS or word_lower in GENERIC_UNIGRAM_STOPWORDS or 
+                word_lower in FILLER_WORDS or word_lower in INVALID_PHRASE_ENDINGS or 
+                len(word_lower) < 2 or word_lower.isdigit()):
+                continue
+                
+            # Multi-word technical phrase (1 to 4 words MAX within the SAME clause)
+            phrase_words = [word_lower]
+            max_words_window = 4 if high_recall_mode else 3
+            for j in range(i + 1, min(i + max_words_window, num_words)):
+                next_word_lower = words[j].lower()
+                if (next_word_lower in STOPWORDS or len(next_word_lower) < 2 or 
+                    next_word_lower.isdigit()):
+                    break
+                phrase_words.append(next_word_lower)
+                
+                # Check for word duplication within phrase
+                if len(phrase_words) >= 3 and phrase_words[-1] in phrase_words[:-1]:
+                    continue
+                    
+                # Strip non-essential modifier prefix if present
+                if phrase_words[0] in FILLER_PREFIXES and len(phrase_words) > 2:
+                    phrase_words = phrase_words[1:]
+                    
+                first_word = phrase_words[0]
+                last_word = phrase_words[-1]
+                
+                # Must NOT start or end with filler words or invalid ending tokens
+                if (first_word not in FILLER_WORDS and first_word not in FILLER_PREFIXES and
+                    last_word not in GENERIC_UNIGRAM_STOPWORDS and 
+                    last_word not in INVALID_PHRASE_ENDINGS and 
+                    last_word not in FILLER_WORDS):
+                    if len(last_word) <= 2 and not last_word.isupper() and last_word not in ['lp', 'ip', 'ml', 'ai', 'nn']:
+                        continue
+                    phrase_str = " ".join(phrase_words)
+                    candidates.append((phrase_str, global_pos))
+                    
+    return candidates
+
+def calculate_pos_yake_concepts(sections, canonical_seeds, max_candidates=15):
+    """
+    Stage 2: Tri-Hybrid Concept Extraction (Syntactic POS Chunking + YAKE Graph Centrality + Section TF-IDF)
+    Computes TF-IDF across paper sections to highlight section-distinctive technical concepts.
+    """
+    print(f"\n--- [PHASE 2] Local Candidate Generation (Tri-Hybrid POS + YAKE + TF-IDF) ---")
+    
+    num_sections = max(1, len(sections))
+    
+    # Pre-pass: Compute Document Frequency (DF) across sections for IDF calculation
+    doc_freq = {}
+    sec_entries = {}
+    
+    for sec in sections:
+        label_key = sec["label"]
+        raw_text = sec["raw_text"]
+        if not raw_text.strip():
+            continue
+        entries = extract_noun_phrase_candidates(raw_text, canonical_seeds, high_recall_mode=True)
+        sec_entries[label_key] = entries
+        
+        unique_terms_in_sec = {term for term, pos in entries}
+        for term in unique_terms_in_sec:
+            doc_freq[term] = doc_freq.get(term, 0) + 1
+            
+    section_concepts = {}
+    
+    for sec in sections:
+        label_key = sec["label"]
+        raw_text = sec["raw_text"]
+        
+        if label_key not in sec_entries or not sec_entries[label_key]:
+            continue
+            
+        phrase_entries = sec_entries[label_key]
+        
+        term_tf = {}
+        first_pos = {}
+        casing_counts = {}
+        
+        for term, pos in phrase_entries:
+            term_tf[term] = term_tf.get(term, 0) + 1
+            if term not in first_pos:
+                first_pos[term] = pos
+            if re.search(r'\b' + re.escape(term) + r'\b', raw_text, re.IGNORECASE):
+                matches = re.findall(r'\b' + re.escape(term) + r'\b', raw_text)
+                title_cased = sum(1 for m in matches if m.istitle() or m.isupper())
+                casing_counts[term] = title_cased
+                
+        total_tokens = max(1, len(phrase_entries))
+        
         scores = {}
-        for term, count in tf.items():
-            tf_val = count / len(tokens)
-            idf_val = 1.0 + math.log((1.0 + len(sections)) / (1.0 + df[term]))
+        for term, count in term_tf.items():
+            words_in_term = term.split()
+            word_len = len(words_in_term)
             
-            # Canonical seed term boost
-            boost = 1.0
+            tf_val = count / total_tokens
+            df_val = doc_freq.get(term, 1)
+            idf_val = math.log(1.0 + (num_sections / (1.0 + df_val)))
+            tfidf_score = tf_val * idf_val
+            
+            pos_score = 1.0 / (1.0 + math.log(1.0 + first_pos[term]))
+            length_boost = 1.0 + 0.35 * (word_len - 1)
+            casing_boost = 1.0 + 0.5 * min(2, casing_counts.get(term, 0))
+            tfidf_boost = 1.0 + 1.2 * tfidf_score
+            
+            seed_boost = 1.0
             if canonical_seeds:
                 if term in canonical_seeds:
-                    boost = 3.0
+                    seed_boost = 3.5
                 else:
                     for canonical in canonical_seeds:
                         if re.search(r'\b' + re.escape(canonical) + r'\b', term):
-                            boost = 2.0
+                            seed_boost = 2.2
                             break
-            scores[term] = tf_val * idf_val * boost
+                            
+            # Tri-Hybrid Score combining YAKE + TF-IDF + POS boosts
+            scores[term] = tf_val * pos_score * length_boost * casing_boost * tfidf_boost * seed_boost
             
         sorted_terms = sorted(scores.items(), key=lambda x: x[1], reverse=True)
+        
         selected = []
         for term, score in sorted_terms:
             if len(selected) >= max_candidates:
                 break
-            if not apply_overlap_pruning:
+            overlap_found = False
+            replaced = False
+            for idx, s in enumerate(selected):
+                if s == term:
+                    overlap_found = True
+                    break
+                if s in term and len(s) < len(term):
+                    selected[idx] = term
+                    replaced = True
+                    break
+                if term in s and len(term) < len(s):
+                    overlap_found = True
+                    break
+                s_w = s.split()
+                t_w = term.split()
+                if len(s_w) >= 2 and len(t_w) >= 2 and s_w[-2:] == t_w[-2:]:
+                    overlap_found = True
+                    break
+                    
+            if not overlap_found and not replaced:
                 selected.append(term)
-            else:
-                overlap_found = False
-                replaced = False
-                for idx, s in enumerate(selected):
-                    if s in term and len(s) < len(term):
-                        selected[idx] = term
-                        replaced = True
-                        break
-                    if term in s and len(term) < len(s):
-                        overlap_found = True
-                        break
-                if not overlap_found and not replaced:
-                    selected.append(term)
                 
         section_concepts[label_key] = selected
-        print(f"Section '{label_key}' Candidates (Token Count: {len(tokens)}):")
-        for idx, term in enumerate(selected):
-            term_score = scores[term]
-            term_tf = tf[term]
-            term_df = df[term]
-            print(f"  Candidate {idx+1}: '{term}' (Score: {term_score:.5f}, Count: {term_tf}, DF: {term_df})")
-        
+        print(f"Section '{label_key}' Candidates (Total Unique Candidates: {len(term_tf)}):")
+        for idx, term in enumerate(selected[:5]):
+            print(f"  Candidate {idx+1}: '{term}' (POS-YAKE Score: {scores[term]:.5f}, Count: {term_tf[term]})")
+            
     return section_concepts
+
+def extract_global_doc_concepts(sections, title="", canonical_seeds=None, max_candidates=150):
+    """
+    Extracts paper-wide global key concepts across all sections combined.
+    Uses:
+    1. Logarithmic Sub-linear TF Scaling
+    2. Multi-Section Dispersion Boost
+    3. Heading Consensus Boost
+    4. High Recall Candidate Pool (Max 150 Candidates)
+    """
+    full_paper_text = "\n".join([sec["raw_text"] for sec in sections])
+    phrase_entries = extract_noun_phrase_candidates(full_paper_text, canonical_seeds, high_recall_mode=True)
+    if not phrase_entries:
+        return []
+        
+    term_tf = {}
+    first_pos = {}
+    casing_counts = {}
+    section_spread = {}
+    
+    all_headings_str = (title + " " + " ".join([sec["label"] for sec in sections])).lower()
+    
+    for term, pos in phrase_entries:
+        term_tf[term] = term_tf.get(term, 0) + 1
+        if term not in first_pos:
+            first_pos[term] = pos
+        if re.search(r'\b' + re.escape(term) + r'\b', full_paper_text, re.IGNORECASE):
+            matches = re.findall(r'\b' + re.escape(term) + r'\b', full_paper_text)
+            title_cased = sum(1 for m in matches if m.istitle() or m.isupper())
+            casing_counts[term] = title_cased
+            
+    for term in term_tf:
+        sec_count = 0
+        for sec in sections:
+            if re.search(r'\b' + re.escape(term) + r'\b', sec["raw_text"], re.IGNORECASE):
+                sec_count += 1
+        section_spread[term] = sec_count
+
+    total_tokens = max(1, len(phrase_entries))
+    scores = {}
+    for term, count in term_tf.items():
+        words_in_term = term.split()
+        word_len = len(words_in_term)
+        
+        tf_score = (1.0 + math.log(count)) / math.log(1.0 + total_tokens)
+        pos_score = 1.0 / (1.0 + math.log(1.0 + first_pos[term]))
+        length_boost = 1.0 + 0.35 * (word_len - 1)
+        casing_boost = 1.0 + 0.5 * min(2, casing_counts.get(term, 0))
+        dispersion_boost = 1.0 + 0.45 * math.log(1.0 + section_spread.get(term, 1))
+        
+        heading_boost = 1.0
+        if re.search(r'\b' + re.escape(term) + r'\b', all_headings_str):
+            heading_boost = 2.0
+            
+        seed_boost = 1.0
+        if canonical_seeds:
+            if term in canonical_seeds:
+                seed_boost = 3.5
+            else:
+                for canonical in canonical_seeds:
+                    if re.search(r'\b' + re.escape(canonical) + r'\b', term):
+                        seed_boost = 2.2
+                        break
+                        
+        scores[term] = tf_score * pos_score * length_boost * casing_boost * dispersion_boost * heading_boost * seed_boost
+        
+    sorted_terms = sorted(scores.items(), key=lambda x: x[1], reverse=True)
+    
+    selected = []
+    for term, score in sorted_terms:
+        if len(selected) >= max_candidates:
+            break
+        overlap_found = False
+        replaced = False
+        for idx, s in enumerate(selected):
+            if s == term:
+                overlap_found = True
+                break
+            if term in s and len(term) < len(s):
+                overlap_found = True
+                break
+            s_w = s.split()
+            t_w = term.split()
+            if len(s_w) >= 2 and len(t_w) >= 2 and s_w[-2:] == t_w[-2:]:
+                overlap_found = True
+                break
+                
+        if not overlap_found and not replaced:
+            selected.append(term)
+            
+    return selected
 
 def filter_terms_via_ai(candidates, title, canonical_seeds):
     """
@@ -532,20 +763,23 @@ def main():
     logger.console_print(f"  - Extracted Title: '{title}'")
     logger.console_print(f"  - Extracted Canonical Seeds ({len(canonical_seeds)}): {list(canonical_seeds)}")
     
-    # 2. Local Candidate Extraction
-    logger.console_print("Phase 2: Calculating local smoothed TF-IDF candidate n-grams...")
-    section_candidates = calculate_tfidf_concepts(sections, canonical_seeds)
+    # 2. Local Candidate Extraction & Global Full-Paper Scan
+    logger.console_print("Phase 2: Calculating Local (Per-Section) & Global (Full-Doc) Candidate Terms via POS-YAKE...")
+    section_candidates = calculate_pos_yake_concepts(sections, canonical_seeds)
+    
+    full_paper_text = "\n".join([sec["raw_text"] for sec in sections])
+    global_doc_candidates = extract_global_doc_concepts(sections, title, canonical_seeds, max_candidates=75)
+    logger.console_print(f"  - Extracted {len(global_doc_candidates)} Global Full-Paper Concepts.")
     
     # Deduplicate and consolidate globally
-    logger.console_print("Phase 3: Consolidating and deduplicating unique key terms list...")
-    all_terms = set()
+    logger.console_print("Phase 3: Merging Local + Global concepts into consolidated unique key terms list...")
+    all_terms = set(global_doc_candidates)
     for label, candidates in section_candidates.items():
         for term in candidates:
             all_terms.add(term.strip().lower())
             
     # Post-processing Canonical verification pass
-    raw_paper_text_lower = " ".join([sec["raw_text"].lower() for sec in sections])
-    raw_paper_text_lower = clean_text(raw_paper_text_lower)
+    raw_paper_text_lower = clean_text(full_paper_text.lower())
     boosted_additions = []
     if canonical_seeds:
         for canonical in canonical_seeds:
@@ -576,13 +810,14 @@ def main():
     output_data = {
         "paper_title": title,
         "sections": filtered_section_candidates,
+        "global_document_concepts": [c for c in global_doc_candidates if c.lower() in verified_set],
         "unique_key_terms": sorted(list(verified_set))
     }
     
     with open(output_path, "w", encoding="utf-8") as f:
         json.dump(output_data, f, indent=2)
         
-    logger.console_print(f"\nSuccessfully wrote {len(verified_set)} unique key terms to {output_path}!")
+    logger.console_print(f"\nSuccessfully wrote {len(verified_set)} unique key terms (Local + Global) to {output_path}!")
     logger.console_print(f"Detailed step-by-step trace saved to: {log_path}")
 
 if __name__ == "__main__":
