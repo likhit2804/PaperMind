@@ -28,6 +28,55 @@ load_dotenv(override=True)
 # Reconfigure standard output to handle unicode outputs in Windows
 sys.stdout.reconfigure(encoding='utf-8')
 
+def singularize_word(w):
+    if not w or not isinstance(w, str):
+        return w
+    w_lower = w.lower()
+    IRREGULAR_MAP = {
+        'matrices': 'matrix', 'indices': 'index', 'axes': 'axis', 'analyses': 'analysis',
+        'hypotheses': 'hypothesis', 'criteria': 'criterion', 'phenomena': 'phenomenon',
+        'vertices': 'vertex', 'simplices': 'simplex'
+    }
+    EXCEPTIONS = {'process', 'status', 'basis', 'bias', 'loss', 'cross', 'glass', 'class', 'mass', 'pass', 'canvas', 'corpus', 'series', 'species', 'consensus', 'keras', 'graphics'}
+    
+    if w_lower in EXCEPTIONS or w_lower.endswith(('ss', 'us', 'is', 'as', 'os')):
+        return w
+    if w_lower in IRREGULAR_MAP:
+        return IRREGULAR_MAP[w_lower]
+    if '-' in w:
+        parts = w.split('-')
+        parts[-1] = singularize_word(parts[-1])
+        return "-".join(parts)
+    if len(w_lower) > 3:
+        if w_lower.endswith('ies') and not w_lower.endswith('series'):
+            return w[:-3] + 'y'
+        elif w_lower.endswith('ses') or w_lower.endswith('xes') or w_lower.endswith('ches') or w_lower.endswith('shes'):
+            return w[:-2]
+        elif w_lower.endswith('s') and not w_lower.endswith('ss'):
+            return w[:-1]
+    return w
+
+def singularize_term(term):
+    """
+    Normalizes a technical term or noun phrase from plural to singular form,
+    including hyphenated modifiers (e.g. '68-points landmark' -> '68-point landmark').
+    """
+    if not term or not isinstance(term, str):
+        return term
+    
+    term_str = term.strip()
+    words = term_str.split()
+    if not words:
+        return term_str
+    
+    # Singularize the final noun and any hyphenated modifiers
+    words[-1] = singularize_word(words[-1])
+    for idx in range(len(words) - 1):
+        if '-' in words[idx]:
+            words[idx] = singularize_word(words[idx])
+            
+    return " ".join(words)
+
 # Generic English stop words
 STOPWORDS = set([
     'a', 'about', 'above', 'after', 'again', 'against', 'all', 'am', 'an', 'and', 'any', 'are', 'arent', 'as', 'at',
@@ -378,11 +427,11 @@ def extract_noun_phrase_candidates(text, canonical_seeds=None, high_recall_mode=
             )
             
             if is_valid_unigram:
-                candidates.append((word_lower, global_pos))
+                candidates.append((singularize_term(word_lower), global_pos))
                 
             if (word_lower in STOPWORDS or word_lower in GENERIC_UNIGRAM_STOPWORDS or 
                 word_lower in FILLER_WORDS or word_lower in INVALID_PHRASE_ENDINGS or 
-                len(word_lower) < 2 or word_lower.isdigit()):
+                len(word_lower) < 2):
                 continue
                 
             # Multi-word technical phrase (1 to 4 words MAX within the SAME clause)
@@ -390,8 +439,7 @@ def extract_noun_phrase_candidates(text, canonical_seeds=None, high_recall_mode=
             max_words_window = 4 if high_recall_mode else 3
             for j in range(i + 1, min(i + max_words_window, num_words)):
                 next_word_lower = words[j].lower()
-                if (next_word_lower in STOPWORDS or len(next_word_lower) < 2 or 
-                    next_word_lower.isdigit()):
+                if (next_word_lower in STOPWORDS or len(next_word_lower) < 2):
                     break
                 phrase_words.append(next_word_lower)
                 
@@ -414,7 +462,7 @@ def extract_noun_phrase_candidates(text, canonical_seeds=None, high_recall_mode=
                     if len(last_word) <= 2 and not last_word.isupper() and last_word not in ['lp', 'ip', 'ml', 'ai', 'nn']:
                         continue
                     phrase_str = " ".join(phrase_words)
-                    candidates.append((phrase_str, global_pos))
+                    candidates.append((singularize_term(phrase_str), global_pos))
                     
     return candidates
 
@@ -462,8 +510,8 @@ def calculate_pos_yake_concepts(sections, canonical_seeds, max_candidates=15):
             term_tf[term] = term_tf.get(term, 0) + 1
             if term not in first_pos:
                 first_pos[term] = pos
-            if re.search(r'\b' + re.escape(term) + r'\b', raw_text, re.IGNORECASE):
-                matches = re.findall(r'\b' + re.escape(term) + r'\b', raw_text)
+            if re.search(r'\b' + re.escape(term) + r'(?:s|es)?\b', raw_text, re.IGNORECASE):
+                matches = re.findall(r'\b' + re.escape(term) + r'(?:s|es)?\b', raw_text)
                 title_cased = sum(1 for m in matches if m.istitle() or m.isupper())
                 casing_counts[term] = title_cased
                 
@@ -557,15 +605,15 @@ def extract_global_doc_concepts(sections, title="", canonical_seeds=None, max_ca
         term_tf[term] = term_tf.get(term, 0) + 1
         if term not in first_pos:
             first_pos[term] = pos
-        if re.search(r'\b' + re.escape(term) + r'\b', full_paper_text, re.IGNORECASE):
-            matches = re.findall(r'\b' + re.escape(term) + r'\b', full_paper_text)
+        if re.search(r'\b' + re.escape(term) + r'(?:s|es)?\b', full_paper_text, re.IGNORECASE):
+            matches = re.findall(r'\b' + re.escape(term) + r'(?:s|es)?\b', full_paper_text)
             title_cased = sum(1 for m in matches if m.istitle() or m.isupper())
             casing_counts[term] = title_cased
             
     for term in term_tf:
         sec_count = 0
         for sec in sections:
-            if re.search(r'\b' + re.escape(term) + r'\b', sec["raw_text"], re.IGNORECASE):
+            if re.search(r'\b' + re.escape(term) + r'(?:s|es)?\b', sec["raw_text"], re.IGNORECASE):
                 sec_count += 1
         section_spread[term] = sec_count
 
@@ -606,20 +654,22 @@ def extract_global_doc_concepts(sections, title="", canonical_seeds=None, max_ca
         overlap_found = False
         replaced = False
         for idx, s in enumerate(selected):
-            if s == term:
+            s_sing = singularize_term(s)
+            t_sing = singularize_term(term)
+            if s == term or s_sing == t_sing:
                 overlap_found = True
                 break
-            if term in s and len(term) < len(s):
+            if t_sing in s_sing and len(t_sing) < len(s_sing):
                 overlap_found = True
                 break
-            s_w = s.split()
-            t_w = term.split()
+            s_w = s_sing.split()
+            t_w = t_sing.split()
             if len(s_w) >= 2 and len(t_w) >= 2 and s_w[-2:] == t_w[-2:]:
                 overlap_found = True
                 break
                 
         if not overlap_found and not replaced:
-            selected.append(term)
+            selected.append(singularize_term(term))
             
     return selected
 
@@ -649,6 +699,7 @@ Specifically:
 - REMOVE: citation markers or author names (e.g. 'citation', 'et al', 'le', 'sun')
 - REMOVE: layout-related labels or captions (e.g. 'figure', 'table', 'section', 'page')
 - REMOVE: grammatical fragments, incomplete phrases, or punctuation artifacts (e.g. 'will', 'with', 'from', 'etc')
+- CONVERT PLURALS TO SINGULAR: Normalize all terms to their singular form (e.g. 'facial expressions' -> 'facial expression', 'neural networks' -> 'neural network', 'models' -> 'model', 'heuristics' -> 'heuristic', 'algorithms' -> 'algorithm'). Never return both singular and plural versions of the same concept.
 - KEEP: core contributions, algorithms, models, modules, and experimental analysis concepts (e.g. named algorithms, custom circuit/architectural modules, representation schemes, or formal complexity definitions discussed in the text)
 
 Return your response strictly in JSON format as an object with the key "verified_terms" containing a list of strings:
@@ -668,16 +719,17 @@ Return your response strictly in JSON format as an object with the key "verified
         # Parse the JSON response
         data = parse_json_robust(response.text)
         verified = data.get("verified_terms", [])
-        # Lowercase and strip for consistency
-        verified_clean = {t.strip().lower() for t in verified if isinstance(t, str)}
+        # Lowercase, strip, and singularize for consistency
+        verified_clean = {singularize_term(t.strip().lower()) for t in verified if isinstance(t, str)}
         
         # Keep only elements that are actually in the original candidates list (preventing hallucinations)
         final_verified = []
         for c in candidates:
-            c_clean = c.lower().strip()
+            c_clean = singularize_term(c.lower().strip())
             # Retain if verified by AI OR if it's a known canonical seed
             if c_clean in verified_clean or (canonical_seeds and c_clean in canonical_seeds):
-                final_verified.append(c)
+                if c_clean not in [singularize_term(v.lower().strip()) for v in final_verified]:
+                    final_verified.append(c_clean)
                 
         print(f"AI Filtering: Input {len(candidates)} candidates -> Output {len(final_verified)} verified concepts.")
         return final_verified
@@ -771,12 +823,12 @@ def main():
     global_doc_candidates = extract_global_doc_concepts(sections, title, canonical_seeds, max_candidates=75)
     logger.console_print(f"  - Extracted {len(global_doc_candidates)} Global Full-Paper Concepts.")
     
-    # Deduplicate and consolidate globally
+    # Deduplicate and consolidate globally with singular normalization
     logger.console_print("Phase 3: Merging Local + Global concepts into consolidated unique key terms list...")
-    all_terms = set(global_doc_candidates)
+    all_terms = set(singularize_term(c.lower()) for c in global_doc_candidates)
     for label, candidates in section_candidates.items():
         for term in candidates:
-            all_terms.add(term.strip().lower())
+            all_terms.add(singularize_term(term.strip().lower()))
             
     # Post-processing Canonical verification pass
     raw_paper_text_lower = clean_text(full_paper_text.lower())
@@ -799,10 +851,14 @@ def main():
     verified_terms = filter_terms_via_ai(sorted_unique_terms, title, canonical_seeds)
     verified_set = set(verified_terms)
     
-    # Back-propagate verification to sections
+    # Back-propagate verification to sections with singular normalization
     filtered_section_candidates = {}
     for label, candidates in section_candidates.items():
-        filtered_section = [c for c in candidates if c.strip().lower() in verified_set]
+        filtered_section = []
+        for c in candidates:
+            sing_c = singularize_term(c.strip().lower())
+            if sing_c in verified_set and sing_c not in filtered_section:
+                filtered_section.append(sing_c)
         filtered_section_candidates[label] = filtered_section
         
     logger.stop()
