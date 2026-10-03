@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hexi Chatbot SVG Animations & Customizer</title>
+<script src="hexi-bot.js"></script>
+<style>
+  :root {
+    --bg: #f8fafc;
+    --card-bg: #ffffff;
+    --fg: #0f172a;
+    --border: #e2e8f0;
+    --accent: #3b82f6;
+    --accent-hover: #2563eb;
+    --muted: #64748b;
+    --shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -2px rgba(0,0,0,0.05);
+  }
+
+  [data-theme="dark"] {
+    --bg: #090d16;
+    --card-bg: #141b2d;
+    --fg: #f8fafc;
+    --border: #26334d;
+    --accent: #60a5fa;
+    --accent-hover: #3b82f6;
+    --muted: #94a3b8;
+    --shadow: 0 4px 20px rgba(0,0,0,0.4);
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background-color: var(--bg);
+    color: var(--fg);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    transition: background-color 0.3s, color 0.3s;
+    padding-bottom: 60px;
+  }
+
+  header {
+    padding: 32px 24px 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .title-group h1 {
+    font-size: 26px;
+    font-weight: 800;
+    margin: 0 0 6px;
+    letter-spacing: -0.02em;
+  }
+
+  .title-group p {
+    margin: 0;
+    font-size: 14px;
+    color: var(--muted);
+  }
+
+  .theme-toggle {
+    background: var(--card-bg);
+    border: 1.5px solid var(--border);
+    color: var(--fg);
+    padding: 8px 16px;
+    border-radius: 999px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s;
+  }
+  .theme-toggle:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  main {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 24px;
+  }
+
+  h2 {
+    font-size: 18px;
+    font-weight: 700;
+    margin: 36px 0 16px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+  }
+
+  .card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px;
+    text-align: center;
+    box-shadow: var(--shadow);
+    transition: transform 0.2s, border-color 0.2s;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .card:hover {
+    border-color: var(--accent);
+    transform: translateY(-2px);
+  }
+
+  .avatar-box {
+    width: 180px;
+    height: 170px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 16px;
+  }
+
+  .card h3 {
+    font-size: 18px;
+    margin: 0 0 6px;
+  }
+
+  .card p {
+    font-size: 13px;
+    color: var(--muted);
+    margin: 0 0 16px;
+    line-height: 1.4;
+  }
+
+  .badge {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    padding: 3px 10px;
+    border-radius: 999px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    margin-bottom: 12px;
+  }
+
+  .controls {
+    width: 100%;
+    margin-top: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .ctl-group {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  .btn-group {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .btn {
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--fg);
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 6px 12px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .btn:hover, .btn.active {
+    background: var(--accent);
+    color: #ffffff;
+    border-color: var(--accent);
+  }
+
+  /* Chat Simulator */
+  .chat-sim {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 24px;
+    box-shadow: var(--shadow);
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    gap: 24px;
+    align-items: center;
+  }
+
+  @media (max-width: 768px) {
+    .chat-sim { grid-template-columns: 1fr; text-align: center; }
+  }
+
+  .chat-avatar-pane {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    border-right: 1px solid var(--border);
+    padding-right: 20px;
+  }
+
+  .status-tag {
+    font-size: 12px;
+    font-weight: 700;
+    padding: 4px 12px;
+    border-radius: 999px;
+    background: var(--accent);
+    color: #fff;
+    margin-top: 8px;
+  }
+
+  .chat-messages {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    max-height: 260px;
+    overflow-y: auto;
+    padding-right: 8px;
+  }
+
+  .msg {
+    padding: 10px 16px;
+    border-radius: 14px;
+    font-size: 14px;
+    max-width: 80%;
+    line-height: 1.4;
+  }
+
+  .msg.user {
+    background: var(--accent);
+    color: #ffffff;
+    align-self: flex-end;
+    border-bottom-right-radius: 2px;
+  }
+
+  .msg.bot {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    align-self: flex-start;
+    border-bottom-left-radius: 2px;
+  }
+
+  .chat-input-bar {
+    display: flex;
+    gap: 10px;
+    margin-top: 16px;
+    grid-column: 1 / -1;
+  }
+
+  .chat-input-bar input {
+    flex: 1;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 10px 16px;
+    font-size: 14px;
+    color: var(--fg);
+    outline: none;
+  }
+
+  .chat-input-bar input:focus {
+    border-color: var(--accent);
+  }
+
+  .chat-input-bar button {
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    padding: 10px 20px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .chat-input-bar button:hover {
+    background: var(--accent-hover);
+  }
+
+  code {
+    background: var(--bg);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: monospace;
+    font-size: 12px;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="title-group">
+    <h1>Hexi Chatbot SVG Avatar Collection</h1>
+    <p>Base states (Idle & Happy) + Searching with customizable loops (Dark & Light themes)</p>
+  </div>
+  <button class="theme-toggle" id="globalThemeBtn">
+    <span id="themeIcon">☀️</span> <span id="themeText">Light Theme</span>
+  </button>
+</header>
+
+<main>
+
+  <!-- Interactive Chatbot Simulator -->
+  <h2>🤖 Interactive Chatbot Demonstration</h2>
+  <div class="chat-sim">
+    <div class="chat-avatar-pane">
+      <hexi-bot id="simBot" state="idle" theme="light"></hexi-bot>
+      <div class="status-tag" id="simStatus">Status: Idle</div>
+    </div>
+    <div style="width: 100%;">
+      <div class="chat-messages" id="chatMsgs">
+        <div class="msg bot">Hello! I am Hexi. Ask me anything to test my searching loop animation!</div>
+      </div>
+      <form class="chat-input-bar" id="chatForm">
+        <input type="text" id="userInput" placeholder="Type a message (e.g. 'Search for quantum computing')..." value="Search for knowledge graph algorithms" required>
+        <button type="submit">Send</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Base States -->
+  <h2>1. Base States (2 Core States)</h2>
+  <div class="grid">
+    <div class="card">
+      <div class="badge">State: idle</div>
+      <div class="avatar-box">
+        <hexi-bot id="cardIdleBot" state="idle" theme="light"></hexi-bot>
+      </div>
+      <h3>Base State 1: Idle</h3>
+      <p>Continuous gentle floating animation with auto eye blinks. Ideal for awaiting user prompt.</p>
+      <div class="controls">
+        <div class="btn-group">
+          <a class="btn" href="hexi-idle-light.svg" download>SVG Light</a>
+          <a class="btn" href="hexi-idle-dark.svg" download>SVG Dark</a>
+          <a class="btn" href="hexi-idle-adaptive.svg" download>Adaptive SVG</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="badge">State: happy</div>
+      <div class="avatar-box">
+        <hexi-bot id="cardHappyBot" state="happy" theme="light"></hexi-bot>
+      </div>
+      <h3>Base State 2: Happy</h3>
+      <p>Cheerful hop bounce with curved eye arcs and widened smile. Perfect for greetings & completed replies.</p>
+      <div class="controls">
+        <div class="btn-group">
+          <a class="btn" href="hexi-happy-light.svg" download>SVG Light</a>
+          <a class="btn" href="hexi-happy-dark.svg" download>SVG Dark</a>
+          <a class="btn" href="hexi-happy-adaptive.svg" download>Adaptive SVG</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Searching with Customizable Loops -->
+  <h2>2. Searching (Customizable Loops)</h2>
+  <div class="grid">
+    <div class="card" style="grid-column: 1 / -1;">
+      <div class="badge">State: searching (custom sequence)</div>
+      <div style="display: flex; flex-wrap: wrap; gap: 30px; align-items: center; justify-content: center; width: 100%; margin-bottom: 20px;">
+        <div class="avatar-box" style="width: 220px; height: 200px;">
+          <hexi-bot id="customSearchBot" state="idle" theme="light"></hexi-bot>
+        </div>
+        <div style="max-width: 450px; text-align: left;">
+          <h3 style="margin-top: 0;">Knowledge Grid Search & Answer Sequence</h3>
+          <p>Hexi zooms into a outer 20-hexagon cell matrix, performs scanning loops while waiting for backend API/LLM responses, and outputs streaming text lines when done.</p>
+          
+          <div class="ctl-group" style="margin-bottom: 12px;">
+            <span><strong>Lookup Scan Loops:</strong></span>
+            <div class="btn-group" id="lookupLoopBtns">
+              <button class="btn" data-n="1">1 loop (1.2s)</button>
+              <button class="btn active" data-n="2">2 loops (2.4s)</button>
+              <button class="btn" data-n="3">3 loops (3.6s)</button>
+              <button class="btn" data-n="4">4 loops (4.8s)</button>
+            </div>
+          </div>
+
+          <div class="ctl-group" style="margin-bottom: 16px;">
+            <span><strong>Answer Text Length:</strong></span>
+            <div class="btn-group" id="textLoopBtns">
+              <button class="btn" data-t="1">Short (1 loop)</button>
+              <button class="btn active" data-t="2">Medium (2 loops)</button>
+              <button class="btn" data-t="3">Long (3 loops)</button>
+            </div>
+          </div>
+
+          <div class="btn-group" style="justify-content: flex-start;">
+            <button class="btn active" id="triggerSearchBtn" style="padding: 8px 18px; font-size: 13px;">▶ Run Search Sequence</button>
+            <button class="btn" id="resetSearchBtn" style="padding: 8px 18px; font-size: 13px;">🔄 Reset to Idle</button>
+            <a class="btn" href="hexi-searching-light.svg" download>SVG Light</a>
+            <a class="btn" href="hexi-searching-dark.svg" download>SVG Dark</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Developer Integration Code -->
+  <h2>3. Chatbot Integration Code</h2>
+  <div class="card" style="align-items: flex-start; text-align: left;">
+    <h3>How to use Hexi in your Chatbot project:</h3>
+    <p>Include <code>hexi-bot.js</code> or embed the standalone SVG files directly into your HTML/React/Vue app.</p>
+    <pre style="background: var(--bg); padding: 16px; border-radius: 10px; border: 1px solid var(--border); overflow-x: auto; width: 100%; font-size: 13px;"><code>&lt;!-- 1. Include Script --&gt;
+&lt;script src="hexi-bot.js"&gt;&lt;/script&gt;
+
+&lt;!-- 2. Embed Component --&gt;
+&lt;hexi-bot id="myAvatar" state="idle" theme="dark"&gt;&lt;/hexi-bot&gt;
+
+&lt;!-- 3. Control in JavaScript --&gt;
+&lt;script&gt;
+  const bot = document.getElementById('myAvatar');
+
+  // Trigger base states
+  bot.setState('idle');   // Idle base state
+  bot.setState('happy');  // Happy base state
+
+  // Trigger searching with customizable loops
+  bot.runSearchSequence({
+    lookupLoops: 3,  // Number of 1.2s scan loops while fetching API
+    textLoops: 2,    // Number of text animation loops
+    onComplete: () =&gt; {
+      bot.setState('happy'); // Transition to happy when answer finishes!
+    }
+  });
+&lt;/script&gt;</code></pre>
+  </div>
+
+</main>
+
+<script>
+  let currentTheme = 'light';
+  const htmlEl = document.documentElement;
+  const themeBtn = document.getElementById('globalThemeBtn');
+  const themeIcon = document.getElementById('themeIcon');
+  const themeText = document.getElementById('themeText');
+
+  const allBots = document.querySelectorAll('hexi-bot');
+
+  themeBtn.addEventListener('click', () => {
+    currentTheme = currentTheme === 'light' ? 'dark' : 'light';
+    htmlEl.setAttribute('data-theme', currentTheme);
+    themeIcon.textContent = currentTheme === 'light' ? '☀️' : '🌙';
+    themeText.textContent = currentTheme === 'light' ? 'Light Theme' : 'Dark Theme';
+
+    allBots.forEach(bot => bot.setTheme(currentTheme));
+  });
+
+  // Chat Simulator Logic
+  const simBot = document.getElementById('simBot');
+  const simStatus = document.getElementById('simStatus');
+  const chatForm = document.getElementById('chatForm');
+  const userInput = document.getElementById('userInput');
+  const chatMsgs = document.getElementById('chatMsgs');
+
+  chatForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const text = userInput.value.trim();
+    if (!text) return;
+
+    // Add user message
+    const userMsg = document.createElement('div');
+    userMsg.className = 'msg user';
+    userMsg.textContent = text;
+    chatMsgs.appendChild(userMsg);
+    userInput.value = '';
+    chatMsgs.scrollTop = chatMsgs.scrollHeight;
+
+    // Set bot status searching
+    simStatus.textContent = 'Status: Searching Knowledge Grid...';
+    simBot.runSearchSequence({
+      lookupLoops: 2,
+      textLoops: 2,
+      onComplete: () => {
+        simStatus.textContent = 'Status: Replying (Happy)';
+        simBot.setState('happy');
+
+        const botMsg = document.createElement('div');
+        botMsg.className = 'msg bot';
+        botMsg.textContent = 'Here is the detailed result retrieved from the knowledge graph regarding "' + text + '"!';
+        chatMsgs.appendChild(botMsg);
+        chatMsgs.scrollTop = chatMsgs.scrollHeight;
+
+        setTimeout(() => {
+          simStatus.textContent = 'Status: Idle';
+          simBot.setState('idle');
+        }, 3000);
+      }
+    });
+  });
+
+  // Custom Search Controls
+  const customSearchBot = document.getElementById('customSearchBot');
+  const triggerSearchBtn = document.getElementById('triggerSearchBtn');
+  const resetSearchBtn = document.getElementById('resetSearchBtn');
+
+  let selectedLookupLoops = 2;
+  let selectedTextLoops = 2;
+
+  document.querySelectorAll('#lookupLoopBtns .btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      document.querySelectorAll('#lookupLoopBtns .btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      selectedLookupLoops = parseInt(btn.getAttribute('data-n'));
+    });
+  });
+
+  document.querySelectorAll('#textLoopBtns .btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      document.querySelectorAll('#textLoopBtns .btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      selectedTextLoops = parseInt(btn.getAttribute('data-t'));
+    });
+  });
+
+  triggerSearchBtn.addEventListener('click', () => {
+    customSearchBot.runSearchSequence({
+      lookupLoops: selectedLookupLoops,
+      textLoops: selectedTextLoops,
+      onComplete: () => {
+        setTimeout(() => customSearchBot.setState('happy'), 500);
+      }
+    });
+  });
+
+  resetSearchBtn.addEventListener('click', () => {
+    customSearchBot.setState('idle');
+  });
+</script>
+
+</body>
+</html>

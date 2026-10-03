@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 190" class="hexi-bot hexi-happy">
+  <style>
+    .hexi-happy { --fg: #ffffff; --bg: #000000; }
+    .hex { fill: none; stroke: var(--fg); stroke-width: 7; stroke-linejoin: round; }
+    .f { fill: var(--fg); }
+    .s { fill: none; stroke: var(--fg); stroke-width: 6; stroke-linecap: round; stroke-linejoin: round; }
+    .tilt { transform-origin: 100px 95px; }
+    .fg { animation: hexi-hop 1.6s ease-out infinite; }
+    .hy { opacity: 1; }
+    .mouth { transform-box: fill-box; transform-origin: center; transform: scale(1.35); }
+    
+    @keyframes hexi-hop { 0%, 40%, 100% { transform: translateY(0); } 20% { transform: translateY(-10px); } }
+  </style>
+  <g class="tilt">
+    <g class="fg">
+      <polygon class="hex" points="182.0,95.0 141.0,166.0 59.0,166.0 18.0,95.0 59.0,24.0 141.0,24.0"/>
+      <g class="hy">
+        <path class="s" d="M64 90 Q76 70 88 90"/>
+        <path class="s" d="M112 90 Q124 70 136 90"/>
+      </g>
+      <path class="s mouth" d="M84 122 Q100 134 116 122"/>
+    </g>
+  </g>
+</svg>

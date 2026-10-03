@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 190" class="hexi-bot hexi-idle">
+  <style>
+    :root { --fg: #000000; --bg: #ffffff; }
+    @media (prefers-color-scheme: dark) { :root { --fg: #ffffff; --bg: #000000; } }
+    .hexi-idle[data-theme="light"] { --fg: #000000; --bg: #ffffff; }
+    .hexi-idle[data-theme="dark"] { --fg: #ffffff; --bg: #000000; }
+    
+    .hex { fill: none; stroke: var(--fg); stroke-width: 7; stroke-linejoin: round; }
+    .f { fill: var(--fg); }
+    .s { fill: none; stroke: var(--fg); stroke-width: 6; stroke-linecap: round; stroke-linejoin: round; }
+    .tilt { transform-origin: 100px 95px; }
+    .fg { animation: hexi-fl 4s ease-in-out infinite; }
+    .look { animation: hexi-drift 6s ease-in-out infinite alternate; transform-box: fill-box; transform-origin: center; }
+    .eye { transform-box: fill-box; transform-origin: center; animation: hexi-blink 4s infinite; }
+    .mouth { transform-box: fill-box; transform-origin: center; }
+    
+    @keyframes hexi-fl { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
+    @keyframes hexi-drift { 0%, 100% { transform: translateX(0); } 30% { transform: translate(-3px, -1px); } 70% { transform: translate(3px, 1px); } }
+    @keyframes hexi-blink { 0%, 95%, 100% { transform: scaleY(1); } 97.5% { transform: scaleY(0.1); } }
+  </style>
+  <g class="tilt">
+    <g class="fg">
+      <polygon class="hex" points="182.0,95.0 141.0,166.0 59.0,166.0 18.0,95.0 59.0,24.0 141.0,24.0"/>
+      <g class="look">
+        <circle class="f eye eL" cx="76" cy="84" r="8"/>
+        <circle class="f eye eR" cx="124" cy="84" r="8"/>
+      </g>
+      <path class="s mouth" d="M84 122 Q100 134 116 122"/>
+    </g>
+  </g>
+</svg>

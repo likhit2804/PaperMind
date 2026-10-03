@@ -2,6 +2,8 @@ import { useState, useCallback, useEffect, useRef } from "react";
 import PdfViewer from "./PdfViewer";
 import UploadZone from "./UploadZone";
 import AnalysisTimeline from "./AnalysisTimeline";
+import RagAssistant from "../RagAssistant/RagAssistant";
+import HexiAvatar from "../HexiBot/HexiAvatar";
 
 const BACKEND_URL = import.meta.env.VITE_API_BASE_URL 
   || (import.meta.env.DEV ? "http://localhost:8000" : window.location.origin);
@@ -896,6 +898,15 @@ export default function PaperExplorer() {
                 >
                   Architecture
                 </button>
+                <button 
+                  className={`pe-view-btn ${mainView === "rag" ? "active" : ""}`}
+                  onClick={() => setMainView("rag")}
+                  title="Ask questions about the paper using HexaMind AI Assistant"
+                  style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}
+                >
+                  <HexiAvatar state="idle" width={18} height={18} />
+                  <span>HexaMind</span>
+                </button>
               </div>
 
               <div className="pe-header-divider" />
@@ -1161,9 +1172,21 @@ export default function PaperExplorer() {
               <div className="pe-summary-pane" style={{ overflow: "hidden", display: "flex", flexDirection: "column", height: "100%" }}>
                 {renderSummaryView()}
               </div>
-            ) : (
+            ) : mainView === "architecture" ? (
               <div className="pe-architecture-pane" style={{ overflow: "hidden", display: "flex", flexDirection: "column", height: "100%" }}>
                 {renderArchitectureView()}
+              </div>
+            ) : (
+              <div className="pe-rag-pane" style={{ overflow: "hidden", display: "flex", flexDirection: "column", height: "100%" }}>
+                <RagAssistant
+                  paperTitle={paperTitle}
+                  nodes={nodes}
+                  summary={summary}
+                  architectureNotes={architectureNotes}
+                  pdfPage={pdfPage}
+                  onNavigateToPage={setPdfPage}
+                  onOpenPdf={() => { setPdfOpen(true); setShowPdf(true); }}
+                />
               </div>
             )}
           </div>
