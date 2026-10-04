@@ -539,6 +539,42 @@ function rankElementsWithRRF(queryText, history, elements) {
   return { matched, similarity, historyWeight };
 }
 
+// Procedural Coreference & Topic Drift Resolver
+async function resolveQueryAndHistory(query, history, genAI, modelName) {
+  if (!Array.isArray(history) || history.length === 0) {
+    return { effectiveQuery: query, activeHistory: [] };
+  }
+
+  const similarity = computeContinuousSimilarity(query, history);
+  const corefPronouns = /\b(it|this|that|they|them|he|she|these|those|prerequisite|prerequisites|requirement|requirements|first|second|third|which|what|how)\b/i;
+  const hasPronouns = corefPronouns.test(query);
+
+  if (similarity < 0.05 && !hasPronouns) {
+    return { effectiveQuery: query, activeHistory: [] };
+  }
+
+  let effectiveQuery = query;
+  if (hasPronouns && genAI && history.length > 0) {
+    try {
+      const model = genAI.getGenerativeModel({ model: modelName || "gemini-1.5-flash" });
+      const recentHist = history.slice(-4).map(h => `${h.role === "user" ? "User" : "Assistant"}: ${h.text || ''}`).join("\n");
+      const prompt = `Given the conversation history:\n${recentHist}\n\nUser Question: "${query}"\n\nIf the user question refers to previous context using pronouns or implicit references, rewrite it into a single, complete, standalone question. If it is already standalone, return it as is. Output ONLY the standalone question text with no extra commentary.`;
+      const result = await model.generateContent({
+        contents: [{ role: "user", parts: [{ text: prompt }] }],
+        generationConfig: { maxOutputTokens: 100, temperature: 0.1 }
+      });
+      const rephrased = result?.response?.text()?.trim();
+      if (rephrased && rephrased.length > 3) {
+        effectiveQuery = rephrased;
+      }
+    } catch (err) {
+      console.warn("[resolveQueryAndHistory] Coreference resolution fallback to raw query:", err.message);
+    }
+  }
+
+  return { effectiveQuery, activeHistory: history };
+}
+
 // ─── POST /paper/rag/query ──────────────────────────────────────────────────
 router.post("/paper/rag/query", async (req, res, next) => {
   try {
@@ -694,7 +730,7 @@ MATCHED RAW TEXT PASSAGES:
 ${matchedChunks.slice(0, 3).map(c => `[${c.section}]: ${c.text}`).join("\n\n")}
 
 ${formattedHistory ? `CONVERSATION HISTORY (PAST FOLLOW-UPS):\n${formattedHistory}\n` : ""}
-USER QUESTION: "${query}"
+USER QUESTION: "${effectiveQuery}"
 `;
 
       for (const candidateModel of candidateModels) {

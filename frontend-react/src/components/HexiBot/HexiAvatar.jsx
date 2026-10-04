@@ -3,7 +3,7 @@ import "./hexi-bot.js";
 import { useTheme } from "../../context/ThemeContext";
 
 const HexiAvatar = forwardRef(function HexiAvatar(
-  { state = "idle", width = 160, height = 150, className = "", style = {}, onSearchComplete },
+  { state = "idle", width = 160, height = 150, className = "", style = {}, onClick, onSearchComplete },
   ref
 ) {
   const botRef = useRef(null);
@@ -51,10 +51,12 @@ const HexiAvatar = forwardRef(function HexiAvatar(
   return (
     <div
       className={`hexi-avatar-container ${className}`}
+      onClick={onClick}
       style={{
         display: "inline-flex",
         alignItems: "center",
         justifyContent: "center",
+        cursor: onClick ? "pointer" : "default",
         width: typeof width === "number" ? `${width}px` : width,
         height: typeof height === "number" ? `${height}px` : height,
         ...style,

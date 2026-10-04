@@ -452,6 +452,36 @@ function generateRagAnswer(query, paperTitle, nodes, summary, architectureNotes,
   return { answerText, citations: citations.slice(0, 4) };
 }
 
+function InteractiveAvatar({ defaultState = "idle", width = 50, height = 46, style = {} }) {
+  const [avatarState, setAvatarState] = useState(defaultState);
+  const timerRef = useRef(null);
+
+  const handleClick = (e) => {
+    if (e && typeof e.stopPropagation === "function") e.stopPropagation();
+    setAvatarState("happy");
+    if (timerRef.current) clearTimeout(timerRef.current);
+    timerRef.current = setTimeout(() => {
+      setAvatarState(defaultState);
+    }, 2500);
+  };
+
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) clearTimeout(timerRef.current);
+    };
+  }, []);
+
+  return (
+    <HexiAvatar
+      state={avatarState}
+      width={width}
+      height={height}
+      onClick={handleClick}
+      style={{ cursor: "pointer", ...style }}
+    />
+  );
+}
+
 const BACKEND_URL = import.meta.env.VITE_API_BASE_URL 
   || (import.meta.env.DEV ? "http://localhost:8000" : window.location.origin);
 
@@ -512,7 +542,7 @@ export default function RagAssistant({
       setMessages((prev) => [...prev, userMsg]);
       setInputQuery("");
       setIsSearching(true);
-      setHexiState("searching");
+      setHexiState("idle");
 
       const runQueryBackend = async () => {
         let answerText = "";
@@ -577,8 +607,7 @@ export default function RagAssistant({
 
         setMessages((prev) => [...prev, hexiMsg]);
         setIsSearching(false);
-        setHexiState("happy");
-        setTimeout(() => setHexiState("idle"), 3500);
+        setHexiState("idle");
       };
 
       // Trigger Hexi Avatar searching sequence UI animation
@@ -644,7 +673,7 @@ export default function RagAssistant({
       <div className="rag-messages-body">
         {messages.length === 0 && (
           <div className="rag-welcome-box">
-            <HexiAvatar state="happy" width={110} height={105} />
+            <InteractiveAvatar defaultState="idle" width={110} height={105} />
             <h4 className="rag-welcome-title">Hi, I'm HexaMind! Your Research Paper Assistant</h4>
             <p className="rag-welcome-desc">
               Ask me anything about **"{paperTitle || "this paper"}"**. I index all concepts, formulas, architecture notes, and literature citations so you can query questions and jump directly to source pages!
@@ -671,7 +700,7 @@ export default function RagAssistant({
               {msg.sender === "user" ? (
                 <div className="rag-user-avatar">YOU</div>
               ) : (
-                <HexiAvatar state="talk" width={50} height={46} />
+                <InteractiveAvatar />
               )}
             </div>
 
@@ -722,7 +751,7 @@ export default function RagAssistant({
         {isSearching && (
           <div className="rag-msg-row hexi">
             <div className="rag-msg-avatar">
-              <HexiAvatar state="searching" width={50} height={46} />
+              <HexiAvatar ref={avatarRef} state="searching" width={50} height={46} />
             </div>
             <div className="rag-msg-bubble" style={{ background: "var(--accent-bg)" }}>
               <div className="rag-thinking-indicator">

@@ -60,7 +60,7 @@ export default function HexiFloatingDrawer({
       >
         <span className="hexi-trigger-pulse" />
         <span className="hexi-trigger-badge">{isOpen ? "CLOSE" : "HEXAMIND"}</span>
-        <HexiAvatar state={isOpen ? "happy" : "idle"} width={48} height={48} />
+        <HexiAvatar state="idle" width={48} height={48} />
       </button>
     </div>
   );
