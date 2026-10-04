@@ -137,7 +137,7 @@ def get_fallback_model_list(primary_model=None):
     1. Primary: LLM_MODEL or AGENT_MODEL (or explicit primary_model parameter)
     2. Fallbacks: LLM_FALLBACK_MODELS (comma-separated list from .env)
     """
-    raw_fallbacks = os.environ.get("LLM_FALLBACK_MODELS", "gemini-3.6-flash,gemini-3.7-flash,gemini-3.5-flash")
+    raw_fallbacks = os.environ.get("LLM_FALLBACK_MODELS", "gemini-1.5-flash,gemini-2.5-flash-lite,gemini-2.0-flash,gemini-1.5-pro")
     models = [m.strip() for m in raw_fallbacks.split(",") if m.strip()]
     
     # Resolve primary model
@@ -147,9 +147,9 @@ def get_fallback_model_list(primary_model=None):
         elif hasattr(primary_model, "model_name"):
             primary_name = primary_model.model_name.replace("models/", "")
         else:
-            primary_name = os.environ.get("LLM_MODEL") or os.environ.get("AGENT_MODEL") or "gemini-3.6-flash"
+            primary_name = os.environ.get("LLM_MODEL") or os.environ.get("AGENT_MODEL") or "gemini-1.5-flash"
     else:
-        primary_name = os.environ.get("LLM_MODEL") or os.environ.get("AGENT_MODEL") or "gemini-3.6-flash"
+        primary_name = os.environ.get("LLM_MODEL") or os.environ.get("AGENT_MODEL") or "gemini-1.5-flash"
 
     # Avoid duplication
     models = [m for m in models if m != primary_name]
@@ -236,7 +236,7 @@ def get_gemini_model(default_model=None, use_agent_model=False):
     genai.configure(api_key=api_key)
     
     env_var = "AGENT_MODEL" if use_agent_model else "LLM_MODEL"
-    model_name = os.environ.get(env_var) or os.environ.get("LLM_MODEL") or default_model or "gemini-3.7-flash"
+    model_name = os.environ.get(env_var) or os.environ.get("LLM_MODEL") or default_model or "gemini-1.5-flash"
     
     model = genai.GenerativeModel(model_name)
     return model, api_key

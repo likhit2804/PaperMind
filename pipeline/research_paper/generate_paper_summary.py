@@ -208,7 +208,12 @@ def main():
             chunk = sections[i:i + chunk_size]
             label = " & ".join([c["label"] for c in chunk])
             if len(label) > 60:
-                label = chunk[0]["label"] + " et al."
+                first_lbl = chunk[0]["label"]
+                last_lbl = chunk[-1]["label"]
+                if first_lbl != last_lbl:
+                    label = f"{first_lbl} – {last_lbl}"
+                else:
+                    label = f"{first_lbl} (and sub-sections)"
             raw_text = "\n\n".join([c["raw_text"] for c in chunk])
             grouped_sections.append({
                 "label": label,

@@ -24,9 +24,9 @@ const settings = {
   openaiApiKey: process.env.OPENAI_API_KEY || null,
   // Your current quota screenshot shows Gemini 2 Flash / 2 Flash Lite at 0/0,
   // while Gemini 2.5 Flash Lite still has available request capacity.
-  llmModel: process.env.LLM_MODEL || "gemini-3.7-flash",
-  agentModel: process.env.AGENT_MODEL || process.env.LLM_MODEL || "gemini-3.7-flash",
-  llmFallbackModels: (process.env.LLM_FALLBACK_MODELS || "gemini-3.7-flash,gemini-3.6-flash,gemini-3.5-flash")
+  llmModel: process.env.LLM_MODEL || "gemini-1.5-flash",
+  agentModel: process.env.AGENT_MODEL || process.env.LLM_MODEL || "gemini-1.5-flash",
+  llmFallbackModels: (process.env.LLM_FALLBACK_MODELS || "gemini-1.5-flash,gemini-2.5-flash-lite,gemini-2.0-flash,gemini-1.5-pro")
     .split(",")
     .map((item) => item.trim())
     .filter(Boolean),

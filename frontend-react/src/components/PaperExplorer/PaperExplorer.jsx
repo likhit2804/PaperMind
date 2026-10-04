@@ -104,6 +104,7 @@ export default function PaperExplorer() {
   const [sessionId, setSessionId]     = useState(saved?.sessionId || null);
   const [fileType, setFileType]       = useState(saved?.fileType || "pdf");
   const [selectedNode, setSelectedNode] = useState(null);
+  const [ragMessages, setRagMessages] = useState(saved?.ragMessages || []);
   
   // Tabs & Search states for the master list
   const [activeTab, setActiveTab]     = useState("all");
@@ -275,9 +276,9 @@ export default function PaperExplorer() {
   // ── Persist whenever session changes ────────────────────────────────────
   useEffect(() => {
     if (sessionId && nodes.length > 0) {
-      saveSession({ sessionId, paperTitle, nodes, summary, architectureNotes, fileType });
+      saveSession({ sessionId, paperTitle, nodes, summary, architectureNotes, fileType, ragMessages });
     }
-  }, [sessionId, paperTitle, nodes, summary, architectureNotes, fileType]);
+  }, [sessionId, paperTitle, nodes, summary, architectureNotes, fileType, ragMessages]);
 
   // ── Upload handler ───────────────────────────────────────────────────────
   const handleFileUpload = useCallback(async (file) => {
@@ -297,6 +298,7 @@ export default function PaperExplorer() {
     setSelectedNode(null);
     setSummary(null);
     setArchitectureNotes("");
+    setRagMessages([]);
     setMainView("glossary");
     setPdfOpen(false);
     clearSession();
@@ -329,7 +331,8 @@ export default function PaperExplorer() {
         nodes: data.nodes || [], 
         summary: data.summary || null, 
         architectureNotes: data.architectureNotes || "",
-        fileType: data.fileType || "pdf"
+        fileType: data.fileType || "pdf",
+        ragMessages: []
       });
     } catch (err) {
       setError(err.message);
@@ -357,6 +360,7 @@ export default function PaperExplorer() {
     setSelectedNode(null);
     setSummary(null);
     setArchitectureNotes("");
+    setRagMessages([]);
     setFileType("pdf");
     setMainView("glossary");
     setPdfOpen(false);
@@ -1179,6 +1183,7 @@ export default function PaperExplorer() {
             ) : (
               <div className="pe-rag-pane" style={{ overflow: "hidden", display: "flex", flexDirection: "column", height: "100%" }}>
                 <RagAssistant
+                  sessionId={sessionId}
                   paperTitle={paperTitle}
                   nodes={nodes}
                   summary={summary}
@@ -1186,6 +1191,8 @@ export default function PaperExplorer() {
                   pdfPage={pdfPage}
                   onNavigateToPage={setPdfPage}
                   onOpenPdf={() => { setPdfOpen(true); setShowPdf(true); }}
+                  messages={ragMessages}
+                  onUpdateMessages={setRagMessages}
                 />
               </div>
             )}

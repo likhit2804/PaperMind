@@ -2,37 +2,291 @@ import React, { useState, useRef, useEffect, useCallback } from "react";
 import HexiAvatar from "../HexiBot/HexiAvatar";
 import "./RagAssistant.css";
 
+// ── Math / LaTeX Renderer Component using KaTeX ───────────────────────────
+function MathRenderer({ math, block = false }) {
+  const ref = useRef(null);
+
+  useEffect(() => {
+    if (ref.current && window.katex) {
+      try {
+        let cleanMath = math.trim();
+        if (cleanMath.startsWith("$$") && cleanMath.endsWith("$$")) {
+          cleanMath = cleanMath.slice(2, -2).trim();
+        } else if (cleanMath.startsWith("$") && cleanMath.endsWith("$")) {
+          cleanMath = cleanMath.slice(1, -1).trim();
+        } else if (cleanMath.startsWith("\\[") && cleanMath.endsWith("\\]")) {
+          cleanMath = cleanMath.slice(2, -2).trim();
+        } else if (cleanMath.startsWith("\\(") && cleanMath.endsWith("\\)")) {
+          cleanMath = cleanMath.slice(2, -2).trim();
+        }
+        window.katex.render(cleanMath, ref.current, {
+          displayMode: block,
+          throwOnError: false,
+        });
+      } catch (err) {
+        console.warn("KaTeX render error:", err);
+        ref.current.textContent = math;
+      }
+    } else if (ref.current) {
+      ref.current.textContent = math;
+    }
+  }, [math, block]);
+
+  return <span ref={ref} className={block ? "katex-block" : "katex-inline"} />;
+}
+
+function renderFormattedInlineText(text) {
+  if (!text) return null;
+
+  // 1. Process inline code `code`
+  const codeRegex = /(`.*?`)/g;
+  const codeParts = text.split(codeRegex);
+
+  return codeParts.map((cPart, cIdx) => {
+    if (cPart.startsWith("`") && cPart.endsWith("`") && cPart.length > 2) {
+      return (
+        <code
+          key={cIdx}
+          style={{
+            background: "var(--accent-bg)",
+            border: "1px solid var(--border-color)",
+            padding: "1px 5px",
+            fontSize: "0.85em",
+            fontFamily: "var(--font-mono)",
+            borderRadius: "2px",
+          }}
+        >
+          {cPart.slice(1, -1)}
+        </code>
+      );
+    }
+
+    // 2. Process bold **bold**
+    const boldRegex = /(\*\*.*?\*\*)/g;
+    const boldParts = cPart.split(boldRegex);
+
+    return (
+      <React.Fragment key={cIdx}>
+        {boldParts.map((bPart, bIdx) => {
+          if (bPart.startsWith("**") && bPart.endsWith("**")) {
+            const inner = bPart.slice(2, -2);
+            return <strong key={bIdx}>{renderFormattedInlineText(inner)}</strong>;
+          }
+
+          // 3. Process italic *italic* or _italic_
+          const italicRegex = /(\*.*?\*|_.*?_)/g;
+          const italicParts = bPart.split(italicRegex);
+
+          return (
+            <React.Fragment key={bIdx}>
+              {italicParts.map((iPart, iIdx) => {
+                if (
+                  (iPart.startsWith("*") && iPart.endsWith("*") && iPart.length > 2) ||
+                  (iPart.startsWith("_") && iPart.endsWith("_") && iPart.length > 2)
+                ) {
+                  return <em key={iIdx}>{iPart.slice(1, -1)}</em>;
+                }
+                return iPart;
+              })}
+            </React.Fragment>
+          );
+        })}
+      </React.Fragment>
+    );
+  });
+}
+
+function renderMathAndFormattedText(text) {
+  if (!text) return null;
+
+  // Match display math ($$ ... $$ or \[ ... \]) and inline math ($ ... $ or \( ... \))
+  const mathRegex = /(\$\$.*?\$\$|\\\[.*?\\\]|\$.*?\$|\\\(.*?\\\))/gs;
+  const parts = text.split(mathRegex);
+
+  return parts.map((part, index) => {
+    if (!part) return null;
+
+    const isDisplayMath = (part.startsWith("$$") && part.endsWith("$$")) || (part.startsWith("\\[") && part.endsWith("\\]"));
+    const isInlineMath = (part.startsWith("$") && part.endsWith("$")) || (part.startsWith("\\(") && part.endsWith("\\)"));
+
+    if (isDisplayMath) {
+      return (
+        <div key={index} style={{ margin: "10px 0", textAlign: "center", overflowX: "auto" }}>
+          <MathRenderer math={part} block={true} />
+        </div>
+      );
+    }
+
+    if (isInlineMath) {
+      return <MathRenderer key={index} math={part} block={false} />;
+    }
+
+    return <React.Fragment key={index}>{renderFormattedInlineText(part)}</React.Fragment>;
+  });
+}
+
+function preprocessRagText(rawText) {
+  if (!rawText) return "";
+
+  let cleaned = rawText;
+
+  // 1. Wrap un-bracketed \begin{...}...\end{...} environments inside display math $$...$$
+  cleaned = cleaned.replace(
+    /(?<!\$\$|\\\[)\s*(\\begin\{(?:cases|matrix|bmatrix|align|equation|gather|split)\}.*?\\end\{(?:cases|matrix|bmatrix|align|equation|gather|split)\})\s*(?!\$\$|\\\])/gs,
+    (match, env) => {
+      const singleLineEnv = env.replace(/\n\s*\n/g, "\n");
+      return `\n\n$$\n${singleLineEnv}\n$$\n\n`;
+    }
+  );
+
+  // 2. Clean up blank lines inside existing $$ ... $$ blocks
+  cleaned = cleaned.replace(/\$\$(.*?)\$\$/gs, (match, inner) => {
+    const compactInner = inner.split("\n").map(l => l.trim()).filter(Boolean).join("\n");
+    return `$$\n${compactInner}\n$$`;
+  });
+
+  return cleaned;
+}
+
+function renderMarkdownLine(line, idx) {
+  const trimmed = line.trim();
+  if (!trimmed) return <div key={idx} style={{ height: "6px" }} />;
+
+  // 1. Horizontal Rules (---, ***, ___)
+  if (trimmed === "---" || trimmed === "***" || trimmed === "___") {
+    return (
+      <hr
+        key={idx}
+        style={{
+          border: "none",
+          borderTop: "1.5px dashed var(--border-color-muted)",
+          margin: "12px 0",
+          opacity: 0.7,
+        }}
+      />
+    );
+  }
+
+  // 2. Headings (#, ##, ###, ####, #####, ######)
+  const headingMatch = line.match(/^(#{1,6})\s+(.+)$/);
+  if (headingMatch) {
+    const level = headingMatch[1].length;
+    const titleText = headingMatch[2];
+
+    if (level === 1) {
+      return (
+        <h3 key={idx} style={{ margin: "14px 0 6px 0", fontSize: "1.1rem", fontWeight: 800, color: "var(--text-primary)" }}>
+          {renderMathAndFormattedText(titleText)}
+        </h3>
+      );
+    }
+    if (level === 2) {
+      return (
+        <h4 key={idx} style={{ margin: "12px 0 6px 0", fontSize: "1.02rem", fontWeight: 800, color: "var(--text-primary)" }}>
+          {renderMathAndFormattedText(titleText)}
+        </h4>
+      );
+    }
+    if (level === 3) {
+      return (
+        <h4 key={idx} style={{ margin: "10px 0 4px 0", fontSize: "0.96rem", fontWeight: 800, color: "var(--text-primary)" }}>
+          {renderMathAndFormattedText(titleText)}
+        </h4>
+      );
+    }
+    return (
+      <h5 key={idx} style={{ margin: "10px 0 4px 0", fontSize: "0.9rem", fontWeight: 800, color: "var(--text-primary)" }}>
+        {renderMathAndFormattedText(titleText)}
+      </h5>
+    );
+  }
+
+  // Standalone Bold Header Line (**Header Text**)
+  if (line.startsWith("**") && line.endsWith("**") && line.length < 65 && !line.includes("\n")) {
+    const title = line.slice(2, -2);
+    return (
+      <h4 key={idx} style={{ margin: "10px 0 4px 0", fontSize: "0.95rem", fontWeight: 800 }}>
+        {renderMathAndFormattedText(title)}
+      </h4>
+    );
+  }
+
+  // 3. Blockquotes (> Quote)
+  if (line.startsWith("> ")) {
+    return (
+      <blockquote
+        key={idx}
+        style={{
+          borderLeft: "3px solid var(--border-color)",
+          paddingLeft: "12px",
+          margin: "8px 0",
+          fontStyle: "italic",
+          opacity: 0.9,
+        }}
+      >
+        {renderMathAndFormattedText(line.substring(2))}
+      </blockquote>
+    );
+  }
+
+  // 4. Unordered Lists (- Item, * Item, + Item)
+  const ulMatch = line.match(/^[\-\*\+]\s+(.+)$/);
+  if (ulMatch) {
+    return (
+      <li key={idx} style={{ marginLeft: "16px", marginBottom: "4px", listStyleType: "square" }}>
+        {renderMathAndFormattedText(ulMatch[1])}
+      </li>
+    );
+  }
+
+  // 5. Ordered Lists (1. Item, 2. Item)
+  const olMatch = line.match(/^(\d+)\.\s+(.+)$/);
+  if (olMatch) {
+    return (
+      <li key={idx} style={{ marginLeft: "16px", marginBottom: "4px" }}>
+        <span style={{ fontFamily: "var(--font-mono)", fontWeight: 700, marginRight: "4px" }}>{olMatch[1]}.</span>
+        {renderMathAndFormattedText(olMatch[2])}
+      </li>
+    );
+  }
+
+  // Standard Paragraph
+  return (
+    <p key={idx} style={{ margin: "0 0 6px 0" }}>
+      {renderMathAndFormattedText(line)}
+    </p>
+  );
+}
+
 // Helper component for rendering text with inline Math and linebreaks
 function FormattedRagText({ text }) {
   if (!text) return null;
-  const lines = text.split("\n");
+
+  const processedText = preprocessRagText(text);
+
+  // Split text by display math ($$ ... $$) first so multiline math blocks stay intact
+  const displayMathRegex = /(\$\$.*?\$\$)/gs;
+  const blocks = processedText.split(displayMathRegex);
 
   return (
     <div className="rag-formatted-text">
-      {lines.map((line, idx) => {
-        if (!line.trim()) return <div key={idx} style={{ height: "8px" }} />;
+      {blocks.map((block, bIdx) => {
+        if (!block) return null;
 
-        if (line.startsWith("### ") || line.startsWith("**") && line.endsWith("**")) {
-          const title = line.replace(/^###\s*/, "").replace(/^\*\*/, "").replace(/\*\*$/, "");
+        if (block.startsWith("$$") && block.endsWith("$$")) {
           return (
-            <h4 key={idx} style={{ margin: "10px 0 4px 0", fontSize: "0.95rem", fontWeight: 800 }}>
-              {title}
-            </h4>
+            <div key={bIdx} style={{ margin: "12px 0", textAlign: "center", overflowX: "auto" }}>
+              <MathRenderer math={block} block={true} />
+            </div>
           );
         }
 
-        if (line.startsWith("- ") || line.startsWith("* ")) {
-          return (
-            <li key={idx} style={{ marginLeft: "14px", marginBottom: "4px" }}>
-              {line.substring(2)}
-            </li>
-          );
-        }
+        const lines = block.split("\n");
 
         return (
-          <p key={idx} style={{ margin: "0 0 6px 0" }}>
-            {line}
-          </p>
+          <React.Fragment key={bIdx}>
+            {lines.map((line, idx) => renderMarkdownLine(line, idx))}
+          </React.Fragment>
         );
       })}
     </div>
@@ -78,7 +332,7 @@ function generateRagAnswer(query, paperTitle, nodes, summary, architectureNotes,
       }
 
       if (
-        (qLower.includes("reference") || qLower.includes("paper") || qLower.includes("author") || qLower.includes("cite")) &&
+        (qLower.includes("reference") || qLower.includes("cited") || qLower.includes("author") || qLower.includes("citation")) &&
         typeStr === "reference"
       ) {
         matchScore += 5;
@@ -108,17 +362,47 @@ function generateRagAnswer(query, paperTitle, nodes, summary, architectureNotes,
   // Construct intelligent response
   let answerText = "";
 
-  if (qLower.includes("main contribution") || qLower.includes("summary") || qLower.includes("overview")) {
+  if (
+    qLower.includes("section") ||
+    qLower.includes("sections") ||
+    qLower.includes("outline") ||
+    qLower.includes("topic") ||
+    qLower.includes("topics") ||
+    qLower.includes("global") ||
+    qLower.includes("whole paper") ||
+    qLower.includes("table of content")
+  ) {
+    answerText = `### Complete Paper Topics & Section Outline for "${paperTitle || "this paper"}"\n\n`;
+    if (summary && summary.sections && summary.sections.length > 0) {
+      summary.sections.forEach((sec, idx) => {
+        let labelClean = (sec.label || "").replace(/\s+et\s+al\.?$/i, " & related sub-sections").trim();
+        const prefix = /^\d/.test(labelClean) ? "" : `${idx + 1}. `;
+        answerText += `**${prefix}${labelClean}**\n${sec.summary}\n\n`;
+      });
+    } else if (summary && (summary.executive || summary.overview)) {
+      answerText += `${summary.executive || summary.overview}\n\n`;
+      const contribs = summary.keyContributions || summary.contributions;
+      if (contribs && contribs.length > 0) {
+        answerText += `**Key Topics & Focus Areas:**\n`;
+        contribs.forEach((c) => {
+          answerText += `- ${c}\n`;
+        });
+      }
+    } else {
+      answerText += `Topics across the paper include Introduction, Problem Formulation & MIP Background, Neural Diving (predicting partial variable assignments), Neural Branching (variable selection policies), and Empirical Benchmarking.`;
+    }
+  } else if (qLower.includes("main contribution") || qLower.includes("summary") || qLower.includes("overview")) {
     answerText = `### Paper Summary & Core Contribution\n\n`;
-    if (summary && summary.overview) {
-      answerText += `${summary.overview}\n\n`;
+    if (summary && (summary.overview || summary.executive)) {
+      answerText += `${summary.overview || summary.executive}\n\n`;
     } else {
       answerText += `This paper, **"${paperTitle || "Uploaded Research Paper"}"**, presents a formal methodology for domain concept extraction and structured analysis.\n\n`;
     }
 
-    if (summary && summary.keyContributions && summary.keyContributions.length > 0) {
+    const contribs = summary ? (summary.keyContributions || summary.contributions) : null;
+    if (contribs && contribs.length > 0) {
       answerText += `**Key Contributions:**\n`;
-      summary.keyContributions.forEach((contrib) => {
+      contribs.forEach((contrib) => {
         answerText += `- ${contrib}\n`;
       });
     }
@@ -168,7 +452,11 @@ function generateRagAnswer(query, paperTitle, nodes, summary, architectureNotes,
   return { answerText, citations: citations.slice(0, 4) };
 }
 
+const BACKEND_URL = import.meta.env.VITE_API_BASE_URL 
+  || (import.meta.env.DEV ? "http://localhost:8000" : window.location.origin);
+
 export default function RagAssistant({
+  sessionId = null,
   paperTitle = "",
   nodes = [],
   summary = null,
@@ -176,8 +464,23 @@ export default function RagAssistant({
   pdfPage = 1,
   onNavigateToPage,
   onOpenPdf,
+  messages: externalMessages,
+  onUpdateMessages,
 }) {
-  const [messages, setMessages] = useState([]);
+  const [localMessages, setLocalMessages] = useState([]);
+  const messages = externalMessages !== undefined ? externalMessages : localMessages;
+
+  const setMessages = useCallback(
+    (updater) => {
+      if (onUpdateMessages) {
+        onUpdateMessages(updater);
+      } else {
+        setLocalMessages(updater);
+      }
+    },
+    [onUpdateMessages]
+  );
+
   const [inputQuery, setInputQuery] = useState("");
   const [hexiState, setHexiState] = useState("idle");
   const [isSearching, setIsSearching] = useState(false);
@@ -195,7 +498,7 @@ export default function RagAssistant({
   }, [messages, isSearching]);
 
   const handleSendQuery = useCallback(
-    (queryText) => {
+    async (queryText) => {
       const q = (queryText || inputQuery).trim();
       if (!q || isSearching) return;
 
@@ -211,42 +514,47 @@ export default function RagAssistant({
       setIsSearching(true);
       setHexiState("searching");
 
-      // Trigger Hexi Avatar searching sequence
-      if (avatarRef.current && avatarRef.current.runSearchSequence) {
-        avatarRef.current.runSearchSequence({
-          lookupLoops: 2,
-          textLoops: 1,
-          onComplete: () => {
-            // RAG Retrieval
-            const { answerText, citations } = generateRagAnswer(
-              q,
-              paperTitle,
-              nodes,
-              summary,
-              architectureNotes,
-              pdfPage
-            );
+      const runQueryBackend = async () => {
+        let answerText = "";
+        let citations = [];
 
-            const hexiMsg = {
-              id: (Date.now() + 1).toString(),
-              sender: "hexi",
-              text: answerText,
-              citations,
-              timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-            };
+        let suggestedFollowUps = [];
 
-            setMessages((prev) => [...prev, hexiMsg]);
-            setIsSearching(false);
-            setHexiState("happy");
+        // Attempt backend RAG endpoint call
+        if (sessionId) {
+          try {
+            const historyPayload = messages.slice(-6).map((m) => ({
+              role: m.sender === "user" ? "user" : "assistant",
+              text: m.text,
+            }));
 
-            // Return Hexi back to idle state after 3s
-            setTimeout(() => setHexiState("idle"), 3500);
-          },
-        });
-      } else {
-        // Fallback timeout if web component method is loading
-        setTimeout(() => {
-          const { answerText, citations } = generateRagAnswer(
+            const res = await fetch(`${BACKEND_URL}/paper/rag/query`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                sessionId,
+                query: q,
+                currentPage: pdfPage,
+                history: historyPayload,
+              }),
+            });
+
+            if (res.ok) {
+              const data = await res.json();
+              if (data.answer) {
+                answerText = data.answer;
+                citations = data.citations || [];
+                suggestedFollowUps = data.suggestedFollowUps || [];
+              }
+            }
+          } catch (err) {
+            console.warn("[RagAssistant] Backend RAG fetch failed, using client fallback:", err);
+          }
+        }
+
+        // Fallback to client-side local search if backend call wasn't available
+        if (!answerText) {
+          const fallback = generateRagAnswer(
             q,
             paperTitle,
             nodes,
@@ -254,23 +562,41 @@ export default function RagAssistant({
             architectureNotes,
             pdfPage
           );
+          answerText = fallback.answerText;
+          citations = fallback.citations;
+        }
 
-          const hexiMsg = {
-            id: (Date.now() + 1).toString(),
-            sender: "hexi",
-            text: answerText,
-            citations,
-            timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-          };
+        const hexiMsg = {
+          id: (Date.now() + 1).toString(),
+          sender: "hexi",
+          text: answerText,
+          citations,
+          suggestedFollowUps,
+          timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+        };
 
-          setMessages((prev) => [...prev, hexiMsg]);
-          setIsSearching(false);
-          setHexiState("happy");
-          setTimeout(() => setHexiState("idle"), 3500);
-        }, 2200);
+        setMessages((prev) => [...prev, hexiMsg]);
+        setIsSearching(false);
+        setHexiState("happy");
+        setTimeout(() => setHexiState("idle"), 3500);
+      };
+
+      // Trigger Hexi Avatar searching sequence UI animation
+      if (avatarRef.current && avatarRef.current.runSearchSequence) {
+        avatarRef.current.runSearchSequence({
+          lookupLoops: 2,
+          textLoops: 1,
+          onComplete: () => {
+            runQueryBackend();
+          },
+        });
+      } else {
+        setTimeout(() => {
+          runQueryBackend();
+        }, 1500);
       }
     },
-    [inputQuery, isSearching, paperTitle, nodes, summary, architectureNotes, pdfPage]
+    [inputQuery, isSearching, sessionId, paperTitle, nodes, summary, architectureNotes, pdfPage, setMessages]
   );
 
   const handleCitationClick = (page) => {
@@ -369,6 +695,22 @@ export default function RagAssistant({
                     >
                       <span>Page {cit.page}</span>
                       {cit.section && <span style={{ opacity: 0.75 }}>({cit.section})</span>}
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              {msg.suggestedFollowUps && msg.suggestedFollowUps.length > 0 && (
+                <div className="rag-followups-wrap" style={{ marginTop: "12px", paddingTop: "8px", borderTop: "1px dashed var(--border-color-muted)", display: "flex", flexWrap: "wrap", gap: "6px" }}>
+                  <span style={{ fontSize: "0.72rem", opacity: 0.8, width: "100%", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.03em" }}>Suggested Follow-ups:</span>
+                  {msg.suggestedFollowUps.map((chipText, fIdx) => (
+                    <button
+                      key={fIdx}
+                      className="rag-suggestion-chip"
+                      onClick={() => handleSendQuery(chipText)}
+                      style={{ fontSize: "0.8rem", padding: "4px 10px" }}
+                    >
+                      {chipText} ↗
                     </button>
                   ))}
                 </div>
