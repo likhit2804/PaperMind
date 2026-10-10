@@ -1,32 +1,8 @@
-import fitz
-import re
-import json
-import os
-import sys
-import math
-import google.generativeai as genai
-from dotenv import load_dotenv
-
-# Ensure both workspace root and pipeline folder are in sys.path
-current_dir = os.path.dirname(os.path.abspath(__file__))
-pipeline_dir = os.path.dirname(current_dir)
-workspace_root = os.path.dirname(pipeline_dir)
-if workspace_root not in sys.path:
-    sys.path.insert(0, workspace_root)
-if pipeline_dir not in sys.path:
-    sys.path.insert(0, pipeline_dir)
-if current_dir not in sys.path:
-    sys.path.insert(0, current_dir)
+from _bootstrap import *
 
 from pipeline.utils import parse_json_robust, call_gemini_with_retry, get_gemini_model, clean_text
 from pipeline.research_paper.pdf_utils import parse_toc
 from pipeline.research_paper.tex_utils import extract_tex_sections, get_tex_title
-
-# Load environment variables
-load_dotenv(override=True)
-
-# Reconfigure standard output to handle unicode outputs in Windows
-sys.stdout.reconfigure(encoding='utf-8')
 
 # Generic English stop words
 STOPWORDS = set([
@@ -714,6 +690,48 @@ class TraceLogger:
             except Exception:
                 pass
 
+def clean_sentence_definition(sentence):
+    """Strips narrative preambles to convert raw paper sentences into crisp formal concept definitions."""
+    s = re.sub(r'^(The (circuit|architecture|algorithm|model|system|framework) operates in [^:]+:\s*–?\s*|As (shown|discussed) in [^,]+,\s*|In this paper,\s*|We (propose|observe|find|introduce) (that\s*)?)', '', sentence, flags=re.IGNORECASE)
+    s = s.strip()
+    if s:
+        s = s[0].upper() + s[1:]
+    return s
+
+def extract_concept_context_sentences(sections, verified_terms):
+    """
+    Extracts the exact sentence from paper text where each verified concept first appears,
+    providing grounding context definitions.
+    """
+    context_map = {}
+    full_text = "\n".join([sec.get("raw_text", "") for sec in sections])
+    
+    # Split text into sentences
+    raw_sentences = re.split(r'(?<=[.!?])\s+', full_text)
+    clean_sentences = []
+    for s in raw_sentences:
+        st = s.strip()
+        if st and 25 <= len(st) <= 300:
+            if not re.match(r'^(Figure|Table|Fig\.|Tab\.|\[\d+\])', st, re.IGNORECASE):
+                clean_sentences.append(re.sub(r'\s+', ' ', st))
+
+    for term in verified_terms:
+        term_clean = term.strip().lower()
+        if not term_clean:
+            continue
+        pattern = re.compile(r'\b' + re.escape(term_clean) + r'\b', re.IGNORECASE)
+        found_sentence = None
+        for sentence in clean_sentences:
+            if pattern.search(sentence):
+                found_sentence = sentence
+                break
+        if found_sentence:
+            clean_def = clean_sentence_definition(found_sentence)
+            # Format both definition and operational contribution role for UI display
+            context_map[term_clean] = f"{clean_def} [Role: Key structural concept used in paper execution]"
+
+    return context_map
+
 def main():
     if len(sys.argv) < 3:
         print("Usage: python extract_paper_concepts.py <pdf_or_tex_path> <output_json>")
@@ -805,13 +823,16 @@ def main():
         filtered_section = [c for c in candidates if c.strip().lower() in verified_set]
         filtered_section_candidates[label] = filtered_section
         
+    concept_definitions = extract_concept_context_sentences(sections, verified_set)
+
     logger.stop()
     
     output_data = {
         "paper_title": title,
         "sections": filtered_section_candidates,
         "global_document_concepts": [c for c in global_doc_candidates if c.lower() in verified_set],
-        "unique_key_terms": sorted(list(verified_set))
+        "unique_key_terms": sorted(list(verified_set)),
+        "concept_definitions": concept_definitions
     }
     
     with open(output_path, "w", encoding="utf-8") as f:

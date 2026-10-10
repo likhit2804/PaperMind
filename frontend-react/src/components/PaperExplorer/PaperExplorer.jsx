@@ -4,6 +4,7 @@ import UploadZone from "./UploadZone";
 import AnalysisTimeline from "./AnalysisTimeline";
 import RagAssistant from "../RagAssistant/RagAssistant";
 import HexiAvatar from "../HexiBot/HexiAvatar";
+import WorkInProgressPage from "../WorkInProgress/WorkInProgressPage";
 
 const BACKEND_URL = import.meta.env.VITE_API_BASE_URL 
   || (import.meta.env.DEV ? "http://localhost:8000" : window.location.origin);
@@ -113,7 +114,7 @@ export default function PaperExplorer() {
   const [pdfPage, setPdfPage]         = useState(1);
   const [pdfOpen, setPdfOpen]         = useState(!!saved);
   const [pdfDocked, setPdfDocked]     = useState(true);
-  const [autoFilterPage, setAutoFilterPage] = useState(true);
+  const [autoFilterPage, setAutoFilterPage] = useState(false);
 
   const [showUpgradeBanner, setShowUpgradeBanner] = useState(false);
 
@@ -364,32 +365,48 @@ export default function PaperExplorer() {
     setFileType("pdf");
     setMainView("glossary");
     setPdfOpen(false);
-    setAutoFilterPage(true);
+    setAutoFilterPage(false);
   }, [sessionId]);
 
   // ── Filtering Logic ──────────────────────────────────────────────────────
-  const pageFilteredNodes = (pdfOpen && autoFilterPage)
-    ? nodes.filter(n => n.type === "notation" || n.sources?.some(src => src.page === pdfPage))
+  const cleanSearch = search.trim().toLowerCase();
+  const isSearching = cleanSearch.length > 0;
+  
+  // When user types a search query, search across all node fields (label, definition, latex, section)
+  const searchMatchingNodes = isSearching
+    ? nodes.filter((n) => {
+        const labelStr = (n.label || "").toLowerCase();
+        const defStr = (n.definition || "").toLowerCase();
+        const latexStr = (n.latex || "").toLowerCase();
+        const rawStr = (n.rawText || "").toLowerCase();
+        const secStr = (n.sources || []).map(s => s.section || "").join(" ").toLowerCase();
+        return (
+          labelStr.includes(cleanSearch) ||
+          defStr.includes(cleanSearch) ||
+          latexStr.includes(cleanSearch) ||
+          rawStr.includes(cleanSearch) ||
+          secStr.includes(cleanSearch)
+        );
+      })
     : nodes;
 
+  const baseNodes = (!isSearching && pdfOpen && autoFilterPage)
+    ? nodes.filter(n => n.type === "notation" || n.sources?.some(src => src.page === pdfPage))
+    : searchMatchingNodes;
+
   const counts = {
-    all: pageFilteredNodes.length,
-    concept: pageFilteredNodes.filter(n => (n.type || "concept") === "concept").length,
-    notation: pageFilteredNodes.filter(n => n.type === "notation").length,
-    equation: pageFilteredNodes.filter(n => n.type === "equation").length,
-    reference: pageFilteredNodes.filter(n => n.type === "reference").length,
+    all: baseNodes.length,
+    concept: baseNodes.filter(n => (n.type || "concept") === "concept").length,
+    notation: baseNodes.filter(n => n.type === "notation").length,
+    equation: baseNodes.filter(n => n.type === "equation").length,
+    reference: baseNodes.filter(n => n.type === "reference").length,
   };
 
-  const tabFiltered = pageFilteredNodes.filter((n) => {
+  const filtered = baseNodes.filter((n) => {
     const type = n.type || "concept";
     if (activeTab === "all") return true;
     return type === activeTab;
   });
-
-  const filtered = tabFiltered.filter((n) =>
-    n.label.toLowerCase().includes(search.toLowerCase()) ||
-    n.definition?.toLowerCase().includes(search.toLowerCase())
-  );
 
   const displayType = (type) => {
     switch (type) {
@@ -525,10 +542,14 @@ export default function PaperExplorer() {
 
         {roleBadge && (
           <div className="nd-section nd-role-section" style={{ padding: "14px 0" }}>
-            <p className="nd-label">Influence Role</p>
-            <span className={`nd-role-badge role-${roleBadge.toLowerCase().replace(/[^a-z]/g, "")}`}>
-              {roleBadge}
-            </span>
+            <p className="nd-label">{node.type === "concept" ? "Paper Contribution & Operational Role" : "Influence Role"}</p>
+            {roleBadge.length < 35 ? (
+              <span className={`nd-role-badge role-${roleBadge.toLowerCase().replace(/[^a-z]/g, "")}`}>
+                {roleBadge}
+              </span>
+            ) : (
+              <p className="nd-definition" style={{ fontStyle: "italic", opacity: 0.95 }}>{roleBadge}</p>
+            )}
           </div>
         )}
 
@@ -880,7 +901,7 @@ export default function PaperExplorer() {
         <div className="pe-actions">
           {nodes.length > 0 && (
             <>
-              {/* Segmented Selector for Main Views */}
+              {/* Primary Left Selector: Glossary + HexaMind Icon Button */}
               <div className="pe-view-selector">
                 <button 
                   className={`pe-view-btn ${mainView === "glossary" ? "active" : ""}`}
@@ -889,27 +910,12 @@ export default function PaperExplorer() {
                   Glossary
                 </button>
                 <button 
-                  className={`pe-view-btn ${mainView === "summary" ? "active" : ""}`}
-                  onClick={() => setMainView("summary")}
-                  disabled={!summary}
-                >
-                  Summary
-                </button>
-                <button 
-                  className={`pe-view-btn ${mainView === "architecture" ? "active" : ""}`}
-                  onClick={() => setMainView("architecture")}
-                  disabled={!architectureNotes}
-                >
-                  Architecture
-                </button>
-                <button 
                   className={`pe-view-btn ${mainView === "rag" ? "active" : ""}`}
                   onClick={() => setMainView("rag")}
-                  title="Ask questions about the paper using HexaMind AI Assistant"
-                  style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}
+                  title="HexaMind AI Assistant"
+                  style={{ padding: "4px 8px", display: "inline-flex", alignItems: "center", justifyContent: "center" }}
                 >
                   <HexiAvatar state="idle" width={18} height={18} />
-                  <span>HexaMind</span>
                 </button>
               </div>
 
@@ -951,6 +957,30 @@ export default function PaperExplorer() {
                     <line x1="10.5" y1="2" x2="10.5" y2="14" stroke="currentColor" strokeWidth="1.5"/>
                     {mainView === "glossary" && isDetailVisible && <rect x="11" y="2.5" width="3.5" height="11" fill="currentColor" opacity="0.35"/>}
                   </svg>
+                </button>
+              </div>
+
+              <div className="pe-header-divider" />
+
+              {/* Top Right Shifted Tabs: Summary, Architecture, Paper Notes */}
+              <div className="pe-view-selector">
+                <button 
+                  className={`pe-view-btn ${mainView === "summary" ? "active" : ""}`}
+                  onClick={() => setMainView("summary")}
+                >
+                  Summary
+                </button>
+                <button 
+                  className={`pe-view-btn ${mainView === "architecture" ? "active" : ""}`}
+                  onClick={() => setMainView("architecture")}
+                >
+                  Architecture
+                </button>
+                <button 
+                  className={`pe-view-btn ${mainView === "notes" ? "active" : ""}`}
+                  onClick={() => setMainView("notes")}
+                >
+                  Paper Notes
                 </button>
               </div>
 
@@ -1048,7 +1078,7 @@ export default function PaperExplorer() {
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                       />
-                      <span className="ktp-count">{filtered.length}/{tabFiltered.length}</span>
+                      <span className="ktp-count">{filtered.length}/{baseNodes.length}</span>
                     </div>
 
                     {/* Active Page Guide Indicator with Toggle */}
@@ -1174,11 +1204,27 @@ export default function PaperExplorer() {
               </>
             ) : mainView === "summary" ? (
               <div className="pe-summary-pane" style={{ overflow: "hidden", display: "flex", flexDirection: "column", height: "100%" }}>
-                {renderSummaryView()}
+                <WorkInProgressPage
+                  featureName="Executive Summary"
+                  scriptName="generate_paper_summary.py"
+                  onReturnToGlossary={() => setMainView("glossary")}
+                />
               </div>
             ) : mainView === "architecture" ? (
               <div className="pe-architecture-pane" style={{ overflow: "hidden", display: "flex", flexDirection: "column", height: "100%" }}>
-                {renderArchitectureView()}
+                <WorkInProgressPage
+                  featureName="Architecture Notes"
+                  scriptName="generate_architecture_notes.py"
+                  onReturnToGlossary={() => setMainView("glossary")}
+                />
+              </div>
+            ) : mainView === "notes" ? (
+              <div className="pe-notes-pane" style={{ overflow: "hidden", display: "flex", flexDirection: "column", height: "100%" }}>
+                <WorkInProgressPage
+                  featureName="Paper Notes"
+                  scriptName="generate_paper_notes.py"
+                  onReturnToGlossary={() => setMainView("glossary")}
+                />
               </div>
             ) : (
               <div className="pe-rag-pane" style={{ overflow: "hidden", display: "flex", flexDirection: "column", height: "100%" }}>

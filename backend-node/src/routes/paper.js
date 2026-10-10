@@ -149,8 +149,8 @@ router.post("/paper/analyze", upload.single("file"), async (req, res, next) => {
     await runPythonWithTimeout([unifiedScript, path.resolve(filePath), outDir], settings.baseDir);
 
     // Parse outputs
-    const conceptsData = JSON.parse(fs.readFileSync(conceptsJson, "utf-8"));
-    const mdText = fs.readFileSync(notesMd, "utf-8");
+    const conceptsData = fs.existsSync(conceptsJson) ? JSON.parse(fs.readFileSync(conceptsJson, "utf-8")) : { unique_key_terms: [], sections: {} };
+    const mdText = fs.existsSync(notesMd) ? fs.readFileSync(notesMd, "utf-8") : "# Paper Notes\n\nUnder active upgrade.";
     const glossaryNodes = parseGlossaryMd(mdText);
 
     // Parse summary if available
@@ -174,10 +174,75 @@ router.post("/paper/analyze", upload.single("file"), async (req, res, next) => {
     }
 
     // Initialize combined nodes with type: "concept"
-    const nodes = glossaryNodes.map(node => ({
+    let conceptNodes = glossaryNodes.map(node => ({
       ...node,
       type: "concept"
     }));
+
+    // If notes.md produced no concept nodes (e.g. notes generation step was omitted/paused),
+    // populate concept nodes directly from concepts.json (conceptsData)
+    if (conceptNodes.length === 0 && conceptsData) {
+      const conceptMap = new Map();
+      const conceptDefs = conceptsData.concept_definitions || {};
+      const paperTitleStr = conceptsData.paper_title || "Research Paper";
+
+      if (conceptsData.sections && typeof conceptsData.sections === "object") {
+        Object.entries(conceptsData.sections).forEach(([secName, terms]) => {
+          const pageMatch = secName.match(/Page\s*(\d+)/i);
+          const page = pageMatch ? parseInt(pageMatch[1], 10) : 1;
+
+          if (Array.isArray(terms)) {
+            terms.forEach(term => {
+              if (!term || typeof term !== "string") return;
+              const cleanTerm = term.trim();
+              if (!cleanTerm) return;
+              const termKey = cleanTerm.toLowerCase();
+
+              const definition = conceptDefs[termKey] || `Core technical concept introduced in ${secName}. [Role: Provides foundational algorithmic component in ${secName}]`;
+
+              if (!conceptMap.has(termKey)) {
+                conceptMap.set(termKey, {
+                  id: `concept_${termKey.replace(/[^a-z0-9]/g, "_")}`,
+                  label: cleanTerm.charAt(0).toUpperCase() + cleanTerm.slice(1),
+                  definition: definition,
+                  sources: [{ page, section: secName }],
+                  type: "concept"
+                });
+              } else {
+                const existing = conceptMap.get(termKey);
+                if (!existing.sources.some(s => s.section === secName)) {
+                  existing.sources.push({ page, section: secName });
+                }
+              }
+            });
+          }
+        });
+      }
+
+      const termsList = conceptsData.unique_key_terms || conceptsData.key_terms;
+      if (Array.isArray(termsList)) {
+        termsList.forEach(term => {
+          if (!term || typeof term !== "string") return;
+          const cleanTerm = term.trim();
+          if (!cleanTerm) return;
+          const termKey = cleanTerm.toLowerCase();
+          const definition = conceptDefs[termKey] || `Key domain term extracted from '${paperTitleStr}'. [Role: Key domain contribution in paper baseline execution]`;
+          if (!conceptMap.has(termKey)) {
+            conceptMap.set(termKey, {
+              id: `concept_${termKey.replace(/[^a-z0-9]/g, "_")}`,
+              label: cleanTerm.charAt(0).toUpperCase() + cleanTerm.slice(1),
+              definition: definition,
+              sources: [{ page: 1, section: "Full Document" }],
+              type: "concept"
+            });
+          }
+        });
+      }
+
+      conceptNodes = Array.from(conceptMap.values());
+    }
+
+    const nodes = [...conceptNodes];
 
     // Parse references if available
     if (fs.existsSync(referencesJson)) {
@@ -383,7 +448,7 @@ function getCachedSessionData(sessionId, outDir) {
     try {
       conceptsData = JSON.parse(fs.readFileSync(conceptsPath, "utf-8"));
       paperTitle = conceptsData.paper_title || paperTitle;
-      concepts = conceptsData.key_terms || [];
+      concepts = conceptsData.unique_key_terms || conceptsData.key_terms || [];
     } catch (err) {
       console.warn("[rag/cache] Failed to read concepts:", err);
     }
