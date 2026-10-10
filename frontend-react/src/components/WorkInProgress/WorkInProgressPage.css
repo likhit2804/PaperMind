@@ -1,0 +1,40 @@
+.wip-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  width: 100%;
+  padding: 32px 24px;
+}
+
+.wip-hero {
+  width: 100%;
+  max-width: 720px;
+  padding: 28px 24px;
+}
+
+.wip-content-row {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.wip-avatar-box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.wip-text-box {
+  flex: 1;
+}
+
+.wip-one-liner {
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: var(--text-main);
+  font-weight: 500;
+}

@@ -1,46 +1,16 @@
-import sys
-import os
-import re
-import json
-import fitz
-import google.generativeai as genai
-from dotenv import load_dotenv
-
-# Ensure both workspace root and pipeline folder are in sys.path
-current_dir = os.path.dirname(os.path.abspath(__file__))
-pipeline_dir = os.path.dirname(current_dir)
-workspace_root = os.path.dirname(pipeline_dir)
-if workspace_root not in sys.path:
-    sys.path.insert(0, workspace_root)
-if pipeline_dir not in sys.path:
-    sys.path.insert(0, pipeline_dir)
-if current_dir not in sys.path:
-    sys.path.insert(0, current_dir)
-
+from _bootstrap import *
 from pipeline.utils import parse_json_robust, call_gemini_with_retry, get_gemini_model, get_pdf_title
 from pipeline.research_paper.tex_utils import extract_tex_notations, get_tex_title
 
-# Load environment variables
-load_dotenv(override=True)
-
-# Enforce UTF-8 output encoding for Windows consoles
-sys.stdout.reconfigure(encoding='utf-8')
-
-# Common English words and document structure markers to exclude from symbols
-EXCLUDE_WORDS = {
+# Standard structural English stopwords
+STANDARD_STOPWORDS = {
     "the", "and", "for", "with", "from", "that", "this", "these", "those",
-    "many", "using", "used", "some", "such", "typical", "general", "specific",
-    "both", "either", "neither", "each", "every", "other", "another", "would",
-    "could", "should", "shall", "will", "been", "have", "has", "had", "were",
-    "was", "are", "they", "them", "their", "our", "your", "its", "her", "his",
-    "she", "him", "who", "whom", "whose", "what", "which", "where", "when",
-    "why", "how", "but", "not", "only", "about", "above", "below", "after",
-    "before", "into", "onto", "upon", "again", "once", "then", "than", "first",
-    "second", "third", "one", "two", "three", "four", "five", "six", "seven",
-    "eight", "nine", "ten", "total", "prime", "share", "data", "many", "using",
-    "but", "left", "without", "et", "al", "cost", "tive", "in", "qss", "against",
-    "efficient", "tangled", "pauli", "given", "distinct", "recovered", "single",
-    "we", "show", "mance", "naries", "protocol", "analyses", "security", "tion"
+    "using", "used", "some", "such", "both", "either", "neither", "each",
+    "every", "other", "another", "would", "could", "should", "shall", "will",
+    "been", "have", "has", "had", "were", "was", "are", "they", "them", "their",
+    "our", "your", "its", "her", "his", "she", "him", "who", "whom", "whose",
+    "what", "which", "where", "when", "why", "how", "but", "not", "only",
+    "about", "above", "below", "after", "before", "into", "onto", "upon"
 }
 
 def extract_lines_from_words(page):
@@ -94,19 +64,19 @@ def extract_lines_from_words(page):
 
 def is_valid_symbol(symbol):
     """
-    Validates if a parsed string looks like a mathematical symbol/variable.
+    Validates if a parsed string looks like a mathematical symbol/variable based on structural rules.
     """
     symbol_strip = symbol.strip()
-    if not symbol_strip:
-        return False
-    if len(symbol_strip) > 15:
+    if not symbol_strip or len(symbol_strip) > 15:
         return False
         
     symbol_lower = symbol_strip.lower()
     
-    if symbol_lower in EXCLUDE_WORDS:
+    # 1. Reject standard structural English stopwords
+    if symbol_lower in STANDARD_STOPWORDS:
         return False
         
+    # 2. Reject section numbers or bullet prefixes (e.g. "1.", "a.", "iv.")
     if re.match(r'^(?:[a-zA-Z]|\d+|[ivxIVX]+)\.$', symbol_strip):
         return False
         
@@ -114,18 +84,27 @@ def is_valid_symbol(symbol):
     if len(words) > 3:
         return False
         
-    if all(w.lower() in EXCLUDE_WORDS for w in words):
+    if all(w.lower() in STANDARD_STOPWORDS for w in words):
         return False
         
-    has_math_char = any(c in symbol_strip for c in ['_', '^', '(', ')', '[', ']', '|', '⟩', '⟨', '>', '<', '=', '+', '−', '*', '/', '⊕', '⊗', '·', '′', '\'', '’', '∈', '⊂', '⊃', '⊆', '⊇', '∩', '∪', '√', '∞', '≈', '≠', '≡', '∝'])
+    has_math_char = any(c in symbol_strip for c in ['_', '^', '(', ')', '[', ']', '|', '⟩', '⟨', '>', '<', '=', '+', '−', '*', '/', '⊕', '⊗', '·', '′', '\'', '’', '∈', '⊂', '⊃', '⊆', '⊇', '∩', '∪', '√', '∞', '≈', '≠', '≡', '∝', '\\'])
     has_greek = any(c in symbol_strip for c in 'αβγδεζηθικλμνξοπρστυφχψωϵ')
     
-    if len(symbol_strip) <= 3:
-        return True
+    # A) Valid if contains structural math decorators or Greek letters (e.g. W_i, \alpha, f(x), S')
     if has_math_char or has_greek:
         return True
-    if symbol_strip.isupper() and len(symbol_strip) <= 5:
+
+    # B) Valid if single-letter variable or short symbol (e.g. x, y, n, K, S)
+    if len(symbol_strip) <= 3:
         return True
+
+    # C) Valid if uppercase matrix / acronym operator (e.g. CNOT, MAJ, UMA, RES)
+    if symbol_strip.isupper() and len(symbol_strip) <= 6:
+        return True
+
+    # D) Reject 4+ letter lowercase words with NO math decorators (e.g. "security", "protocol", "performance")
+    if len(symbol_strip) >= 4 and symbol_strip.islower() and not has_math_char:
+        return False
         
     if re.match(r'^[a-zA-Z]+[0-9a-zA-Z_]*$', symbol_strip):
         if len(symbol_strip) <= 8:

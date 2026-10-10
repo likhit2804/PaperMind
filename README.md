@@ -1,12 +1,14 @@
 <div align="center">
 
 # PaperMind
+
 ### *Read less. Understand more.*
 
 [![React](https://img.shields.io/badge/Frontend-React%2018%20%7C%20Vite-61DAFB?logo=react&logoColor=black)](https://react.dev/)
 [![Node.js](https://img.shields.io/badge/Backend-Node.js%20%7C%20Express-339933?logo=node.js&logoColor=white)](https://nodejs.org/)
 [![Python](https://img.shields.io/badge/Pipeline-Python%203.11+-3776AB?logo=python&logoColor=white)](https://www.python.org/)
 [![Gemini](https://img.shields.io/badge/AI-Google%20Gemini%202.5%2F3.1-8E75B2?logo=google&logoColor=white)](https://ai.google.dev/)
+[![RAG](https://img.shields.io/badge/RAG-Hybrid%20RRF%20Engine-FF6F61)](backend-node/src/routes/paper.js)
 [![KaTeX](https://img.shields.io/badge/Math-KaTeX-00d1b2)](https://katex.org/)
 [![Docker](https://img.shields.io/badge/Container-Docker%20Ready-2496ED?logo=docker&logoColor=white)](https://www.docker.com/)
 
@@ -47,9 +49,10 @@
 
 ## Overview
 
-Reading modern scientific and machine learning research papers can be overwhelming due to dense mathematical nomenclature, intricate system architectures, and deep citation dependencies. 
+Reading modern scientific and machine learning research papers can be overwhelming due to dense mathematical nomenclature, intricate system architectures, and deep citation dependencies.
 
 **PaperMind** bridges this gap by functioning as an intelligent AI-guided research companion:
+
 - **Digests Both PDF and LaTeX Sources**: Ingests standard scientific PDFs or raw `.tex` source files.
 - **Deconstructs Paper Complexity**: Automatically extracts, classifies, and cross-references key concepts, math symbols, formulas, and references.
 - **Synchronized Three-Pane Workbench**: View the original paper alongside structured breakdowns with bi-directional navigation (click any concept or equation to highlight its exact page occurrences).
@@ -59,28 +62,47 @@ Reading modern scientific and machine learning research papers can be overwhelmi
 ## Key Features
 
 ### 1. Dual-Format Ingestion (PDF & LaTeX)
+
 Upload pre-compiled scientific papers (`.pdf`) or author source packages (`.tex`). The backend normalizes whitespace, strips compilation artifacts, extracts structured sections, and feeds clean text into downstream extractors.
 
 ### 2. 7-Stage Autonomous AI Extraction Pipeline
+
 Orchestrated via a single unified workflow:
+
 - **Key Concept Extraction**: Hybrid N-Gram TF-IDF candidate selection + Gemini LLM semantic refinement.
 - **Context-Rich Glossary**: Synthesizes definitions, cross-concept relationship tags, and section citations.
 - **Executive Summaries**: Synthesizes TL;DR, core research questions, major contributions, and section timelines.
 - **System & Model Architecture**: Generates structured technical breakdowns with Markdown tables and algorithmic flowcharts.
 - **Citation & Literature Graph**: Classifies cited works by influence role (*Foundational, Baseline, Comparison, Theoretical Support*).
 - **Mathematical Nomenclature**: Compiles a dedicated notation dictionary mapping every Greek symbol/variable to its paper definition.
-- **LaTeX Formula Solver**: Extracts equations into clean LaTeX markup and links variables directly to the notation glossary.
+- **LaTeX Formula Solver & Notation Mapping**: 100% Zero-Loss Equation Extractor. Converts raw display math blocks into clean LaTeX markup and maps every variable symbol ($L_H$, $p$, $*$) to its exact contextual definition.
 
 ### 3. Interactive 3-Pane Research Workbench
+
 - **Left Pane (Document Viewer)**: PDF renderer with page-by-page scrolling, jump-to-page anchors, and responsive scaling.
 - **Center Pane (Master Explorer)**: Filter by node type (*All, Concepts, Notations, Equations, References*), live search, and auto-filter to current page view.
 - **Right Pane (Detail & Knowledge Inspector)**: Deep-dive inspector with KaTeX math rendering, influence badges, inter-concept links, and clickable page occurrences.
 - **Executive Summary & Architecture Views**: One-click toggle between granular entity cards, full-paper executive summaries, and system design specifications.
 
 ### 4. VS Code-Inspired Productivity Controls
+
 - **Adjustable Split Panes**: Smooth draggable borders between PDF viewer, entity list, and detail inspector.
 - **Hotkey Support**: Toggle panes instantly using `Alt + 1` (PDF), `Alt + 2` (Master list), and `Alt + 3` (Detail pane).
 - **Persistent State**: Seamless `localStorage` caching ensures you never lose extracted paper sessions across refreshes.
+
+### 5. HexiBot — Interactive Context-Aware RAG Assistant
+
+PaperMind features an integrated, real-time Retrieval-Augmented Generation (RAG) research assistant powered by **HexiBot**:
+
+- **Continuous Soft Reciprocal Rank Fusion (RRF)**: Merges dense character N-Gram vector similarity with contextual keyword matching for precise paper chunk retrieval.
+- **Procedural Coreference & Topic Drift Resolution**: Dynamically resolves ambiguous query pronouns (*"it"*, *"this equation"*, *"the prerequisite"*) against preceding conversation turns using Gemini LLM.
+- **Live LaTeX & Code Rendering**: Streams responses formatted with KaTeX mathematical formulas, syntax-highlighted code blocks, and clickable concept/section citation tags.
+- **State-Aware Animated Mascot**: Interactive hexagonal AI mascot with dynamic visual state loops (*Idle*, *Searching / RAG Lookup*, *Happy*).
+
+<div align="center">
+  <img src="docs/hexi_rag_assistant_preview.jpg" alt="HexiBot Interactive RAG Assistant UI Preview" width="100%" />
+  <p><em>HexiBot Interactive RAG Assistant responding to a paper query with KaTeX math rendering, code snippets, and clickable reference source tags.</em></p>
+</div>
 
 ---
 
@@ -93,12 +115,14 @@ flowchart TB
         PDF["PDF Canvas Viewer"]
         KaTeX["KaTeX Formula Engine"]
         Storage["LocalStorage State Cache"]
+        RAGUI["HexiBot RAG Assistant Drawer"]
     end
 
     subgraph Backend["Backend (Node.js + Express)"]
         Server["Express API Server (Port 8000)"]
         Multer["Multer File Handler"]
         Runner["Python ChildProcess Runner"]
+        RAG["Continuous Hybrid RRF RAG Engine"]
     end
 
     subgraph Pipeline["Python 3.11 AI Pipeline"]
@@ -129,6 +153,9 @@ flowchart TB
     UI --> PDF
     UI --> KaTeX
     UI --> Storage
+
+    RAGUI <-->|Stream Queries & RAG Answers| RAG
+    RAG <-->|Coreference & Answer Synthesis| Gemini
 ```
 
 ---
@@ -152,18 +179,21 @@ The Python pipeline is located in `pipeline/research_paper/` and coordinated by 
 ## Tech Stack
 
 ### Frontend
+
 - **Framework**: React 18 + Vite
 - **Math Typesetting**: KaTeX (CDN with fast LaTeX formula parsing)
 - **Styling**: Vanilla CSS3 (Custom design system, glassmorphism, responsive CSS grid/flexbox, Dark/Light theme context)
 - **State**: React Hooks + LocalStorage session persistence
 
 ### Backend
+
 - **Runtime**: Node.js (ES Modules, Express 4.x)
 - **File Ingestion**: Multer (disk storage with session UUID partitioning)
 - **Pipeline Bridge**: Asynchronous Node.js `child_process.spawn`
 - **Security & Utilities**: CORS, dotenv, Zod, UUID
 
 ### AI & Data Pipeline
+
 - **Python**: 3.11+
 - **PDF & Document Parsing**: PyMuPDF (`fitz`), `pdfplumber`, regex-based LaTeX AST parsing
 - **LLM Engine**: Google Generative AI (`google-generativeai`), Gemini 2.5 / 3.1 Flash Lite
@@ -179,46 +209,70 @@ PaperMind/
 │   ├── src/
 │   │   ├── routes/
 │   │   │   ├── health.js         # Health check endpoint (/health)
-│   │   │   └── paper.js          # Paper upload, pipeline execution & PDF streaming
-│   │   ├── uploads/papers/       # Session storage for uploaded papers & extracted JSON
+│   │   │   └── paper.js          # Paper upload, pipeline execution, RAG engine & PDF streaming
+│   │   ├── uploads/              # Session storage for uploaded papers & extracted JSON
 │   │   ├── config.js             # Environment and path settings
+│   │   ├── logger.js             # Express logger utility
 │   │   └── server.js             # Application entry point & static asset serving
 │   ├── package.json
+│   ├── package-lock.json
 │   └── nodemon.json
 ├── frontend-react/               # React 18 + Vite Frontend
 │   ├── src/
+│   │   ├── assets/               # Static assets & graphics
 │   │   ├── components/
+│   │   │   ├── HexiBot/
+│   │   │   │   ├── HexiAvatar.jsx      # Animated AI Assistant mascot graphics
+│   │   │   │   └── hexi-bot.js         # Bot state machine & mascot handlers
 │   │   │   ├── PaperExplorer/
+│   │   │   │   ├── AnalysisTimeline.jsx# Pipeline stage extraction timeline
 │   │   │   │   ├── PaperExplorer.jsx   # 3-Pane master workbench & KaTeX renderer
 │   │   │   │   ├── PdfViewer.jsx       # Integrated PDF viewer with page navigation
 │   │   │   │   └── UploadZone.jsx      # Drag & drop upload target (.pdf & .tex)
+│   │   │   ├── RagAssistant/
+│   │   │   │   ├── HexiFloatingDrawer.css
+│   │   │   │   ├── HexiFloatingDrawer.jsx # Floating drawer widget container
+│   │   │   │   ├── RagAssistant.css
+│   │   │   │   └── RagAssistant.jsx    # Interactive RAG research assistant UI
 │   │   │   ├── Banner.jsx              # Status alert component
 │   │   │   ├── Card.jsx                # UI container card
+│   │   │   ├── HexagonIcon.jsx         # Custom SVG icon
 │   │   │   └── ThemeToggle.jsx         # Dark / Light theme switcher
 │   │   ├── context/
 │   │   │   └── ThemeContext.jsx        # Theme persistence provider
 │   │   ├── App.jsx                     # Top-level portal layout & connection badge
 │   │   ├── App.css                     # Primary workspace styles
-│   │   ├── index.css                   # Core tokens, themes & layout CSS
+│   │   ├── design-tokens.css           # Core CSS design system variables
+│   │   ├── index.css                   # Layout CSS, dark mode & base resets
 │   │   └── main.jsx                    # React DOM root
+│   ├── index.html
 │   ├── package.json
 │   └── vite.config.js
 ├── pipeline/                     # Python AI & Document Extraction Pipeline
 │   ├── research_paper/
+│   │   ├── extract_notations_local.py     # Math notation dictionary builder
 │   │   ├── extract_paper_concepts.py      # TF-IDF + Gemini concept extraction
+│   │   ├── extract_paper_equations.py     # LaTeX equation extractor
+│   │   ├── extract_paper_references.py    # Citation role classifier
+│   │   ├── generate_architecture_notes.py # System architecture & Markdown tables
 │   │   ├── generate_paper_notes.py        # Glossary & connection compiler
 │   │   ├── generate_paper_summary.py      # TL;DR & section breakdown
-│   │   ├── generate_architecture_notes.py # System architecture & Markdown tables
-│   │   ├── extract_paper_references.py    # Citation role classifier
-│   │   ├── extract_notations_local.py     # Math notation dictionary builder
-│   │   ├── extract_paper_equations.py     # LaTeX equation extractor
 │   │   ├── pdf_utils.py                   # PyMuPDF TOC and section segmenter
 │   │   ├── tex_utils.py                   # LaTeX section & equation parser
 │   │   └── unified_paper_pipeline.py      # Master runner for all 7 stages
-│   ├── extraction_parameters.md           # Parameter documentation for scoring
+│   ├── evaluate_public_benchmarks.py      # Public academic dataset benchmark evaluator (SemEval / KP20k)
+│   ├── logger.py                          # Pipeline logger module
 │   └── utils.py                           # Gemini retry client, JSON repair & rate limiter
+├── ablation_results/             # Evaluation & benchmarking datasets
+├── docs/                         # Methods audit, validation guides & preview images
+│   ├── ablation_and_methods_audit_report.md
+│   ├── extraction_validation_guide.md
+│   ├── public_academic_datasets_guide.md
+│   └── hexi_rag_assistant_preview.jpg
 ├── Dockerfile                    # Dual Python 3.11 + Node 20 container definition
+├── render.yaml                   # Cloud deployment specification
 ├── requirements.txt              # Python dependencies
+├── run_local.bat                 # Local startup script
 └── .env                          # Environment variables & API keys
 ```
 
@@ -227,7 +281,9 @@ PaperMind/
 ## Getting Started
 
 ### Prerequisites
+
 Make sure you have the following installed on your machine:
+
 - [Node.js](https://nodejs.org/) (v18.x or v20.x recommended)
 - [Python](https://www.python.org/) (v3.10, v3.11, or v3.12)
 - [Git](https://git-scm.com/)
@@ -236,6 +292,7 @@ Make sure you have the following installed on your machine:
 ---
 
 ### 1. Clone Repository
+
 ```bash
 git clone https://github.com/likhit2804/PaperMind.git
 cd PaperMind
@@ -244,6 +301,7 @@ cd PaperMind
 ---
 
 ### 2. Environment Configuration
+
 Create a `.env` file in the project root (or update the existing one):
 
 ```env
@@ -268,6 +326,7 @@ PYTHON_PATH=.\venv\Scripts\python.exe
 ---
 
 ### 3. Python Environment Setup
+
 Set up a Python virtual environment and install dependencies:
 
 ```bash
@@ -287,6 +346,7 @@ pip install -r requirements.txt
 ---
 
 ### 4. Node Backend Setup
+
 Install backend dependencies:
 
 ```bash
@@ -298,6 +358,7 @@ cd ..
 ---
 
 ### 5. React Frontend Setup
+
 Install frontend dependencies:
 
 ```bash
@@ -314,18 +375,22 @@ cd ..
 
 Run the backend and frontend in separate terminal windows for live reloading:
 
-#### Terminal 1 — Start Backend:
+#### Terminal 1 — Start Backend
+
 ```bash
 cd backend-node
 npm run dev
 ```
+
 *Backend runs on `http://localhost:8000`*
 
-#### Terminal 2 — Start Frontend:
+#### Terminal 2 — Start Frontend
+
 ```bash
 cd frontend-react
 npm run dev
 ```
+
 *Frontend dev server runs on `http://localhost:5173` (proxies requests to port 8000)*
 
 ---
@@ -344,6 +409,7 @@ cd ..
 cd backend-node
 npm start
 ```
+
 *Open your browser and visit: `http://localhost:8000`*
 
 ---
@@ -359,6 +425,7 @@ docker build -t papermind:latest .
 # Run container with environment variables
 docker run -p 8000:8000 --env-file .env papermind:latest
 ```
+
 *Visit `http://localhost:8000` in your browser.*
 
 ---
@@ -366,10 +433,12 @@ docker run -p 8000:8000 --env-file .env papermind:latest
 ## API Reference
 
 ### 1. Upload and Analyze Research Paper
+
 - **Endpoint**: `POST /paper/analyze`
 - **Content-Type**: `multipart/form-data`
 - **Body**: `file` (File buffer, `.pdf` or `.tex`)
 - **Response**:
+
 ```json
 {
   "sessionId": "26bc2418-4a11-4327-836a-2748f6684683",
@@ -405,14 +474,17 @@ docker run -p 8000:8000 --env-file .env papermind:latest
 ```
 
 ### 2. Stream Original Document
+
 - **Endpoint**: `GET /paper/pdf/:sessionId`
 - **Response**: `application/pdf` or `text/plain` stream.
 
 ### 3. Clear Paper Session
+
 - **Endpoint**: `DELETE /paper/:sessionId`
 - **Response**: `{ "detail": "Session files deleted successfully." }`
 
 ### 4. Health Check
+
 - **Endpoint**: `GET /health`
 - **Response**: `{ "status": "ok" }`
 

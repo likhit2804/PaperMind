@@ -1,14 +1,20 @@
 """
-unified_paper_pipeline.py - Orchestrates the execution of all 7 individual scripts
-in the research paper processing pipeline.
+unified_paper_pipeline.py - Orchestrates the execution of all research paper processing pipeline scripts.
+
+Architecture & Pairing:
+  - Phase 1: Sequential Base Anchor (extract_paper_concepts.py) - Must run first for concept grounding.
+  - Phase 2: Parallel Zero-Interference Extraction Group (max_workers = 3):
+      1. extract_paper_equations.py (1 Batched API Call for complex math, local typesetting for simple math)
+      2. extract_paper_references.py (0 API Calls - 100% Offline Dual Format Regex Engine)
+      3. extract_notations_local.py  (0 API Calls - 100% Offline Regex Engine)
 
 Usage:
   python unified_paper_pipeline.py <input_path> <output_dir>
 """
-import sys
-import os
+from _bootstrap import *
 import subprocess
-
+import time
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 import warnings
 warnings.filterwarnings("ignore")
@@ -16,19 +22,35 @@ warnings.filterwarnings("ignore")
 def run_script(script_name, args):
     script_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), script_name)
     cmd = [sys.executable, "-u", "-W", "ignore", script_path] + args
-    print(f"\n---> Running: {' '.join(cmd)}", flush=True)
+    print(f"\n---> [Pipeline Step] Launching {script_name}...", flush=True)
     
+    t0 = time.time()
     env = dict(os.environ)
     env["PYTHONWARNINGS"] = "ignore"
+    env["PYTHONUNBUFFERED"] = "1"
     
-    result = subprocess.run(cmd, capture_output=True, text=True, env=env)
-    if result.stdout:
-        print(result.stdout)
-    if result.returncode != 0:
-        print(f"Error: {script_name} failed with exit code {result.returncode}:")
-        if result.stderr:
-            print(result.stderr)
+    proc = subprocess.Popen(
+        cmd,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        text=True,
+        env=env,
+        bufsize=1
+    )
+    
+    for line in iter(proc.stdout.readline, ""):
+        if line:
+            print(f"[{script_name}] {line.rstrip()}", flush=True)
+            
+    proc.stdout.close()
+    return_code = proc.wait()
+    elapsed = time.time() - t0
+    
+    if return_code != 0:
+        print(f"❌ Error: {script_name} failed with exit code {return_code} ({elapsed:.2f}s)", flush=True)
         return False
+        
+    print(f"✅ [Pipeline Step Completed] {script_name} finished in {elapsed:.2f}s", flush=True)
     return True
 
 
@@ -45,38 +67,34 @@ def main():
         sys.exit(1)
 
     os.makedirs(output_dir, exist_ok=True)
+    pipeline_t0 = time.time()
 
     concepts_json = os.path.join(output_dir, "concepts.json")
-    notes_md = os.path.join(output_dir, "notes.md")
-    summary_json = os.path.join(output_dir, "summary.json")
-    architecture_notes_md = os.path.join(output_dir, "architecture_notes.md")
     references_json = os.path.join(output_dir, "references.json")
     notations_json = os.path.join(output_dir, "notations.json")
     equations_json = os.path.join(output_dir, "equations.json")
 
     print(f"======================================================================")
-    print(f"Starting Unified Paper Processing Pipeline")
-    print(f"Input: {input_path}")
+    print(f"Starting PaperMind Unified Research Paper Processing Pipeline")
+    print(f"Input Document:   {input_path}")
     print(f"Output Directory: {output_dir}")
     print(f"======================================================================")
 
-    # 1. Concepts extraction (must run first, as notes/architecture depend on it)
+    # Phase 1: Sequential Base Anchor (Concept extraction runs first for terminology grounding)
+    print("\n--- Phase 1: Sequential Base Anchor ---")
     if not run_script("extract_paper_concepts.py", [input_path, concepts_json]):
         print("Fatal: Concept extraction failed. Aborting pipeline.")
         sys.exit(1)
 
-    # Steps 2-7 are independent (once concepts.json exists), but keep the
-    # worker count bounded so a small deployment instance is not overwhelmed
-    # by six Python processes and their concurrent LLM requests.
-    from concurrent.futures import ThreadPoolExecutor, as_completed
-
+    # Phase 2: Parallel Extraction Group (Zero-Interference Concurrent Pairing)
+    # Pairs 1 Batched API call task (equations) with 2 Offline Zero-API tasks (references, notations)
+    print("\n--- Phase 2: Zero-Interference Parallel Extraction Group ---")
     tasks = [
-        ("generate_paper_notes.py", [input_path, concepts_json, notes_md]),
-        ("generate_paper_summary.py", [input_path, summary_json]),
-        ("generate_architecture_notes.py", [input_path, concepts_json, architecture_notes_md]),
+        # Paused tasks (replaced by native UI Work in Progress pages):
+        # generate_paper_notes.py, generate_paper_summary.py, generate_architecture_notes.py
+        ("extract_paper_equations.py", [input_path, equations_json]),
         ("extract_paper_references.py", [input_path, references_json]),
         ("extract_notations_local.py", [input_path, notations_json]),
-        ("extract_paper_equations.py", [input_path, equations_json]),
     ]
 
     try:
@@ -85,7 +103,7 @@ def main():
         env_workers = 3
 
     max_workers = max(1, min(env_workers, len(tasks)))
-    print(f"\n---> Running remaining {len(tasks)} pipeline steps with max {max_workers} concurrent workers...")
+    print(f"---> Dispatching {len(tasks)} concurrent tasks (Max Workers = {max_workers})...")
 
     with ThreadPoolExecutor(max_workers=max_workers) as executor:
         future_to_script = {
@@ -101,8 +119,26 @@ def main():
             except Exception as exc:
                 print(f"Error: Step {script_name} generated an exception: {exc}")
 
+    # Generate fallback placeholder files for paused generation scripts to ensure backend compatibility
+    notes_md = os.path.join(output_dir, "notes.md")
+    summary_json = os.path.join(output_dir, "summary.json")
+    arch_notes_md = os.path.join(output_dir, "architecture_notes.md")
+
+    if not os.path.exists(notes_md):
+        with open(notes_md, "w", encoding="utf-8") as f:
+            f.write("# Paper Notes\n\nThis feature is under active upgrade for PaperMind.")
+
+    if not os.path.exists(summary_json):
+        with open(summary_json, "w", encoding="utf-8") as f:
+            json.dump({"overview": "Summary feature is under active upgrade.", "key_takeaways": []}, f, indent=2)
+
+    if not os.path.exists(arch_notes_md):
+        with open(arch_notes_md, "w", encoding="utf-8") as f:
+            f.write("# Architecture Notes\n\nArchitecture notes are under active upgrade.")
+
+    total_pipeline_time = time.time() - pipeline_t0
     print(f"\n======================================================================")
-    print(f"Unified Paper Processing Pipeline Completed Successfully!")
+    print(f"🎉 PaperMind Unified Processing Pipeline Completed in {total_pipeline_time:.2f}s!")
     print(f"======================================================================")
 
 

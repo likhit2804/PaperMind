@@ -1,0 +1,740 @@
+{
+  "equations": [
+    {
+      "label": "Equation [Unnumbered-1]",
+      "latex": "$$ L_H = \\begin{bmatrix} -1 & -1 & -1 \\\\ 2 & 2 & 2 \\\\ -1 & -1 & -1 \\end{bmatrix} * p $$",
+      "description": "This equation calculates the horizontal line detection of a digital image p using a specific horizontal mask.",
+      "page": 2,
+      "section": "The Classical Line Detection Method",
+      "raw_text": "2.1. The Classical Line Detection Method\nFor example, using the horizontal mask, the horizontal line can be calculated by the\nfollowing equation:\n\uf8ee\n\uf8f9\nLH =\n\uf8f0\n\u22121\n\u22121\n\u22121\n2\n2\n2\n\u22121\n\u22121\n\u22121"
+    },
+    {
+      "label": "Equation (1)",
+      "latex": "$$\\begin{aligned} &(1) \\text{ Quantum image representation;} \\\\ &(2) \\text{ Quantum image shift transformation;} \\\\ &(3) \\text{ Calculation of lines in different directions;} \\\\ &(4) \\text{ Threshold value classification;} \\\\ &(5) \\text{ Quantum measurement operation.} \\end{aligned}$$",
+      "description": "This enumeration outlines the five primary procedural steps comprising the quantum line detection algorithm.",
+      "page": 2,
+      "section": "The Classical Line Detection Method",
+      "raw_text": "2.1. The Classical Line Detection Method\nFor example, using the horizontal mask, the horizontal line can be calculated by the\nfollowing equation:\n\uf8ee\n\uf8f9\nLH =\n\uf8f0\n\u22121\n\u22121\n\u22121\n2\n2\n2\n\u22121\n\u22121\n\u22121\n\uf8fb\u2217p\n(1)"
+    },
+    {
+      "label": "Equation [Unnumbered-2]",
+      "latex": "$$ \\begin{bmatrix} -1 & -1 & -1 \\\\ 2 & 2 & 2 \\\\ -1 & -1 & -1 \\end{bmatrix} $$",
+      "description": "This represents a spatial filter matrix or mask used for feature or line detection in image processing.",
+      "page": 3,
+      "section": "Quantum Representation of Image",
+      "raw_text": "\u22121\n\u22121\n\u22121"
+    },
+    {
+      "label": "Equation [Unnumbered-3]",
+      "latex": "$$ \\begin{bmatrix} -1 & -1 & -1 \\\\ 2 & 2 & 2 \\\\ -1 & -1 & -1 \\end{bmatrix} $$",
+      "description": "This represents a directional mask matrix used in classical image processing for line detection.",
+      "page": 3,
+      "section": "Quantum Representation of Image",
+      "raw_text": "\u22121\n\u22121\n\u22121\n\u22121\n2\n\u22121"
+    },
+    {
+      "label": "Equation [Unnumbered-4]",
+      "latex": "$$ \\begin{bmatrix} -1 & -1 & -1 \\\\ 2 & 2 & 2 \\\\ -1 & -1 & -1 \\end{bmatrix} $$",
+      "description": "This illustrates a standard 3x3 convolution mask used to extract line features from an image.",
+      "page": 3,
+      "section": "Quantum Representation of Image",
+      "raw_text": "\u22121\n\u22121\n\u22121\n\u22121\n2\n\u22121\n2\n2\n2\n\u22121\n2\n\u22121"
+    },
+    {
+      "label": "Equation [Unnumbered-5]",
+      "latex": "$$ \\begin{bmatrix} -1 & -1 & -1 \\\\ 2 & 2 & 2 \\\\ -1 & -1 & -1 \\end{bmatrix} $$",
+      "description": "This shows a convolution kernel utilized in line detection algorithms.",
+      "page": 3,
+      "section": "Quantum Representation of Image",
+      "raw_text": "\u22121\n\u22121\n\u22121\n\u22121\n2\n\u22121\n2\n2\n2\n\u22121\n2\n\u22121\n\u22121\n\u22121\n\u22121"
+    },
+    {
+      "label": "Equation [Unnumbered-6]",
+      "latex": "$$ \\begin{bmatrix} -1 & -1 & -1 \\\\ 2 & 2 & 2 \\\\ -1 & -1 & -1 \\end{bmatrix} $$",
+      "description": "This displays a mask matrix configuration for detecting specific directional lines in images.",
+      "page": 3,
+      "section": "Quantum Representation of Image",
+      "raw_text": "\u22121\n\u22121\n\u22121\n\u22121\n2\n\u22121\n2\n2\n2\n\u22121\n2\n\u22121\n\u22121\n\u22121\n\u22121\n\u22121\n2\n\u22121"
+    },
+    {
+      "label": "Equation [Unnumbered-7]",
+      "latex": "$$ \\begin{bmatrix} -1 & -1 & -1 \\\\ 2 & 2 & 2 \\\\ -1 & -1 & -1 \\end{bmatrix} $$",
+      "description": "This represents a numerical mask component used for spatial filtering.",
+      "page": 3,
+      "section": "Quantum Representation of Image",
+      "raw_text": "\u22121\n\u22121\n\u22121\n\u22121\n2\n\u22121\n2\n2\n2\n\u22121\n2\n\u22121\n\u22121\n\u22121\n\u22121\n\u22121\n2\n\u22121\nHorizontal\nvertical\n\u22121\n\u22121\n2"
+    },
+    {
+      "label": "Equation [Unnumbered-8]",
+      "latex": "$$ \\begin{bmatrix} -1 & -1 & -1 \\\\ 2 & 2 & 2 \\\\ -1 & -1 & -1 \\end{bmatrix} $$",
+      "description": "This indicates a mask configuration for horizontal or vertical line detection filters.",
+      "page": 3,
+      "section": "Quantum Representation of Image",
+      "raw_text": "\u22121\n\u22121\n\u22121\n\u22121\n2\n\u22121\n2\n2\n2\n\u22121\n2\n\u22121\n\u22121\n\u22121\n\u22121\n\u22121\n2\n\u22121\nHorizontal\nvertical\n\u22121\n\u22121\n2\n2\n\u22121\n\u22121"
+    },
+    {
+      "label": "Equation [Unnumbered-9]",
+      "latex": "$$ \\begin{bmatrix} -1 & -1 & -1 \\\\ 2 & 2 & 2 \\\\ -1 & -1 & -1 \\end{bmatrix} $$",
+      "description": "This displays the complete matrix values for a line detection mask.",
+      "page": 3,
+      "section": "Quantum Representation of Image",
+      "raw_text": "\u22121\n\u22121\n\u22121\n\u22121\n2\n\u22121\n2\n2\n2\n\u22121\n2\n\u22121\n\u22121\n\u22121\n\u22121\n\u22121\n2\n\u22121\nHorizontal\nvertical\n\u22121\n\u22121\n2\n2\n\u22121\n\u22121\n\u22121\n2\n\u22121"
+    },
+    {
+      "label": "Equation [Unnumbered-10]",
+      "latex": "$$\\begin{pmatrix} -1 & -1 & -1 \\\\ -1 & 2 & -1 \\\\ 2 & 2 & 2 \\end{pmatrix}$$",
+      "description": "This represents the horizontal line detection mask used in image processing.",
+      "page": 3,
+      "section": "Quantum Representation of Image",
+      "raw_text": "\u22121\n\u22121\n\u22121\n\u22121\n2\n\u22121\n2\n2\n2\n\u22121\n2\n\u22121\n\u22121\n\u22121\n\u22121\n\u22121\n2\n\u22121\nHorizontal\nvertical\n\u22121\n\u22121\n2\n2\n\u22121\n\u22121\n\u22121\n2\n\u22121\n\u22121\n2\n\u22121"
+    },
+    {
+      "label": "Equation [Unnumbered-11]",
+      "latex": "$$\\begin{pmatrix} -1 & -1 & 2 \\\\ -1 & 2 & -1 \\\\ 2 & -1 & -1 \\end{pmatrix}$$",
+      "description": "This represents the +45\u00b0 line detection mask used in image processing.",
+      "page": 3,
+      "section": "Quantum Representation of Image",
+      "raw_text": "\u22121\n\u22121\n\u22121\n\u22121\n2\n\u22121\n2\n2\n2\n\u22121\n2\n\u22121\n\u22121\n\u22121\n\u22121\n\u22121\n2\n\u22121\nHorizontal\nvertical\n\u22121\n\u22121\n2\n2\n\u22121\n\u22121\n\u22121\n2\n\u22121\n\u22121\n2\n\u22121\n2\n\u22121\n\u22121"
+    },
+    {
+      "label": "Equation [Unnumbered-12]",
+      "latex": "$$\\begin{pmatrix} 2 & -1 & -1 \\\\ -1 & 2 & -1 \\\\ -1 & -1 & 2 \\end{pmatrix}$$",
+      "description": "This represents the -45\u00b0 line detection mask used in image processing.",
+      "page": 3,
+      "section": "Quantum Representation of Image",
+      "raw_text": "\u22121\n\u22121\n\u22121\n\u22121\n2\n\u22121\n2\n2\n2\n\u22121\n2\n\u22121\n\u22121\n\u22121\n\u22121\n\u22121\n2\n\u22121\nHorizontal\nvertical\n\u22121\n\u22121\n2\n2\n\u22121\n\u22121\n\u22121\n2\n\u22121\n\u22121\n2\n\u22121\n2\n\u22121\n\u22121\n\u22121\n\u22121\n2"
+    },
+    {
+      "label": "Equation [Unnumbered-13]",
+      "latex": "$$\\left|I\\right\\rangle = \\frac{1}{2^n}$$",
+      "description": "This shows the normalization factor for the quantum image state in the NEQR model.",
+      "page": 3,
+      "section": "Quantum Representation of Image",
+      "raw_text": "2.2. Quantum Representation of Image\nThe NEQR model stores the gray values and pixel coordinates of an image in a\nquantum state. For a 2n \u00d7 2n quantum gray-scale image, its NEQR representation is"
+    },
+    {
+      "label": "Equation [Unnumbered-14]",
+      "latex": "$$\\sum_{Y=0}^{2^n-1}$$",
+      "description": "This defines the summation over the vertical pixel coordinate Y in the NEQR quantum state representation.",
+      "page": 3,
+      "section": "Quantum Representation of Image",
+      "raw_text": "2.2. Quantum Representation of Image\nThe NEQR model stores the gray values and pixel coordinates of an image in a\nquantum state. For a 2n \u00d7 2n quantum gray-scale image, its NEQR representation is\n|I\u27e9= 1\n2n\n2n\u22121\n\u2211\nY=0"
+    },
+    {
+      "label": "Equation [Unnumbered-15]",
+      "latex": "$$\\sum_{Y=0}^{2^n-1} \\sum_{X=0}^{2^n-1}$$",
+      "description": "This defines the double summation over all pixel coordinates (X, Y) of the 2n \u00d7 2n quantum image.",
+      "page": 3,
+      "section": "Quantum Representation of Image",
+      "raw_text": "2.2. Quantum Representation of Image\nThe NEQR model stores the gray values and pixel coordinates of an image in a\nquantum state. For a 2n \u00d7 2n quantum gray-scale image, its NEQR representation is\n|I\u27e9= 1\n2n\n2n\u22121\n\u2211\nY=0\n2n\u22121\n\u2211\nX=0"
+    },
+    {
+      "label": "Equation [Unnumbered-16]",
+      "latex": "$$\\left|C_{YX}\\right> \\left|YX\\right> = \\frac{1}{2^n} \\sum_{Y=0}^{2^n-1}$$",
+      "description": "This is an intermediate expansion term combining the gray-scale value ket and position ket in the NEQR superposition.",
+      "page": 3,
+      "section": "Quantum Representation of Image",
+      "raw_text": "2.2. Quantum Representation of Image\nThe NEQR model stores the gray values and pixel coordinates of an image in a\nquantum state. For a 2n \u00d7 2n quantum gray-scale image, its NEQR representation is\n|I\u27e9= 1\n2n\n2n\u22121\n\u2211\nY=0\n2n\u22121\n\u2211\nX=0\n|CYX\u27e9|YX\u27e9= 1\n2n\n2n\u22121\n\u2211\nY=0"
+    },
+    {
+      "label": "Equation [Unnumbered-17]",
+      "latex": "$$c_{q-1}^{YX} c_{q-2}^{YX}$$",
+      "description": "This represents the binary bit components of the pixel gray-scale value in the NEQR formulation.",
+      "page": 3,
+      "section": "Quantum Representation of Image",
+      "raw_text": "2.2. Quantum Representation of Image\nThe NEQR model stores the gray values and pixel coordinates of an image in a\nquantum state. For a 2n \u00d7 2n quantum gray-scale image, its NEQR representation is\n|I\u27e9= 1\n2n\n2n\u22121\n\u2211\nY=0\n2n\u22121\n\u2211\nX=0\n|CYX\u27e9|YX\u27e9= 1\n2n\n2n\u22121\n\u2211\nY=0\n2n\u22121\n\u2211\nX=0"
+    },
+    {
+      "label": "Equation (2)",
+      "latex": "$$\\left|I\\right\\rangle = \\frac{1}{2^n} \\sum_{Y=0}^{2^n-1} \\sum_{X=0}^{2^n-1} \\left|C_{YX}\\right\\rangle \\left|YX\\right\\rangle = \\frac{1}{2^n} \\sum_{Y=0}^{2^n-1} \\sum_{X=0}^{2^n-1} \\left|c_{q-1}^{YX} c_{q-2}^{YX} \\dots c_{0}^{YX}\\right\\rangle \\left|YX\\right\\rangle$$",
+      "description": "This defines the complete Novel Enhanced Quantum Representation (NEQR) state of a 2n \u00d7 2n gray-scale image combining color and coordinate information.",
+      "page": 3,
+      "section": "Quantum Representation of Image",
+      "raw_text": "The NEQR model stores the gray values and pixel coordinates of an image in a\nquantum state. For a 2n \u00d7 2n quantum gray-scale image, its NEQR representation is\n|I\u27e9= 1\n2n\n2n\u22121\n\u2211\nY=0\n2n\u22121\n\u2211\nX=0\n|CYX\u27e9|YX\u27e9= 1\n2n\n2n\u22121\n\u2211\nY=0\n2n\u22121\n\u2211\nX=0\ncq\u22121\nYX cq\u22122\nYX . . . c0\nYX\nE\n|YX\u27e9\n(2)"
+    },
+    {
+      "label": "Equation [Unnumbered-18]",
+      "latex": "$$\\left|I\\right\\rangle = \\frac{1}{2^n} \\sum_{Y=0}^{2^n-1} \\sum_{X=0}^{2^n-1} \\left|C_{YX}\\right\\rangle \\left|YX\\right\\rangle = \\frac{1}{2^n} \\sum_{Y=0}^{2^n-1} \\sum_{X=0}^{2^n-1} \\left|c_{q-1}^{YX} c_{q-2}^{YX} \\dots c_{0}^{YX}\\right\\rangle \\left|YX\\right\\rangle$$",
+      "description": "This reiterates the full NEQR quantum state equation expressing the image superposition in terms of binary gray-scale values and pixel coordinates.",
+      "page": 3,
+      "section": "Quantum Representation of Image",
+      "raw_text": "|I\u27e9= 1\n2n\n2n\u22121\n\u2211\nY=0\n2n\u22121\n\u2211\nX=0\n|CYX\u27e9|YX\u27e9= 1\n2n\n2n\u22121\n\u2211\nY=0\n2n\u22121\n\u2211\nX=0\ncq\u22121\nYX cq\u22122\nYX . . . c0\nYX\nE\n|YX\u27e9\n(2)\nwhere |I\u27e9is the quantum image, CYX are gray-scale values, cq\u22121"
+    },
+    {
+      "label": "Equation [Unnumbered-19]",
+      "latex": "$$\\frac{1}{2^n} \\sum_{Y=0}^{2^n-1} \\sum_{X=0}^{2^n-1} \\left|C_{YX}\\right|\\left|YX\\right\\rangle = \\frac{1}{2^n} \\sum_{Y=0}^{2^n-1} \\sum_{X=0}^{2^n-1} c_{YX}^{q-1} c_{YX}^{q-2} \\dots c_{YX}^0 \\left|YX\\right\\rangle$$",
+      "description": "Defines the quantum representation of an image using NEQR, linking pixel intensity binary strings and position kets.",
+      "page": 3,
+      "section": "Quantum Representation of Image",
+      "raw_text": "2n\n2n\u22121\n\u2211\nY=0\n2n\u22121\n\u2211\nX=0\n|CYX\u27e9|YX\u27e9= 1\n2n\n2n\u22121\n\u2211\nY=0\n2n\u22121\n\u2211\nX=0\ncq\u22121\nYX cq\u22122\nYX . . . c0\nYX\nE\n|YX\u27e9\n(2)\nwhere |I\u27e9is the quantum image, CYX are gray-scale values, cq\u22121\nYX are the binary\nrepresentations of the gray-scale values, and |YX\u27e9are pixel coordinates. Thus, |CYX\u27e9\u2208\n{0, 1, . . . , 2q \u22121}, cq\u22121"
+    },
+    {
+      "label": "Equation [Unnumbered-20]",
+      "latex": "$$\\left|C_{YX}\\right|\\left|YX\\right\\rangle = \\frac{1}{2^n} \\sum_{Y=0}^{2^n-1} \\sum_{X=0}^{2^n-1} c_{YX}^{q-1} c_{YX}^{q-2} \\dots c_{YX}^0 \\left|YX\\right\\rangle$$",
+      "description": "Expresses the individual gray-scale value and coordinate state components within the overall quantum image formulation.",
+      "page": 3,
+      "section": "Quantum Representation of Image",
+      "raw_text": "|CYX\u27e9|YX\u27e9= 1\n2n\n2n\u22121\n\u2211\nY=0\n2n\u22121\n\u2211\nX=0\ncq\u22121\nYX cq\u22122\nYX . . . c0\nYX\nE\n|YX\u27e9\n(2)\nwhere |I\u27e9is the quantum image, CYX are gray-scale values, cq\u22121\nYX are the binary\nrepresentations of the gray-scale values, and |YX\u27e9are pixel coordinates. Thus, |CYX\u27e9\u2208\n{0, 1, . . . , 2q \u22121}, cq\u22121\nYX cq\u22122\nYX . . . c0\nYX \u2208{0, 1}. The q indicates that there are q qubits for\nbinary gray-scale values. For instance, a 2 \u00d7 2 gray-scale image can be expressed as"
+    },
+    {
+      "label": "Equation [Unnumbered-21]",
+      "latex": "$$\\frac{1}{2^n} \\sum_{Y=0}^{2^n-1} \\sum_{X=0}^{2^n-1} c_{YX}^{q-1} c_{YX}^{q-2} \\dots c_{YX}^0 \\left|YX\\right\\rangle$$",
+      "description": "Represents the double summation over spatial coordinates for pixel intensity binary representations in NEQR.",
+      "page": 3,
+      "section": "Quantum Representation of Image",
+      "raw_text": "2n\n2n\u22121\n\u2211\nY=0\n2n\u22121\n\u2211\nX=0\ncq\u22121\nYX cq\u22122\nYX . . . c0\nYX\nE\n|YX\u27e9\n(2)\nwhere |I\u27e9is the quantum image, CYX are gray-scale values, cq\u22121\nYX are the binary\nrepresentations of the gray-scale values, and |YX\u27e9are pixel coordinates. Thus, |CYX\u27e9\u2208\n{0, 1, . . . , 2q \u22121}, cq\u22121\nYX cq\u22122\nYX . . . c0\nYX \u2208{0, 1}. The q indicates that there are q qubits for\nbinary gray-scale values. For instance, a 2 \u00d7 2 gray-scale image can be expressed as\nYX , cq\u22122"
+    },
+    {
+      "label": "Equation (3)",
+      "latex": "$$\\begin{aligned} \\left|I\\right\\rangle &= \\frac{1}{2}(\\left|0\\right\\rangle\\left|00\\right\\rangle + \\left|80\\right\\rangle\\left|01\\right\\rangle + \\left|161\\right\\rangle\\left|10\\right\\rangle + \\left|255\\right\\rangle\\left|11\\right\\rangle) \\\\ &= \\frac{1}{2} \\left[ \\left|00000000\\right\\rangle\\left|00\\right\\rangle + \\left|01010000\\right\\rangle\\left|01\\right\\rangle + \\left|10100001\\right\\rangle\\left|10\\right\\rangle + \\left|11111111\\right\\rangle\\left|11\\right\\rangle \\right] \\end{aligned}$$",
+      "description": "Provides the explicit NEQR quantum state representation for an example 2 x 2 gray-scale image.",
+      "page": 3,
+      "section": "Quantum Representation of Image",
+      "raw_text": "YX\nE\n|YX\u27e9\n(2)\nwhere |I\u27e9is the quantum image, CYX are gray-scale values, cq\u22121\nYX are the binary\nrepresentations of the gray-scale values, and |YX\u27e9are pixel coordinates. Thus, |CYX\u27e9\u2208\n{0, 1, . . . , 2q \u22121}, cq\u22121\nYX cq\u22122\nYX . . . c0\nYX \u2208{0, 1}. The q indicates that there are q qubits for\nbinary gray-scale values. For instance, a 2 \u00d7 2 gray-scale image can be expressed as\nYX , cq\u22122\nYX , . . . , c0\n|I\u27e9= 1\n2(|0\u27e9|00\u27e9+ |80\u27e9|01\u27e9+ |161\u27e9|10\u27e9+ |255\u27e9|11\u27e9)\n=\n[\n|00000000\u27e9|00\u27e9+ |01010000\u27e9|01\u27e9\n+|10100001\u27e9|10\u27e9+ |11111111\u27e9|11\u27e9\n]\n(3)"
+    },
+    {
+      "label": "Equation [Unnumbered-22]",
+      "latex": "$$c^{q-1} c^{q-2} \\dots c^0 0 = 2 c^{q-1} c^{q-2} \\dots c^0$$",
+      "description": "Illustrates the logical multiplication of a binary gray-scale value by two via appending a zero bit.",
+      "page": 4,
+      "section": "Several Auxiliary Modules for Quantum Line Detection",
+      "raw_text": "cq\u22121cq\u22122 . . . c00"
+    },
+    {
+      "label": "Equation [Unnumbered-23]",
+      "latex": "$$c^{q-1} c^{q-2} \\dots c^0 0 = 2 c^{q-1} c^{q-2} \\dots c^0$$",
+      "description": "Defines the scaling operation implemented by the quantum double (DO) module.",
+      "page": 4,
+      "section": "Several Auxiliary Modules for Quantum Line Detection",
+      "raw_text": "cq\u22121cq\u22122 . . . c00\n=\n2cq\u22121cq\u22122 . . . c0"
+    },
+    {
+      "label": "Equation [Unnumbered-24]",
+      "latex": "$$\\text{CT}^{(X\\pm)}\\left|I\\right\\rangle = \\frac{1}{2^n} \\sum_{Y=0}^{2^n-1} \\sum_{X=0}^{2^n-1} \\left|C_{YX}^{\\text{CT}}\\right|\\left|Y\\right\\rangle\\left|X \\pm 1 \\pmod{2^n}\\right\\rangle$$",
+      "description": "Defines the cyclic shift transformation along the horizontal X-axis for a quantum image.",
+      "page": 4,
+      "section": "Several Auxiliary Modules for Quantum Line Detection",
+      "raw_text": "CT(X\u00b1)|I\u27e9= 1\n2n\n2n\u22121\n\u2211\nY=0"
+    },
+    {
+      "label": "Equation [Unnumbered-25]",
+      "latex": "$$\\text{CT}^{(X\\pm)}\\left|I\\right\\rangle = \\frac{1}{2^n} \\sum_{Y=0}^{2^n-1} \\sum_{X=0}^{2^n-1} \\left|C_{YX}^{\\text{CT}}\\right|\\left|Y\\right\\rangle\\left|X \\pm 1 \\pmod{2^n}\\right\\rangle$$",
+      "description": "Represents the horizontal spatial translation operation used within the auxiliary quantum shift modules.",
+      "page": 4,
+      "section": "Several Auxiliary Modules for Quantum Line Detection",
+      "raw_text": "CT(X\u00b1)|I\u27e9= 1\n2n\n2n\u22121\n\u2211\nY=0\n2n\u22121\n\u2211\nX=0"
+    },
+    {
+      "label": "Equation (4)",
+      "latex": "$$ \\text{CT}(X_{\\pm})|I\\rangle = \\frac{1}{2^n} \\sum_{Y=0}^{2^n-1} \\sum_{X=0}^{2^n-1} |C_{T_{YX}}\\rangle |Y\\rangle |X \\pm 1 \\bmod 2^n\\rangle $$",
+      "description": "This equation defines the cycle shift transformation operation CT along the X-direction applied to the quantum image state.",
+      "page": 4,
+      "section": "Several Auxiliary Modules for Quantum Line Detection",
+      "raw_text": "CT(X\u00b1)|I\u27e9= 1\n2n\n2n\u22121\n\u2211\nY=0\n2n\u22121\n\u2211\nX=0\n|CTYX\u27e9|Y\u27e9|X \u00b1 1mod2n\u27e9\n(4)"
+    },
+    {
+      "label": "Equation [Unnumbered-26]",
+      "latex": "$$\\begin{aligned} \\text{CT}^{(X\\pm)}\\left|I\\right\\rangle &= \\frac{1}{2^n} \\sum_{Y=0}^{2^n-1} \\sum_{X=0}^{2^n-1} \\left|C_{YX}^{\\text{CT}}\\right|\\left|Y\\right\\rangle\\left|X \\pm 1 \\pmod{2^n}\\right\\rangle \\\\ \\text{CT}^{(Y\\pm)}\\left|I\\right\\rangle &= \\frac{1}{2^n} \\sum_{Y=0}^{2^n-1} \\sum_{X=0}^{2^n-1} \\left|C_{YX}^{\\text{CT}}\\right|\\left|Y \\pm 1 \\pmod{2^n}\\right\\rangle\\left|X\\right\\rangle \\end{aligned}$$",
+      "description": "Summarizes both horizontal and vertical cyclic shift transformations used for moving image pixels in auxiliary modules.",
+      "page": 4,
+      "section": "Several Auxiliary Modules for Quantum Line Detection",
+      "raw_text": "CT(X\u00b1)|I\u27e9= 1\n2n\n2n\u22121\n\u2211\nY=0\n2n\u22121\n\u2211\nX=0\n|CTYX\u27e9|Y\u27e9|X \u00b1 1mod2n\u27e9\n(4)\nCT(Y\u00b1)|I\u27e9= 1\n2n\n2n\u22121\n\u2211\nY=0"
+    },
+    {
+      "label": "Equation [Unnumbered-27]",
+      "latex": "$$CT(X\u00b1)|I\u27e9= 1\n2n\n2n\u22121\n\u2211\nY=0\n2n\u22121\n\u2211\nX=0\n|CTYX\u27e9|Y\u27e9|X \u00b1 1mod2n\u27e9\n(4)\nCT(Y\u00b1)|I\u27e9= 1\n2n\n2n\u22121\n\u2211\nY=0\n2n\u22121\n\u2211\nX=0$$",
+      "description": "Mathematical equation reference.",
+      "page": 4,
+      "section": "Several Auxiliary Modules for Quantum Line Detection",
+      "raw_text": "CT(X\u00b1)|I\u27e9= 1\n2n\n2n\u22121\n\u2211\nY=0\n2n\u22121\n\u2211\nX=0\n|CTYX\u27e9|Y\u27e9|X \u00b1 1mod2n\u27e9\n(4)\nCT(Y\u00b1)|I\u27e9= 1\n2n\n2n\u22121\n\u2211\nY=0\n2n\u22121\n\u2211\nX=0"
+    },
+    {
+      "label": "Equation (5)",
+      "latex": "$$ \\text{CT}(Y_{\\pm})|I\\rangle = \\frac{1}{2^n} \\sum_{Y=0}^{2^n-1} \\sum_{X=0}^{2^n-1} |C_{T_{YX}}\\rangle |Y \\pm 1 \\bmod 2^n\\rangle |X\\rangle $$",
+      "description": "This equation defines the cycle shift transformation operation CT along the Y-direction applied to corresponding qubit registers of the quantum image state.",
+      "page": 4,
+      "section": "Several Auxiliary Modules for Quantum Line Detection",
+      "raw_text": "CT(X\u00b1)|I\u27e9= 1\n2n\n2n\u22121\n\u2211\nY=0\n2n\u22121\n\u2211\nX=0\n|CTYX\u27e9|Y\u27e9|X \u00b1 1mod2n\u27e9\n(4)\nCT(Y\u00b1)|I\u27e9= 1\n2n\n2n\u22121\n\u2211\nY=0\n2n\u22121\n\u2211\nX=0\n|CTYX\u27e9|Y \u00b1 1mod2n\u27e9|X\u27e9\n(5)"
+    },
+    {
+      "label": "Equation (4)",
+      "latex": "$$ \\text{CT}(X_{\\pm})|I\\rangle = \\frac{1}{2^n} \\sum_{Y=0}^{2^n-1} \\sum_{X=0}^{2^n-1} |C_{T_{YX}}\\rangle |Y\\rangle |X \\pm 1 \\bmod 2^n\\rangle $$",
+      "description": "This equation defines the cycle shift transformation operation CT along the X-direction applied to the quantum image state.",
+      "page": 5,
+      "section": "Several Auxiliary Modules for Quantum Line Detection",
+      "raw_text": "If X is used to replace X + 1 and Y is used to replace Y + 1, the above Equations (4)\nand (5) can be changed to"
+    },
+    {
+      "label": "Equation [Unnumbered-28]",
+      "latex": "$$If X is used to replace X + 1 and Y is used to replace Y + 1, the above Equations (4)\nand (5) can be changed to\nCT(X\u00b1)|I\u27e9= 1\n2n\n2n\u22121\n\u2211\nY=0$$",
+      "description": "Mathematical equation reference.",
+      "page": 5,
+      "section": "Several Auxiliary Modules for Quantum Line Detection",
+      "raw_text": "If X is used to replace X + 1 and Y is used to replace Y + 1, the above Equations (4)\nand (5) can be changed to\nCT(X\u00b1)|I\u27e9= 1\n2n\n2n\u22121\n\u2211\nY=0"
+    },
+    {
+      "label": "Equation [Unnumbered-29]",
+      "latex": "$$If X is used to replace X + 1 and Y is used to replace Y + 1, the above Equations (4)\nand (5) can be changed to\nCT(X\u00b1)|I\u27e9= 1\n2n\n2n\u22121\n\u2211\nY=0\n2n\u22121\n\u2211\nX=0$$",
+      "description": "Mathematical equation reference.",
+      "page": 5,
+      "section": "Several Auxiliary Modules for Quantum Line Detection",
+      "raw_text": "If X is used to replace X + 1 and Y is used to replace Y + 1, the above Equations (4)\nand (5) can be changed to\nCT(X\u00b1)|I\u27e9= 1\n2n\n2n\u22121\n\u2211\nY=0\n2n\u22121\n\u2211\nX=0"
+    },
+    {
+      "label": "Equation (6)",
+      "latex": "$$ \\text{CT}(X_{\\pm})|I\\rangle = \\frac{1}{2^n} \\sum_{Y=0}^{2^n-1} \\sum_{X=0}^{2^n-1} |C_{T_{YX'}}\\rangle |Y\\rangle |X\\rangle $$",
+      "description": "This equation presents the modified coordinate-replaced form of the X-direction cycle shift transformation.",
+      "page": 5,
+      "section": "Several Auxiliary Modules for Quantum Line Detection",
+      "raw_text": "If X is used to replace X + 1 and Y is used to replace Y + 1, the above Equations (4)\nand (5) can be changed to\nCT(X\u00b1)|I\u27e9= 1\n2n\n2n\u22121\n\u2211\nY=0\n2n\u22121\n\u2211\nX=0\n|CTYX\u2032\u27e9|Y\u27e9|X\u27e9\n(6)"
+    },
+    {
+      "label": "Equation [Unnumbered-30]",
+      "latex": "$$If X is used to replace X + 1 and Y is used to replace Y + 1, the above Equations (4)\nand (5) can be changed to\nCT(X\u00b1)|I\u27e9= 1\n2n\n2n\u22121\n\u2211\nY=0\n2n\u22121\n\u2211\nX=0\n|CTYX\u2032\u27e9|Y\u27e9|X\u27e9\n(6)\nCT(Y\u00b1)|I\u27e9= 1\n2n\n2n\u22121\n\u2211\nY=0$$",
+      "description": "Mathematical equation reference.",
+      "page": 5,
+      "section": "Several Auxiliary Modules for Quantum Line Detection",
+      "raw_text": "If X is used to replace X + 1 and Y is used to replace Y + 1, the above Equations (4)\nand (5) can be changed to\nCT(X\u00b1)|I\u27e9= 1\n2n\n2n\u22121\n\u2211\nY=0\n2n\u22121\n\u2211\nX=0\n|CTYX\u2032\u27e9|Y\u27e9|X\u27e9\n(6)\nCT(Y\u00b1)|I\u27e9= 1\n2n\n2n\u22121\n\u2211\nY=0"
+    },
+    {
+      "label": "Equation [Unnumbered-31]",
+      "latex": "$$If X is used to replace X + 1 and Y is used to replace Y + 1, the above Equations (4)\nand (5) can be changed to\nCT(X\u00b1)|I\u27e9= 1\n2n\n2n\u22121\n\u2211\nY=0\n2n\u22121\n\u2211\nX=0\n|CTYX\u2032\u27e9|Y\u27e9|X\u27e9\n(6)\nCT(Y\u00b1)|I\u27e9= 1\n2n\n2n\u22121\n\u2211\nY=0\n2n\u22121\n\u2211\nX=0$$",
+      "description": "Mathematical equation reference.",
+      "page": 5,
+      "section": "Several Auxiliary Modules for Quantum Line Detection",
+      "raw_text": "If X is used to replace X + 1 and Y is used to replace Y + 1, the above Equations (4)\nand (5) can be changed to\nCT(X\u00b1)|I\u27e9= 1\n2n\n2n\u22121\n\u2211\nY=0\n2n\u22121\n\u2211\nX=0\n|CTYX\u2032\u27e9|Y\u27e9|X\u27e9\n(6)\nCT(Y\u00b1)|I\u27e9= 1\n2n\n2n\u22121\n\u2211\nY=0\n2n\u22121\n\u2211\nX=0"
+    },
+    {
+      "label": "Equation (7)",
+      "latex": "$$ \\text{CT}(Y_{\\pm})|I\\rangle = \\frac{1}{2^n} \\sum_{Y=0}^{2^n-1} \\sum_{X=0}^{2^n-1} |C_{T_{Y'X}}\\rangle |Y\\rangle |X\\rangle $$",
+      "description": "This equation presents the modified coordinate-replaced form of the Y-direction cycle shift transformation using inverted coordinate variables.",
+      "page": 5,
+      "section": "Several Auxiliary Modules for Quantum Line Detection",
+      "raw_text": "If X is used to replace X + 1 and Y is used to replace Y + 1, the above Equations (4)\nand (5) can be changed to\nCT(X\u00b1)|I\u27e9= 1\n2n\n2n\u22121\n\u2211\nY=0\n2n\u22121\n\u2211\nX=0\n|CTYX\u2032\u27e9|Y\u27e9|X\u27e9\n(6)\nCT(Y\u00b1)|I\u27e9= 1\n2n\n2n\u22121\n\u2211\nY=0\n2n\u22121\n\u2211\nX=0\n|CTY\u2032X\u27e9|Y\u27e9|X\u27e9\n(7)"
+    },
+    {
+      "label": "Equation [Unnumbered-32]",
+      "latex": "$$If X is used to replace X + 1 and Y is used to replace Y + 1, the above Equations (4)\nand (5) can be changed to\nCT(X\u00b1)|I\u27e9= 1\n2n\n2n\u22121\n\u2211\nY=0\n2n\u22121\n\u2211\nX=0\n|CTYX\u2032\u27e9|Y\u27e9|X\u27e9\n(6)\nCT(Y\u00b1)|I\u27e9= 1\n2n\n2n\u22121\n\u2211\nY=0\n2n\u22121\n\u2211\nX=0\n|CTY\u2032X\u27e9|Y\u27e9|X\u27e9\n(7)\nwhere X\u2032 = (X \u22131)mod2n, and Y\u2032 = (Y \u22131)mod2n.$$",
+      "description": "Mathematical equation reference.",
+      "page": 5,
+      "section": "Several Auxiliary Modules for Quantum Line Detection",
+      "raw_text": "If X is used to replace X + 1 and Y is used to replace Y + 1, the above Equations (4)\nand (5) can be changed to\nCT(X\u00b1)|I\u27e9= 1\n2n\n2n\u22121\n\u2211\nY=0\n2n\u22121\n\u2211\nX=0\n|CTYX\u2032\u27e9|Y\u27e9|X\u27e9\n(6)\nCT(Y\u00b1)|I\u27e9= 1\n2n\n2n\u22121\n\u2211\nY=0\n2n\u22121\n\u2211\nX=0\n|CTY\u2032X\u27e9|Y\u27e9|X\u27e9\n(7)\nwhere X\u2032 = (X \u22131)mod2n, and Y\u2032 = (Y \u22131)mod2n."
+    },
+    {
+      "label": "Equation [Unnumbered-33]",
+      "latex": "$$[x]_c = \\begin{cases} 0, x_{n-1}x_{n-2}\\dots x_2x_1, & x_n = 0 \\\\ 1, x_{n-1}x_{n-2}\\dots x_2x_1 + 1, & x_n = 1 \\end{cases}$$",
+      "description": "This equation defines the binary complement representation of an integer $x$ with $n$ bits, incorporating a sign bit to distinguish between positive and negative numbers.",
+      "page": 5,
+      "section": "Several Auxiliary Modules for Quantum Line Detection",
+      "raw_text": "2.3.5. Quantum Absolute Value Module for Subtraction of Two Positive Integers\n[x]c =\n0, xn\u22121xn\u22122 \u00b7 \u00b7 \u00b7 x2x1,\nxn = 0\n1, xn\u22121xn\u22122 \u00b7 \u00b7 \u00b7 x2x1 + 1,\nxn = 1"
+    },
+    {
+      "label": "Equation (8)",
+      "latex": "$$[x]_c = \\begin{cases} 0, x_{n-1}x_{n-2}\\dots x_2x_1, & x > 0 \\\\ 1, \\bar{x}_{n-1}\\bar{x}_{n-2}\\dots \\bar{x}_2\\bar{x}_1 + 1, & x < 0 \\end{cases}$$",
+      "description": "This equation defines the general complement representation for an $n$-bit integer $x$ based on whether it is positive or negative.",
+      "page": 5,
+      "section": "Several Auxiliary Modules for Quantum Line Detection",
+      "raw_text": "2.3.5. Quantum Absolute Value Module for Subtraction of Two Positive Integers\n[x]c =\n0, xn\u22121xn\u22122 \u00b7 \u00b7 \u00b7 x2x1,\nxn = 0\n1, xn\u22121xn\u22122 \u00b7 \u00b7 \u00b7 x2x1 + 1,\nxn = 1\nx > 0\nx < 0\n(8)"
+    },
+    {
+      "label": "Equation [Unnumbered-34]",
+      "latex": "$$|x| = x_{n-1}x_{n-2}\\dots x_2x_1, \\quad \\bar{x}_l = 1 - x_l, \\quad l = 1, 2, \\dots, n - 1$$",
+      "description": "This formula defines the absolute value and bitwise negation operations used when converting a complement representation back to its original code.",
+      "page": 6,
+      "section": "Several Auxiliary Modules for Quantum Line Detection",
+      "raw_text": "where |x|= xn\u22121xn\u22122 \u00b7 \u00b7 \u00b7 x2x1 , xl = 1 \u2212xl, l = 1, 2, . . . n \u22121."
+    },
+    {
+      "label": "Equation (1)",
+      "latex": "$$\\begin{aligned} &(1) \\text{ Quantum image representation;} \\\\ &(2) \\text{ Quantum image shift transformation;} \\\\ &(3) \\text{ Calculation of lines in different directions;} \\\\ &(4) \\text{ Threshold value classification;} \\\\ &(5) \\text{ Quantum measurement operation.} \\end{aligned}$$",
+      "description": "This enumeration outlines the five primary procedural steps comprising the quantum line detection algorithm.",
+      "page": 7,
+      "section": "Step 2: Quantum Image Shift Transformation",
+      "raw_text": "(1)\nQuantum image representation;\n(2)\nQuantum image shift transformation;\n(3)\nCalculation of lines in different directions;\n(4)\nThreshold value classi\ufb01cation;\n(5)\nQuantum measurement operation."
+    },
+    {
+      "label": "Equation [Unnumbered-35]",
+      "latex": "$$\\frac{1}{2^n} \\sum_{Y=0}^{2^n-1}$$",
+      "description": "This partial summation expression represents the normalization and summation over the vertical coordinate $Y$ for the quantum state preparation.",
+      "page": 8,
+      "section": "Step 3: Quantum Line Calculation in Different Directions",
+      "raw_text": "1\n2n\n2n\u22121\n\u2211\nY=0"
+    },
+    {
+      "label": "Equation [Unnumbered-36]",
+      "latex": "$$\\frac{1}{2^n} \\sum_{Y=0}^{2^n-1} \\sum_{X=0}^{2^n-1}$$",
+      "description": "This double summation expression normalizes and iterates over all pixel positions $(Y, X)$ in the $2^n \\times 2^n$ quantum image.",
+      "page": 8,
+      "section": "Step 3: Quantum Line Calculation in Different Directions",
+      "raw_text": "1\n2n\n2n\u22121\n\u2211\nY=0\n2n\u22121\n\u2211\nX=0"
+    },
+    {
+      "label": "Equation [Unnumbered-37]",
+      "latex": "$$\\frac{1}{2^n} \\sum_{Y=0}^{2^n-1} \\sum_{X=0}^{2^n-1} \\left|C_{Y-1, X-1}\\right> \\otimes \\left|C_{Y, X-1}\\right> \\otimes \\left|C_{Y+1, X-1}\\right> \\otimes \\left|C_{Y-1, X}\\right> \\otimes \\left|C_{Y, X}\\right>$$",
+      "description": "This expression represents the tensor product of the central pixel and its neighborhood pixels resulting from the quantum image shift transformation.",
+      "page": 8,
+      "section": "Step 3: Quantum Line Calculation in Different Directions",
+      "raw_text": "1\n2n\n2n\u22121\n\u2211\nY=0\n2n\u22121\n\u2211\nX=0\n|CY\u22121, X\u22121\u27e9\u2297|CY, X\u22121\u27e9\u2297|CY+1, X\u22121\u27e9\u2297|CY\u22121, X\u27e9\u2297|CY, X\u27e9"
+    },
+    {
+      "label": "Equation (9)",
+      "latex": "$$\\frac{1}{2^n} \\sum_{Y=0}^{2^n-1} \\sum_{X=0}^{2^n-1} \\left|C_{Y-1, X-1}\\right> \\otimes \\left|C_{Y, X-1}\\right> \\otimes \\left|C_{Y+1, X-1}\\right> \\otimes \\left|C_{Y-1, X}\\right> \\otimes \\left|C_{Y, X}\\right> \\otimes \\left|C_{Y+1, X}\\right> \\otimes \\left|C_{Y-1, X+1}\\right> \\otimes \\left|C_{Y, X+1}\\right> \\otimes \\left|C_{Y+1, X+1}\\right> \\otimes \\left|Y X\\right>$$",
+      "description": "This equation defines the comprehensive multi-qubit quantum state representing the 3x3 neighborhood pixels of pixel $(Y, X)$ alongside its position coordinates after shift transformations in all eight directions.",
+      "page": 8,
+      "section": "Step 3: Quantum Line Calculation in Different Directions",
+      "raw_text": "1\n2n\n2n\u22121\n\u2211\nY=0\n2n\u22121\n\u2211\nX=0\n|CY\u22121, X\u22121\u27e9\u2297|CY, X\u22121\u27e9\u2297|CY+1, X\u22121\u27e9\u2297|CY\u22121, X\u27e9\u2297|CY, X\u27e9\n(9)"
+    },
+    {
+      "label": "Equation [Unnumbered-38]",
+      "latex": "$$\\begin{aligned} &\\frac{1}{2^n} \\sum_{Y=0}^{2^n-1} \\sum_{X=0}^{2^n-1} \\left|C_{Y-1, X-1}\\right> \\otimes \\left|C_{Y, X-1}\\right> \\otimes \\left|C_{Y+1, X-1}\\right> \\otimes \\left|C_{Y-1, X}\\right> \\otimes \\left|C_{Y, X}\\right> \\\\ &\\quad \\otimes \\left|C_{Y+1, X}\\right> \\otimes \\left|C_{Y-1, X+1}\\right> \\otimes \\left|C_{Y, X+1}\\right> \\otimes \\left|C_{Y+1, X+1}\\right> \\otimes \\left|Y X\\right> \\end{aligned}$$",
+      "description": "This continuation block details the full tensor product structure of the shifted neighborhood quantum state in Algorithm 1.",
+      "page": 8,
+      "section": "Step 3: Quantum Line Calculation in Different Directions",
+      "raw_text": "1\n2n\n2n\u22121\n\u2211\nY=0\n2n\u22121\n\u2211\nX=0\n|CY\u22121, X\u22121\u27e9\u2297|CY, X\u22121\u27e9\u2297|CY+1, X\u22121\u27e9\u2297|CY\u22121, X\u27e9\u2297|CY, X\u27e9\n(9)\n\u2297|CY+1, X\u27e9\u2297|CY\u22121, X+1\u27e9\u2297|CY, X+1\u27e9\u2297|CY\u22121, X+1\u27e9\u2297|YX\u27e9"
+    },
+    {
+      "label": "Equation [Unnumbered-39]",
+      "latex": "$$\\text{Input} : \\text{the quantum original image } |I_{YX}\\rangle, \\text{ i.e., } |I_{YX}\\rangle = \\frac{1}{2^n} \\sum_{Y=0}^{2^n-1} \\sum_{X=0}^{2^n-1} |C_{YX}\\rangle|YX\\rangle$$",
+      "description": "This line specifies the initial input state of the quantum image based on the NEQR representation model for Algorithm 1.",
+      "page": 8,
+      "section": "Step 3: Quantum Line Calculation in Different Directions",
+      "raw_text": "1. Input : the quantum original image IYX, i.e., |IYX\u27e9= 1\n2n\n2n\u22121\n\u2211\nY=0"
+    },
+    {
+      "label": "Equation [Unnumbered-40]",
+      "latex": "$$|I_{YX}\\rangle = \\frac{1}{2^n} \\sum_{Y=0}^{2^n-1} \\sum_{X=0}^{2^n-1} \\left|C_{Y+1, X}\\rangle \\otimes \\left|C_{Y-1, X+1}\\rangle \\otimes \\left|C_{Y, X+1}\\rangle \\otimes \\left|C_{Y-1, X+1}\\rangle \\otimes \\left|Y, X\\rangle$$",
+      "description": "This equation defines the initial quantum state of the original image with its neighboring pixels represented in tensor products.",
+      "page": 8,
+      "section": "Step 3: Quantum Line Calculation in Different Directions",
+      "raw_text": "1. Input : the quantum original image IYX, i.e., |IYX\u27e9= 1\n2n\n2n\u22121\n\u2211\nY=0\n2n\u22121\n\u2211\nX=0"
+    },
+    {
+      "label": "Equation [Unnumbered-41]",
+      "latex": "$$|I_{Y+1, X}\\rangle = C_T^{(Y-)} |I_{YX}\\rangle = \\frac{1}{2^n} \\sum_{Y=0}^{2^n-1} \\sum_{X=0}^{2^n-1} \\left|C_{Y+1, X}\\rangle \\left|Y, X\\rangle$$",
+      "description": "This equation computes the quantum image state after shifting the original image one unit upward using the shift operator.",
+      "page": 8,
+      "section": "Step 3: Quantum Line Calculation in Different Directions",
+      "raw_text": "1. Input : the quantum original image IYX, i.e., |IYX\u27e9= 1\n2n\n2n\u22121\n\u2211\nY=0\n2n\u22121\n\u2211\nX=0\n|CYX\u27e9|YX\u27e9\n2. Shift IYX one unit upward, then |IY+1X\u27e9= CT(Y\u2212)|IYX\u27e9= 1\n2n\n2n\u22121\n\u2211\nY=0"
+    },
+    {
+      "label": "Equation [Unnumbered-42]",
+      "latex": "$$|I_{Y+1, X-1}\\rangle = C_T^{(X+)} |I_{Y+1, X}\\rangle = \\frac{1}{2^n} \\sum_{Y=0}^{2^n-1} \\sum_{X=0}^{2^n-1} \\left|C_{Y+1, X-1}\\rangle \\left|Y, X\\rangle$$",
+      "description": "This equation computes the quantum image state after shifting the upward-shifted image one unit to the right.",
+      "page": 8,
+      "section": "Step 3: Quantum Line Calculation in Different Directions",
+      "raw_text": "1. Input : the quantum original image IYX, i.e., |IYX\u27e9= 1\n2n\n2n\u22121\n\u2211\nY=0\n2n\u22121\n\u2211\nX=0\n|CYX\u27e9|YX\u27e9\n2. Shift IYX one unit upward, then |IY+1X\u27e9= CT(Y\u2212)|IYX\u27e9= 1\n2n\n2n\u22121\n\u2211\nY=0\n2n\u22121\n\u2211\nX=0"
+    },
+    {
+      "label": "Equation [Unnumbered-43]",
+      "latex": "$$|I_{Y+1, X-1}\\rangle = \\frac{1}{2^n} \\sum_{Y=0}^{2^n-1} \\left|C_{Y+1, X-1}\\rangle \\left|Y, X\\rangle$$",
+      "description": "This equation represents the intermediate summation state during the horizontal and vertical shift operations of the quantum image.",
+      "page": 8,
+      "section": "Step 3: Quantum Line Calculation in Different Directions",
+      "raw_text": "1. Input : the quantum original image IYX, i.e., |IYX\u27e9= 1\n2n\n2n\u22121\n\u2211\nY=0\n2n\u22121\n\u2211\nX=0\n|CYX\u27e9|YX\u27e9\n2. Shift IYX one unit upward, then |IY+1X\u27e9= CT(Y\u2212)|IYX\u27e9= 1\n2n\n2n\u22121\n\u2211\nY=0\n2n\u22121\n\u2211\nX=0\n|CY+1X\u27e9|YX\u27e9\n3. Shift IY+1X one unit rightwards, then |IY+1X\u22121\u27e9= CT(X+)|IY+1X\u27e9="
+    },
+    {
+      "label": "Equation [Unnumbered-44]",
+      "latex": "$$|I_{Y+1, X-1}\\rangle = \\frac{1}{2^n} \\sum_{Y=0}^{2^n-1} \\sum_{X=0}^{2^n-1} \\left|C_{Y+1, X-1}\\rangle \\left|Y, X\\rangle$$",
+      "description": "This equation defines the quantum image state resulting from combined upward and rightward spatial shifts.",
+      "page": 8,
+      "section": "Step 3: Quantum Line Calculation in Different Directions",
+      "raw_text": "1. Input : the quantum original image IYX, i.e., |IYX\u27e9= 1\n2n\n2n\u22121\n\u2211\nY=0\n2n\u22121\n\u2211\nX=0\n|CYX\u27e9|YX\u27e9\n2. Shift IYX one unit upward, then |IY+1X\u27e9= CT(Y\u2212)|IYX\u27e9= 1\n2n\n2n\u22121\n\u2211\nY=0\n2n\u22121\n\u2211\nX=0\n|CY+1X\u27e9|YX\u27e9\n3. Shift IY+1X one unit rightwards, then |IY+1X\u22121\u27e9= CT(X+)|IY+1X\u27e9=\n1\n2n\n2n\u22121\n\u2211\nY=0"
+    },
+    {
+      "label": "Equation [Unnumbered-45]",
+      "latex": "$$|I_{YX-1}\\rangle = C_T^{(Y+)} |I_{Y+1, X-1}\\rangle = \\frac{1}{2^n} \\sum_{Y=0}^{2^n-1} \\sum_{X=0}^{2^n-1} \\left|C_{YX-1}\\rangle \\left|Y, X\\rangle$$",
+      "description": "This equation calculates the resulting quantum state after performing a downward shift on the previously shifted image.",
+      "page": 8,
+      "section": "Step 3: Quantum Line Calculation in Different Directions",
+      "raw_text": "1. Input : the quantum original image IYX, i.e., |IYX\u27e9= 1\n2n\n2n\u22121\n\u2211\nY=0\n2n\u22121\n\u2211\nX=0\n|CYX\u27e9|YX\u27e9\n2. Shift IYX one unit upward, then |IY+1X\u27e9= CT(Y\u2212)|IYX\u27e9= 1\n2n\n2n\u22121\n\u2211\nY=0\n2n\u22121\n\u2211\nX=0\n|CY+1X\u27e9|YX\u27e9\n3. Shift IY+1X one unit rightwards, then |IY+1X\u22121\u27e9= CT(X+)|IY+1X\u27e9=\n1\n2n\n2n\u22121\n\u2211\nY=0\n2n\u22121\n\u2211\nX=0"
+    },
+    {
+      "label": "Equation [Unnumbered-46]",
+      "latex": "$$|I_{YX-1}\\rangle = \\frac{1}{2^n} \\sum_{Y=0}^{2^n-1} \\sum_{X=0}^{2^n-1} \\left|C_{YX-1}\\rangle \\left|Y, X\\rangle$$",
+      "description": "This equation represents the summation form of the quantum image after multiple directional shift operations.",
+      "page": 8,
+      "section": "Step 3: Quantum Line Calculation in Different Directions",
+      "raw_text": "1. Input : the quantum original image IYX, i.e., |IYX\u27e9= 1\n2n\n2n\u22121\n\u2211\nY=0\n2n\u22121\n\u2211\nX=0\n|CYX\u27e9|YX\u27e9\n2. Shift IYX one unit upward, then |IY+1X\u27e9= CT(Y\u2212)|IYX\u27e9= 1\n2n\n2n\u22121\n\u2211\nY=0\n2n\u22121\n\u2211\nX=0\n|CY+1X\u27e9|YX\u27e9\n3. Shift IY+1X one unit rightwards, then |IY+1X\u22121\u27e9= CT(X+)|IY+1X\u27e9=\n1\n2n\n2n\u22121\n\u2211\nY=0\n2n\u22121\n\u2211\nX=0\n|CY+1X\u22121\u27e9|YX\u27e9\n4. Shift IY+1X\u22121 one unit downwards, then |IYX\u22121\u27e9= CT(Y+)|IY+1X\u22121\u27e9="
+    },
+    {
+      "label": "Equation [Unnumbered-47]",
+      "latex": "$$|I_{YX-1}\\rangle = \\frac{1}{2^n} \\sum_{Y=0}^{2^n-1} \\left|C_{YX-1}\\rangle \\left|Y, X\\rangle$$",
+      "description": "This equation expresses the quantum state representation following a sequence of shifts in the neighborhood calculation.",
+      "page": 8,
+      "section": "Step 3: Quantum Line Calculation in Different Directions",
+      "raw_text": "1. Input : the quantum original image IYX, i.e., |IYX\u27e9= 1\n2n\n2n\u22121\n\u2211\nY=0\n2n\u22121\n\u2211\nX=0\n|CYX\u27e9|YX\u27e9\n2. Shift IYX one unit upward, then |IY+1X\u27e9= CT(Y\u2212)|IYX\u27e9= 1\n2n\n2n\u22121\n\u2211\nY=0\n2n\u22121\n\u2211\nX=0\n|CY+1X\u27e9|YX\u27e9\n3. Shift IY+1X one unit rightwards, then |IY+1X\u22121\u27e9= CT(X+)|IY+1X\u27e9=\n1\n2n\n2n\u22121\n\u2211\nY=0\n2n\u22121\n\u2211\nX=0\n|CY+1X\u22121\u27e9|YX\u27e9\n4. Shift IY+1X\u22121 one unit downwards, then |IYX\u22121\u27e9= CT(Y+)|IY+1X\u22121\u27e9=\n1\n2n\n2n\u22121\n\u2211\nY=0"
+    },
+    {
+      "label": "Equation [Unnumbered-48]",
+      "latex": "$$|I_{YX-1}\\rangle = \\frac{1}{2^n} \\sum_{Y=0}^{2^n-1} \\sum_{X=0}^{2^n-1} \\left|C_{YX-1}\\rangle \\left|Y, X\\rangle$$",
+      "description": "This equation describes the quantum image formulation for pixel neighborhood extraction along specific directions.",
+      "page": 8,
+      "section": "Step 3: Quantum Line Calculation in Different Directions",
+      "raw_text": "1. Input : the quantum original image IYX, i.e., |IYX\u27e9= 1\n2n\n2n\u22121\n\u2211\nY=0\n2n\u22121\n\u2211\nX=0\n|CYX\u27e9|YX\u27e9\n2. Shift IYX one unit upward, then |IY+1X\u27e9= CT(Y\u2212)|IYX\u27e9= 1\n2n\n2n\u22121\n\u2211\nY=0\n2n\u22121\n\u2211\nX=0\n|CY+1X\u27e9|YX\u27e9\n3. Shift IY+1X one unit rightwards, then |IY+1X\u22121\u27e9= CT(X+)|IY+1X\u27e9=\n1\n2n\n2n\u22121\n\u2211\nY=0\n2n\u22121\n\u2211\nX=0\n|CY+1X\u22121\u27e9|YX\u27e9\n4. Shift IY+1X\u22121 one unit downwards, then |IYX\u22121\u27e9= CT(Y+)|IY+1X\u22121\u27e9=\n1\n2n\n2n\u22121\n\u2211\nY=0\n2n\u22121\n\u2211\nX=0"
+    },
+    {
+      "label": "Equation [Unnumbered-49]",
+      "latex": "$$|I_{Y-1, X-1}\\rangle = C_T^{(Y+)} |I_{YX-1}\\rangle$$",
+      "description": "This equation computes the final state after shifting the quantum image one additional unit downwards in the sequence.",
+      "page": 8,
+      "section": "Step 3: Quantum Line Calculation in Different Directions",
+      "raw_text": "1. Input : the quantum original image IYX, i.e., |IYX\u27e9= 1\n2n\n2n\u22121\n\u2211\nY=0\n2n\u22121\n\u2211\nX=0\n|CYX\u27e9|YX\u27e9\n2. Shift IYX one unit upward, then |IY+1X\u27e9= CT(Y\u2212)|IYX\u27e9= 1\n2n\n2n\u22121\n\u2211\nY=0\n2n\u22121\n\u2211\nX=0\n|CY+1X\u27e9|YX\u27e9\n3. Shift IY+1X one unit rightwards, then |IY+1X\u22121\u27e9= CT(X+)|IY+1X\u27e9=\n1\n2n\n2n\u22121\n\u2211\nY=0\n2n\u22121\n\u2211\nX=0\n|CY+1X\u22121\u27e9|YX\u27e9\n4. Shift IY+1X\u22121 one unit downwards, then |IYX\u22121\u27e9= CT(Y+)|IY+1X\u22121\u27e9=\n1\n2n\n2n\u22121\n\u2211\nY=0\n2n\u22121\n\u2211\nX=0\n|CYX\u22121\u27e9|YX\u27e9\n5. Shift IYX\u22121 one unit downwards, then |IY\u22121X\u22121\u27e9= CT(Y+)|IYX\u22121\u27e9="
+    },
+    {
+      "label": "Equation [Unnumbered-50]",
+      "latex": "$$ |I_{Y-1, X-1}\\rangle = C_T(Y^+) |I_{Y, X-1}\\rangle = \\frac{1}{2^n} \\sum_{Y=0}^{2^n-1} \\sum_{X=0}^{2^n-1} |C_{Y-1, X-1}\\rangle |Y X\\rangle $$",
+      "description": "This equation defines the quantum state resulting from shifting the state downward by one unit along the Y-axis.",
+      "page": 8,
+      "section": "Step 3: Quantum Line Calculation in Different Directions",
+      "raw_text": "2n\u22121\n\u2211\nX=0\n|CYX\u27e9|YX\u27e9\n2. Shift IYX one unit upward, then |IY+1X\u27e9= CT(Y\u2212)|IYX\u27e9= 1\n2n\n2n\u22121\n\u2211\nY=0\n2n\u22121\n\u2211\nX=0\n|CY+1X\u27e9|YX\u27e9\n3. Shift IY+1X one unit rightwards, then |IY+1X\u22121\u27e9= CT(X+)|IY+1X\u27e9=\n1\n2n\n2n\u22121\n\u2211\nY=0\n2n\u22121\n\u2211\nX=0\n|CY+1X\u22121\u27e9|YX\u27e9\n4. Shift IY+1X\u22121 one unit downwards, then |IYX\u22121\u27e9= CT(Y+)|IY+1X\u22121\u27e9=\n1\n2n\n2n\u22121\n\u2211\nY=0\n2n\u22121\n\u2211\nX=0\n|CYX\u22121\u27e9|YX\u27e9\n5. Shift IYX\u22121 one unit downwards, then |IY\u22121X\u22121\u27e9= CT(Y+)|IYX\u22121\u27e9=\n1\n2n\n2n\u22121\n\u2211\nY=0"
+    },
+    {
+      "label": "Equation [Unnumbered-51]",
+      "latex": "$$ |I_{Y-1, X}\\rangle = C_T(X^-) |I_{Y-1, X-1}\\rangle = \\frac{1}{2^n} \\sum_{Y=0}^{2^n-1} \\sum_{X=0}^{2^n-1} |C_{Y-1, X}\\rangle |Y X\\rangle $$",
+      "description": "This equation defines the quantum state resulting from shifting the previous state one unit leftward along the X-axis.",
+      "page": 8,
+      "section": "Step 3: Quantum Line Calculation in Different Directions",
+      "raw_text": "|CYX\u27e9|YX\u27e9\n2. Shift IYX one unit upward, then |IY+1X\u27e9= CT(Y\u2212)|IYX\u27e9= 1\n2n\n2n\u22121\n\u2211\nY=0\n2n\u22121\n\u2211\nX=0\n|CY+1X\u27e9|YX\u27e9\n3. Shift IY+1X one unit rightwards, then |IY+1X\u22121\u27e9= CT(X+)|IY+1X\u27e9=\n1\n2n\n2n\u22121\n\u2211\nY=0\n2n\u22121\n\u2211\nX=0\n|CY+1X\u22121\u27e9|YX\u27e9\n4. Shift IY+1X\u22121 one unit downwards, then |IYX\u22121\u27e9= CT(Y+)|IY+1X\u22121\u27e9=\n1\n2n\n2n\u22121\n\u2211\nY=0\n2n\u22121\n\u2211\nX=0\n|CYX\u22121\u27e9|YX\u27e9\n5. Shift IYX\u22121 one unit downwards, then |IY\u22121X\u22121\u27e9= CT(Y+)|IYX\u22121\u27e9=\n1\n2n\n2n\u22121\n\u2211\nY=0\n2n\u22121\n\u2211\nX=0"
+    },
+    {
+      "label": "Equation [Unnumbered-52]",
+      "latex": "$$ |I_{Y-1, X}\\rangle = \\frac{1}{2^n} \\sum_{Y=0}^{2^n-1} \\sum_{X=0}^{2^n-1} |C_{Y-1, X}\\rangle |Y X\\rangle $$",
+      "description": "This equation expresses the quantum state representation after completing the leftward shift operation along the X-axis.",
+      "page": 8,
+      "section": "Step 3: Quantum Line Calculation in Different Directions",
+      "raw_text": "2n\u22121\n\u2211\nX=0\n|CY+1X\u27e9|YX\u27e9\n3. Shift IY+1X one unit rightwards, then |IY+1X\u22121\u27e9= CT(X+)|IY+1X\u27e9=\n1\n2n\n2n\u22121\n\u2211\nY=0\n2n\u22121\n\u2211\nX=0\n|CY+1X\u22121\u27e9|YX\u27e9\n4. Shift IY+1X\u22121 one unit downwards, then |IYX\u22121\u27e9= CT(Y+)|IY+1X\u22121\u27e9=\n1\n2n\n2n\u22121\n\u2211\nY=0\n2n\u22121\n\u2211\nX=0\n|CYX\u22121\u27e9|YX\u27e9\n5. Shift IYX\u22121 one unit downwards, then |IY\u22121X\u22121\u27e9= CT(Y+)|IYX\u22121\u27e9=\n1\n2n\n2n\u22121\n\u2211\nY=0\n2n\u22121\n\u2211\nX=0\n|CY\u22121X\u22121\u27e9|YX\u27e9\n6. Shift IY\u22121X\u22121 one unit leftward, then |IY\u22121X\u27e9= CT(X\u2212)|IY\u22121X\u22121\u27e9= 1\n2n\n2n\u22121\n\u2211\nY=0"
+    },
+    {
+      "label": "Equation [Unnumbered-53]",
+      "latex": "$$ |I_{Y-1, X+1}\\rangle = C_T(X^-) |I_{Y-1, X}\\rangle = \\frac{1}{2^n} \\sum_{Y=0}^{2^n-1} \\sum_{X=0}^{2^n-1} |C_{Y-1, X+1}\\rangle |Y X\\rangle $$",
+      "description": "This equation defines the quantum state after performing another leftward shift operation along the X-axis.",
+      "page": 8,
+      "section": "Step 3: Quantum Line Calculation in Different Directions",
+      "raw_text": "|CY+1X\u27e9|YX\u27e9\n3. Shift IY+1X one unit rightwards, then |IY+1X\u22121\u27e9= CT(X+)|IY+1X\u27e9=\n1\n2n\n2n\u22121\n\u2211\nY=0\n2n\u22121\n\u2211\nX=0\n|CY+1X\u22121\u27e9|YX\u27e9\n4. Shift IY+1X\u22121 one unit downwards, then |IYX\u22121\u27e9= CT(Y+)|IY+1X\u22121\u27e9=\n1\n2n\n2n\u22121\n\u2211\nY=0\n2n\u22121\n\u2211\nX=0\n|CYX\u22121\u27e9|YX\u27e9\n5. Shift IYX\u22121 one unit downwards, then |IY\u22121X\u22121\u27e9= CT(Y+)|IYX\u22121\u27e9=\n1\n2n\n2n\u22121\n\u2211\nY=0\n2n\u22121\n\u2211\nX=0\n|CY\u22121X\u22121\u27e9|YX\u27e9\n6. Shift IY\u22121X\u22121 one unit leftward, then |IY\u22121X\u27e9= CT(X\u2212)|IY\u22121X\u22121\u27e9= 1\n2n\n2n\u22121\n\u2211\nY=0\n2n\u22121\n\u2211\nX=0"
+    },
+    {
+      "label": "Equation [Unnumbered-54]",
+      "latex": "$$ |I_{Y-1, X+1}\\rangle = \\frac{1}{2^n} \\sum_{Y=0}^{2^n-1} \\sum_{X=0}^{2^n-1} |C_{Y-1, X+1}\\rangle |Y X\\rangle $$",
+      "description": "This equation represents the resulting quantum state after the second leftward shift along the X-axis.",
+      "page": 8,
+      "section": "Step 3: Quantum Line Calculation in Different Directions",
+      "raw_text": "1\n2n\n2n\u22121\n\u2211\nY=0\n2n\u22121\n\u2211\nX=0\n|CY+1X\u22121\u27e9|YX\u27e9\n4. Shift IY+1X\u22121 one unit downwards, then |IYX\u22121\u27e9= CT(Y+)|IY+1X\u22121\u27e9=\n1\n2n\n2n\u22121\n\u2211\nY=0\n2n\u22121\n\u2211\nX=0\n|CYX\u22121\u27e9|YX\u27e9\n5. Shift IYX\u22121 one unit downwards, then |IY\u22121X\u22121\u27e9= CT(Y+)|IYX\u22121\u27e9=\n1\n2n\n2n\u22121\n\u2211\nY=0\n2n\u22121\n\u2211\nX=0\n|CY\u22121X\u22121\u27e9|YX\u27e9\n6. Shift IY\u22121X\u22121 one unit leftward, then |IY\u22121X\u27e9= CT(X\u2212)|IY\u22121X\u22121\u27e9= 1\n2n\n2n\u22121\n\u2211\nY=0\n2n\u22121\n\u2211\nX=0\n|CY\u22121X\u27e9|YX\u27e9\n7. Shift IY\u22121X one unit leftward, then |IY\u22121X+1\u27e9= CT(X\u2212)|IY\u22121X\u27e9= 1\n2n\n2n\u22121\n\u2211\nY=0"
+    },
+    {
+      "label": "Equation [Unnumbered-55]",
+      "latex": "$$ |I_{Y, X+1}\\rangle = C_T(Y^-) |I_{Y-1, X+1}\\rangle = \\frac{1}{2^n} \\sum_{Y=0}^{2^n-1} \\sum_{X=0}^{2^n-1} |C_{Y, X+1}\\rangle |Y X\\rangle $$",
+      "description": "This equation defines the quantum state obtained by shifting the state upward by one unit along the Y-axis.",
+      "page": 8,
+      "section": "Step 3: Quantum Line Calculation in Different Directions",
+      "raw_text": "2n\u22121\n\u2211\nX=0\n|CY+1X\u22121\u27e9|YX\u27e9\n4. Shift IY+1X\u22121 one unit downwards, then |IYX\u22121\u27e9= CT(Y+)|IY+1X\u22121\u27e9=\n1\n2n\n2n\u22121\n\u2211\nY=0\n2n\u22121\n\u2211\nX=0\n|CYX\u22121\u27e9|YX\u27e9\n5. Shift IYX\u22121 one unit downwards, then |IY\u22121X\u22121\u27e9= CT(Y+)|IYX\u22121\u27e9=\n1\n2n\n2n\u22121\n\u2211\nY=0\n2n\u22121\n\u2211\nX=0\n|CY\u22121X\u22121\u27e9|YX\u27e9\n6. Shift IY\u22121X\u22121 one unit leftward, then |IY\u22121X\u27e9= CT(X\u2212)|IY\u22121X\u22121\u27e9= 1\n2n\n2n\u22121\n\u2211\nY=0\n2n\u22121\n\u2211\nX=0\n|CY\u22121X\u27e9|YX\u27e9\n7. Shift IY\u22121X one unit leftward, then |IY\u22121X+1\u27e9= CT(X\u2212)|IY\u22121X\u27e9= 1\n2n\n2n\u22121\n\u2211\nY=0\n2n\u22121\n\u2211\nX=0"
+    },
+    {
+      "label": "Equation [Unnumbered-56]",
+      "latex": "$$ |I_{Y, X+1}\\rangle = \\frac{1}{2^n} \\sum_{Y=0}^{2^n-1} \\sum_{X=0}^{2^n-1} |C_{Y, X+1}\\rangle |Y X\\rangle $$",
+      "description": "This equation expresses the quantum state resulting from the upward shift operation along the Y-axis.",
+      "page": 8,
+      "section": "Step 3: Quantum Line Calculation in Different Directions",
+      "raw_text": "4. Shift IY+1X\u22121 one unit downwards, then |IYX\u22121\u27e9= CT(Y+)|IY+1X\u22121\u27e9=\n1\n2n\n2n\u22121\n\u2211\nY=0\n2n\u22121\n\u2211\nX=0\n|CYX\u22121\u27e9|YX\u27e9\n5. Shift IYX\u22121 one unit downwards, then |IY\u22121X\u22121\u27e9= CT(Y+)|IYX\u22121\u27e9=\n1\n2n\n2n\u22121\n\u2211\nY=0\n2n\u22121\n\u2211\nX=0\n|CY\u22121X\u22121\u27e9|YX\u27e9\n6. Shift IY\u22121X\u22121 one unit leftward, then |IY\u22121X\u27e9= CT(X\u2212)|IY\u22121X\u22121\u27e9= 1\n2n\n2n\u22121\n\u2211\nY=0\n2n\u22121\n\u2211\nX=0\n|CY\u22121X\u27e9|YX\u27e9\n7. Shift IY\u22121X one unit leftward, then |IY\u22121X+1\u27e9= CT(X\u2212)|IY\u22121X\u27e9= 1\n2n\n2n\u22121\n\u2211\nY=0\n2n\u22121\n\u2211\nX=0\n|CY\u22121X+1\u27e9|YX\u27e9\n8. Shift IY\u22121X+1 one unit upwards, then |IYX+1\u27e9= CT(Y\u2212)|IY\u22121X+1\u27e9= 1\n2n\n2n\u22121\n\u2211\nY=0"
+    },
+    {
+      "label": "Equation [Unnumbered-57]",
+      "latex": "$$ |I_{Y, X+1}\\rangle = \\frac{1}{2^n} \\sum_{Y=0}^{2^n-1} \\sum_{X=0}^{2^n-1} |C_{Y, X+1}\\rangle |Y X\\rangle $$",
+      "description": "This equation represents the intermediate quantum state during the line calculation sequence.",
+      "page": 8,
+      "section": "Step 3: Quantum Line Calculation in Different Directions",
+      "raw_text": "1\n2n\n2n\u22121\n\u2211\nY=0\n2n\u22121\n\u2211\nX=0\n|CYX\u22121\u27e9|YX\u27e9\n5. Shift IYX\u22121 one unit downwards, then |IY\u22121X\u22121\u27e9= CT(Y+)|IYX\u22121\u27e9=\n1\n2n\n2n\u22121\n\u2211\nY=0\n2n\u22121\n\u2211\nX=0\n|CY\u22121X\u22121\u27e9|YX\u27e9\n6. Shift IY\u22121X\u22121 one unit leftward, then |IY\u22121X\u27e9= CT(X\u2212)|IY\u22121X\u22121\u27e9= 1\n2n\n2n\u22121\n\u2211\nY=0\n2n\u22121\n\u2211\nX=0\n|CY\u22121X\u27e9|YX\u27e9\n7. Shift IY\u22121X one unit leftward, then |IY\u22121X+1\u27e9= CT(X\u2212)|IY\u22121X\u27e9= 1\n2n\n2n\u22121\n\u2211\nY=0\n2n\u22121\n\u2211\nX=0\n|CY\u22121X+1\u27e9|YX\u27e9\n8. Shift IY\u22121X+1 one unit upwards, then |IYX+1\u27e9= CT(Y\u2212)|IY\u22121X+1\u27e9= 1\n2n\n2n\u22121\n\u2211\nY=0\n2n\u22121\n\u2211\nX=0"
+    },
+    {
+      "label": "Equation [Unnumbered-58]",
+      "latex": "$$ |I_{Y+1, X+1}\\rangle = C_T(Y^-) |I_{Y, X+1}\\rangle = \\frac{1}{2^n} \\sum_{Y=0}^{2^n-1} \\sum_{X=0}^{2^n-1} |C_{Y+1, X+1}\\rangle |Y X\\rangle $$",
+      "description": "This equation defines the quantum state achieved by performing an additional upward shift along the Y-axis.",
+      "page": 8,
+      "section": "Step 3: Quantum Line Calculation in Different Directions",
+      "raw_text": "|CYX\u22121\u27e9|YX\u27e9\n5. Shift IYX\u22121 one unit downwards, then |IY\u22121X\u22121\u27e9= CT(Y+)|IYX\u22121\u27e9=\n1\n2n\n2n\u22121\n\u2211\nY=0\n2n\u22121\n\u2211\nX=0\n|CY\u22121X\u22121\u27e9|YX\u27e9\n6. Shift IY\u22121X\u22121 one unit leftward, then |IY\u22121X\u27e9= CT(X\u2212)|IY\u22121X\u22121\u27e9= 1\n2n\n2n\u22121\n\u2211\nY=0\n2n\u22121\n\u2211\nX=0\n|CY\u22121X\u27e9|YX\u27e9\n7. Shift IY\u22121X one unit leftward, then |IY\u22121X+1\u27e9= CT(X\u2212)|IY\u22121X\u27e9= 1\n2n\n2n\u22121\n\u2211\nY=0\n2n\u22121\n\u2211\nX=0\n|CY\u22121X+1\u27e9|YX\u27e9\n8. Shift IY\u22121X+1 one unit upwards, then |IYX+1\u27e9= CT(Y\u2212)|IY\u22121X+1\u27e9= 1\n2n\n2n\u22121\n\u2211\nY=0\n2n\u22121\n\u2211\nX=0\n|CYX+1\u27e9|YX\u27e9\n9. Shift IYX+1 one unit upwards, then |IY+1X+1\u27e9= CT(Y\u2212)|IYX+1\u27e9= 1\n2n\n2n\u22121\n\u2211\nY=0"
+    },
+    {
+      "label": "Equation [Unnumbered-59]",
+      "latex": "$$ |I_{Y+1, X+1}\\rangle = \\frac{1}{2^n} \\sum_{Y=0}^{2^n-1} \\sum_{X=0}^{2^n-1} |C_{Y+1, X+1}\\rangle |Y X\\rangle $$",
+      "description": "This equation details the quantum state expression just before returning to the original coordinate position.",
+      "page": 8,
+      "section": "Step 3: Quantum Line Calculation in Different Directions",
+      "raw_text": "5. Shift IYX\u22121 one unit downwards, then |IY\u22121X\u22121\u27e9= CT(Y+)|IYX\u22121\u27e9=\n1\n2n\n2n\u22121\n\u2211\nY=0\n2n\u22121\n\u2211\nX=0\n|CY\u22121X\u22121\u27e9|YX\u27e9\n6. Shift IY\u22121X\u22121 one unit leftward, then |IY\u22121X\u27e9= CT(X\u2212)|IY\u22121X\u22121\u27e9= 1\n2n\n2n\u22121\n\u2211\nY=0\n2n\u22121\n\u2211\nX=0\n|CY\u22121X\u27e9|YX\u27e9\n7. Shift IY\u22121X one unit leftward, then |IY\u22121X+1\u27e9= CT(X\u2212)|IY\u22121X\u27e9= 1\n2n\n2n\u22121\n\u2211\nY=0\n2n\u22121\n\u2211\nX=0\n|CY\u22121X+1\u27e9|YX\u27e9\n8. Shift IY\u22121X+1 one unit upwards, then |IYX+1\u27e9= CT(Y\u2212)|IY\u22121X+1\u27e9= 1\n2n\n2n\u22121\n\u2211\nY=0\n2n\u22121\n\u2211\nX=0\n|CYX+1\u27e9|YX\u27e9\n9. Shift IYX+1 one unit upwards, then |IY+1X+1\u27e9= CT(Y\u2212)|IYX+1\u27e9= 1\n2n\n2n\u22121\n\u2211\nY=0\n2n\u22121\n\u2211\nX=0"
+    },
+    {
+      "label": "Equation [Unnumbered-60]",
+      "latex": "$$ \\frac{1}{2^n} \\sum_{X=0}^{2^n-1} |C_{Y-1, X-1}\\rangle |YX\\rangle $$",
+      "description": "This expression represents a summation term in the quantum state preparation step for directional line calculation.",
+      "page": 8,
+      "section": "Step 3: Quantum Line Calculation in Different Directions",
+      "raw_text": "2n\u22121\n\u2211\nX=0\n|CY\u22121X\u22121\u27e9|YX\u27e9\n6. Shift IY\u22121X\u22121 one unit leftward, then |IY\u22121X\u27e9= CT(X\u2212)|IY\u22121X\u22121\u27e9= 1\n2n\n2n\u22121\n\u2211\nY=0\n2n\u22121\n\u2211\nX=0\n|CY\u22121X\u27e9|YX\u27e9\n7. Shift IY\u22121X one unit leftward, then |IY\u22121X+1\u27e9= CT(X\u2212)|IY\u22121X\u27e9= 1\n2n\n2n\u22121\n\u2211\nY=0\n2n\u22121\n\u2211\nX=0\n|CY\u22121X+1\u27e9|YX\u27e9\n8. Shift IY\u22121X+1 one unit upwards, then |IYX+1\u27e9= CT(Y\u2212)|IY\u22121X+1\u27e9= 1\n2n\n2n\u22121\n\u2211\nY=0\n2n\u22121\n\u2211\nX=0\n|CYX+1\u27e9|YX\u27e9\n9. Shift IYX+1 one unit upwards, then |IY+1X+1\u27e9= CT(Y\u2212)|IYX+1\u27e9= 1\n2n\n2n\u22121\n\u2211\nY=0\n2n\u22121\n\u2211\nX=0\n|CY+1X+1\u27e9|YX\u27e9\n10. Shift IY+1X+1 one unit rightwards and one unit downward to the original position, then |IYX\u27e9="
+    },
+    {
+      "label": "Equation [Unnumbered-61]",
+      "latex": "$$ |C_{Y-1, X-1}\\rangle |YX\\rangle $$",
+      "description": "This represents the quantum state combining color and pixel position information before shifting operations.",
+      "page": 8,
+      "section": "Step 3: Quantum Line Calculation in Different Directions",
+      "raw_text": "|CY\u22121X\u22121\u27e9|YX\u27e9\n6. Shift IY\u22121X\u22121 one unit leftward, then |IY\u22121X\u27e9= CT(X\u2212)|IY\u22121X\u22121\u27e9= 1\n2n\n2n\u22121\n\u2211\nY=0\n2n\u22121\n\u2211\nX=0\n|CY\u22121X\u27e9|YX\u27e9\n7. Shift IY\u22121X one unit leftward, then |IY\u22121X+1\u27e9= CT(X\u2212)|IY\u22121X\u27e9= 1\n2n\n2n\u22121\n\u2211\nY=0\n2n\u22121\n\u2211\nX=0\n|CY\u22121X+1\u27e9|YX\u27e9\n8. Shift IY\u22121X+1 one unit upwards, then |IYX+1\u27e9= CT(Y\u2212)|IY\u22121X+1\u27e9= 1\n2n\n2n\u22121\n\u2211\nY=0\n2n\u22121\n\u2211\nX=0\n|CYX+1\u27e9|YX\u27e9\n9. Shift IYX+1 one unit upwards, then |IY+1X+1\u27e9= CT(Y\u2212)|IYX+1\u27e9= 1\n2n\n2n\u22121\n\u2211\nY=0\n2n\u22121\n\u2211\nX=0\n|CY+1X+1\u27e9|YX\u27e9\n10. Shift IY+1X+1 one unit rightwards and one unit downward to the original position, then |IYX\u27e9=\nCT(X+)(CT(Y+)|IY+1X+1\u27e9) = 1"
+    },
+    {
+      "label": "Equation [Unnumbered-62]",
+      "latex": "$$ \\frac{1}{2^n} \\sum_{Y=0}^{2^n-1} \\sum_{X=0}^{2^n-1} |C_{YX}\\rangle |YX\\rangle $$",
+      "description": "This represents the final quantum image state after shifting back to the original pixel coordinates.",
+      "page": 8,
+      "section": "Step 3: Quantum Line Calculation in Different Directions",
+      "raw_text": "6. Shift IY\u22121X\u22121 one unit leftward, then |IY\u22121X\u27e9= CT(X\u2212)|IY\u22121X\u22121\u27e9= 1\n2n\n2n\u22121\n\u2211\nY=0\n2n\u22121\n\u2211\nX=0\n|CY\u22121X\u27e9|YX\u27e9\n7. Shift IY\u22121X one unit leftward, then |IY\u22121X+1\u27e9= CT(X\u2212)|IY\u22121X\u27e9= 1\n2n\n2n\u22121\n\u2211\nY=0\n2n\u22121\n\u2211\nX=0\n|CY\u22121X+1\u27e9|YX\u27e9\n8. Shift IY\u22121X+1 one unit upwards, then |IYX+1\u27e9= CT(Y\u2212)|IY\u22121X+1\u27e9= 1\n2n\n2n\u22121\n\u2211\nY=0\n2n\u22121\n\u2211\nX=0\n|CYX+1\u27e9|YX\u27e9\n9. Shift IYX+1 one unit upwards, then |IY+1X+1\u27e9= CT(Y\u2212)|IYX+1\u27e9= 1\n2n\n2n\u22121\n\u2211\nY=0\n2n\u22121\n\u2211\nX=0\n|CY+1X+1\u27e9|YX\u27e9\n10. Shift IY+1X+1 one unit rightwards and one unit downward to the original position, then |IYX\u27e9=\nCT(X+)(CT(Y+)|IY+1X+1\u27e9) = 1\n2n\n2n\u22121\n\u2211\nY=0"
+    },
+    {
+      "label": "Equation [Unnumbered-63]",
+      "latex": "$$ \\sum_{X=0}^{2^n-1} |C_{Y-1, X}\\rangle |YX\\rangle $$",
+      "description": "This summation term corresponds to an intermediate quantum state after applying spatial shift operators along the horizontal axis.",
+      "page": 8,
+      "section": "Step 3: Quantum Line Calculation in Different Directions",
+      "raw_text": "2n\u22121\n\u2211\nX=0\n|CY\u22121X\u27e9|YX\u27e9\n7. Shift IY\u22121X one unit leftward, then |IY\u22121X+1\u27e9= CT(X\u2212)|IY\u22121X\u27e9= 1\n2n\n2n\u22121\n\u2211\nY=0\n2n\u22121\n\u2211\nX=0\n|CY\u22121X+1\u27e9|YX\u27e9\n8. Shift IY\u22121X+1 one unit upwards, then |IYX+1\u27e9= CT(Y\u2212)|IY\u22121X+1\u27e9= 1\n2n\n2n\u22121\n\u2211\nY=0\n2n\u22121\n\u2211\nX=0\n|CYX+1\u27e9|YX\u27e9\n9. Shift IYX+1 one unit upwards, then |IY+1X+1\u27e9= CT(Y\u2212)|IYX+1\u27e9= 1\n2n\n2n\u22121\n\u2211\nY=0\n2n\u22121\n\u2211\nX=0\n|CY+1X+1\u27e9|YX\u27e9\n10. Shift IY+1X+1 one unit rightwards and one unit downward to the original position, then |IYX\u27e9=\nCT(X+)(CT(Y+)|IY+1X+1\u27e9) = 1\n2n\n2n\u22121\n\u2211\nY=0\n2n\u22121\n\u2211\nX=0"
+    },
+    {
+      "label": "Equation [Unnumbered-64]",
+      "latex": "$$ E_{YX}^{LH} $$",
+      "description": "This symbol denotes the horizontal edge or line detection component for the quantum image at position YX.",
+      "page": 9,
+      "section": "Step 3: Quantum Line Calculation in Different Directions",
+      "raw_text": "obtained. Then, the lines in different directions of the image |IYX\u27e9can be calculated using\nEquations (10)\u2013(13). Lines in four directions are horizontal, vertical, +45\u25e6, and \u221245\u25e6lines."
+    },
+    {
+      "label": "Equation [Unnumbered-65]",
+      "latex": "$$ E_{YX}^{H} = (|2C_{Y, X-1}\\rangle + |2C_{Y, X}\\rangle + |2C_{Y, X+1}\\rangle) - (|C_{Y+1, X-1}\\rangle + |C_{Y+1, X}\\rangle + |C_{Y+1, X+1}\\rangle) $$",
+      "description": "This equation calculates the horizontal line feature using neighboring pixel intensities in the quantum image.",
+      "page": 9,
+      "section": "Step 3: Quantum Line Calculation in Different Directions",
+      "raw_text": "obtained. Then, the lines in different directions of the image |IYX\u27e9can be calculated using\nEquations (10)\u2013(13). Lines in four directions are horizontal, vertical, +45\u25e6, and \u221245\u25e6lines.\nLH\nYX\nE||| =\n(|2CY,X\u22121\u27e9+ |2CY,X\u27e9+ |2CY,X+1\u27e9) \u2212(|CY+1,X\u22121\u27e9+ |CY+1,X\u27e9+ |CY+1,X+1\u27e9)"
+    },
+    {
+      "label": "Equation [Unnumbered-66]",
+      "latex": "$$ E_{YX}^{H} = (|2C_{Y, X-1}\\rangle + |2C_{Y, X}\\rangle + |2C_{Y, X+1}\\rangle) - (|C_{Y+1, X-1}\\rangle + |C_{Y+1, X}\\rangle + |C_{Y+1, X+1}\\rangle) - (|C_{Y-1, X-1}\\rangle + |C_{Y-1, X}\\rangle + |C_{Y-1, X+1}\\rangle) $$",
+      "description": "This complete formula computes the horizontal line detection mask response for the quantum image.",
+      "page": 9,
+      "section": "Step 3: Quantum Line Calculation in Different Directions",
+      "raw_text": "obtained. Then, the lines in different directions of the image |IYX\u27e9can be calculated using\nEquations (10)\u2013(13). Lines in four directions are horizontal, vertical, +45\u25e6, and \u221245\u25e6lines.\nLH\nYX\nE||| =\n(|2CY,X\u22121\u27e9+ |2CY,X\u27e9+ |2CY,X+1\u27e9) \u2212(|CY+1,X\u22121\u27e9+ |CY+1,X\u27e9+ |CY+1,X+1\u27e9)\n\u2212(|CY\u22121,X\u22121\u27e9+ |CY\u22121,X\u27e9+ |CY\u22121,X+1\u27e9)"
+    },
+    {
+      "label": "Equation (10)",
+      "latex": "$$ E_{YX}^{H} = (|2C_{Y, X-1}\\rangle + |2C_{Y, X}\\rangle + |2C_{Y, X+1}\\rangle) - (|C_{Y+1, X-1}\\rangle + |C_{Y+1, X}\\rangle + |C_{Y+1, X+1}\\rangle) - (|C_{Y-1, X-1}\\rangle + |C_{Y-1, X}\\rangle + |C_{Y-1, X+1}\\rangle) $$",
+      "description": "Equation (10) formally defines the horizontal line detection operator applied to the quantum image state.",
+      "page": 9,
+      "section": "Step 3: Quantum Line Calculation in Different Directions",
+      "raw_text": "obtained. Then, the lines in different directions of the image |IYX\u27e9can be calculated using\nEquations (10)\u2013(13). Lines in four directions are horizontal, vertical, +45\u25e6, and \u221245\u25e6lines.\nLH\nYX\nE||| =\n(|2CY,X\u22121\u27e9+ |2CY,X\u27e9+ |2CY,X+1\u27e9) \u2212(|CY+1,X\u22121\u27e9+ |CY+1,X\u27e9+ |CY+1,X+1\u27e9)\n\u2212(|CY\u22121,X\u22121\u27e9+ |CY\u22121,X\u27e9+ |CY\u22121,X+1\u27e9)\n(10)"
+    },
+    {
+      "label": "Equation [Unnumbered-67]",
+      "latex": "$$ E_{YX}^{V} = (|2C_{Y-1, X}\\rangle + |2C_{Y, X}\\rangle + |2C_{Y+1, X}\\rangle) - (|C_{Y-1, X+1}\\rangle + |C_{Y, X+1}\\rangle + |C_{Y+1, X+1}\\rangle) $$",
+      "description": "This equation computes the vertical line feature components using adjacent column pixels.",
+      "page": 9,
+      "section": "Step 3: Quantum Line Calculation in Different Directions",
+      "raw_text": "obtained. Then, the lines in different directions of the image |IYX\u27e9can be calculated using\nEquations (10)\u2013(13). Lines in four directions are horizontal, vertical, +45\u25e6, and \u221245\u25e6lines.\nLH\nYX\nE||| =\n(|2CY,X\u22121\u27e9+ |2CY,X\u27e9+ |2CY,X+1\u27e9) \u2212(|CY+1,X\u22121\u27e9+ |CY+1,X\u27e9+ |CY+1,X+1\u27e9)\n\u2212(|CY\u22121,X\u22121\u27e9+ |CY\u22121,X\u27e9+ |CY\u22121,X+1\u27e9)\n(10)\nLV\nYX\nE||| =\n(|2CY\u22121,X\u27e9+ |2CY,X\u27e9+ |2CY+1,X\u27e9) \u2212(|CY\u22121,X+1\u27e9+ |CY,X+1\u27e9+ |CY+1,X+1\u27e9)"
+    },
+    {
+      "label": "Equation [Unnumbered-68]",
+      "latex": "$$ E_{YX}^{V} = (|2C_{Y-1, X}\\rangle + |2C_{Y, X}\\rangle + |2C_{Y+1, X}\\rangle) - (|C_{Y-1, X+1}\\rangle + |C_{Y, X+1}\\rangle + |C_{Y+1, X+1}\\rangle) - (|C_{Y-1, X-1}\\rangle + |C_{Y, X-1}\\rangle + |C_{Y+1, X-1}\\rangle) $$",
+      "description": "This complete formula defines the vertical line detection mask response for the quantum image.",
+      "page": 9,
+      "section": "Step 3: Quantum Line Calculation in Different Directions",
+      "raw_text": "obtained. Then, the lines in different directions of the image |IYX\u27e9can be calculated using\nEquations (10)\u2013(13). Lines in four directions are horizontal, vertical, +45\u25e6, and \u221245\u25e6lines.\nLH\nYX\nE||| =\n(|2CY,X\u22121\u27e9+ |2CY,X\u27e9+ |2CY,X+1\u27e9) \u2212(|CY+1,X\u22121\u27e9+ |CY+1,X\u27e9+ |CY+1,X+1\u27e9)\n\u2212(|CY\u22121,X\u22121\u27e9+ |CY\u22121,X\u27e9+ |CY\u22121,X+1\u27e9)\n(10)\nLV\nYX\nE||| =\n(|2CY\u22121,X\u27e9+ |2CY,X\u27e9+ |2CY+1,X\u27e9) \u2212(|CY\u22121,X+1\u27e9+ |CY,X+1\u27e9+ |CY+1,X+1\u27e9)\n\u2212(|CY\u22121,X\u22121\u27e9+ |CY,X\u22121\u27e9+ |CY+1,X\u22121\u27e9)"
+    },
+    {
+      "label": "Equation (11)",
+      "latex": "$$ E_{YX}^{LV} = (|2C_{Y-1,X}\\rangle + |C_{Y,X}\\rangle + |C_{Y+1,X}\\rangle) - (|C_{Y-1,X+1}\\rangle + |C_{Y,X+1}\\rangle + |C_{Y+1,X+1}\\rangle) - (|C_{Y-1,X-1}\\rangle + |C_{Y,X-1}\\rangle + |C_{Y+1,X-1}\\rangle) $$",
+      "description": "This equation calculates the vertical line edge detection mask for the quantum image state.",
+      "page": 9,
+      "section": "Step 3: Quantum Line Calculation in Different Directions",
+      "raw_text": "obtained. Then, the lines in different directions of the image |IYX\u27e9can be calculated using\nEquations (10)\u2013(13). Lines in four directions are horizontal, vertical, +45\u25e6, and \u221245\u25e6lines.\nLH\nYX\nE||| =\n(|2CY,X\u22121\u27e9+ |2CY,X\u27e9+ |2CY,X+1\u27e9) \u2212(|CY+1,X\u22121\u27e9+ |CY+1,X\u27e9+ |CY+1,X+1\u27e9)\n\u2212(|CY\u22121,X\u22121\u27e9+ |CY\u22121,X\u27e9+ |CY\u22121,X+1\u27e9)\n(10)\nLV\nYX\nE||| =\n(|2CY\u22121,X\u27e9+ |2CY,X\u27e9+ |2CY+1,X\u27e9) \u2212(|CY\u22121,X+1\u27e9+ |CY,X+1\u27e9+ |CY+1,X+1\u27e9)\n\u2212(|CY\u22121,X\u22121\u27e9+ |CY,X\u22121\u27e9+ |CY+1,X\u22121\u27e9)\n(11)"
+    },
+    {
+      "label": "Equation [Unnumbered-69]",
+      "latex": "$$YX\nE||| =\n(|2CY,X\u22121\u27e9+ |2CY,X\u27e9+ |2CY,X+1\u27e9) \u2212(|CY+1,X\u22121\u27e9+ |CY+1,X\u27e9+ |CY+1,X+1\u27e9)\n\u2212(|CY\u22121,X\u22121\u27e9+ |CY\u22121,X\u27e9+ |CY\u22121,X+1\u27e9)\n(10)\nLV\nYX\nE||| =\n(|2CY\u22121,X\u27e9+ |2CY,X\u27e9+ |2CY+1,X\u27e9) \u2212(|CY\u22121,X+1\u27e9+ |CY,X+1\u27e9+ |CY+1,X+1\u27e9)\n\u2212(|CY\u22121,X\u22121\u27e9+ |CY,X\u22121\u27e9+ |CY+1,X\u22121\u27e9)\n(11)\nL+45\u25e6\nYX\nE||| =\n(|2CY\u22121,X+1\u27e9+ |2CY,X\u27e9+ |2CY+1,X\u22121\u27e9) \u2212(|CY,X+1\u27e9+ |CY+1,X\u27e9+ |CY+1,X+1\u27e9)$$",
+      "description": "Mathematical equation reference.",
+      "page": 9,
+      "section": "Step 3: Quantum Line Calculation in Different Directions",
+      "raw_text": "YX\nE||| =\n(|2CY,X\u22121\u27e9+ |2CY,X\u27e9+ |2CY,X+1\u27e9) \u2212(|CY+1,X\u22121\u27e9+ |CY+1,X\u27e9+ |CY+1,X+1\u27e9)\n\u2212(|CY\u22121,X\u22121\u27e9+ |CY\u22121,X\u27e9+ |CY\u22121,X+1\u27e9)\n(10)\nLV\nYX\nE||| =\n(|2CY\u22121,X\u27e9+ |2CY,X\u27e9+ |2CY+1,X\u27e9) \u2212(|CY\u22121,X+1\u27e9+ |CY,X+1\u27e9+ |CY+1,X+1\u27e9)\n\u2212(|CY\u22121,X\u22121\u27e9+ |CY,X\u22121\u27e9+ |CY+1,X\u22121\u27e9)\n(11)\nL+45\u25e6\nYX\nE||| =\n(|2CY\u22121,X+1\u27e9+ |2CY,X\u27e9+ |2CY+1,X\u22121\u27e9) \u2212(|CY,X+1\u27e9+ |CY+1,X\u27e9+ |CY+1,X+1\u27e9)"
+    },
+    {
+      "label": "Equation [Unnumbered-70]",
+      "latex": "$$E||| =\n(|2CY,X\u22121\u27e9+ |2CY,X\u27e9+ |2CY,X+1\u27e9) \u2212(|CY+1,X\u22121\u27e9+ |CY+1,X\u27e9+ |CY+1,X+1\u27e9)\n\u2212(|CY\u22121,X\u22121\u27e9+ |CY\u22121,X\u27e9+ |CY\u22121,X+1\u27e9)\n(10)\nLV\nYX\nE||| =\n(|2CY\u22121,X\u27e9+ |2CY,X\u27e9+ |2CY+1,X\u27e9) \u2212(|CY\u22121,X+1\u27e9+ |CY,X+1\u27e9+ |CY+1,X+1\u27e9)\n\u2212(|CY\u22121,X\u22121\u27e9+ |CY,X\u22121\u27e9+ |CY+1,X\u22121\u27e9)\n(11)\nL+45\u25e6\nYX\nE||| =\n(|2CY\u22121,X+1\u27e9+ |2CY,X\u27e9+ |2CY+1,X\u22121\u27e9) \u2212(|CY,X+1\u27e9+ |CY+1,X\u27e9+ |CY+1,X+1\u27e9)\n\u2212(|CY,X\u22121\u27e9+ |CY\u22121,X\u27e9+ |CY\u22121X\u22121\u27e9)$$",
+      "description": "Mathematical equation reference.",
+      "page": 9,
+      "section": "Step 3: Quantum Line Calculation in Different Directions",
+      "raw_text": "E||| =\n(|2CY,X\u22121\u27e9+ |2CY,X\u27e9+ |2CY,X+1\u27e9) \u2212(|CY+1,X\u22121\u27e9+ |CY+1,X\u27e9+ |CY+1,X+1\u27e9)\n\u2212(|CY\u22121,X\u22121\u27e9+ |CY\u22121,X\u27e9+ |CY\u22121,X+1\u27e9)\n(10)\nLV\nYX\nE||| =\n(|2CY\u22121,X\u27e9+ |2CY,X\u27e9+ |2CY+1,X\u27e9) \u2212(|CY\u22121,X+1\u27e9+ |CY,X+1\u27e9+ |CY+1,X+1\u27e9)\n\u2212(|CY\u22121,X\u22121\u27e9+ |CY,X\u22121\u27e9+ |CY+1,X\u22121\u27e9)\n(11)\nL+45\u25e6\nYX\nE||| =\n(|2CY\u22121,X+1\u27e9+ |2CY,X\u27e9+ |2CY+1,X\u22121\u27e9) \u2212(|CY,X+1\u27e9+ |CY+1,X\u27e9+ |CY+1,X+1\u27e9)\n\u2212(|CY,X\u22121\u27e9+ |CY\u22121,X\u27e9+ |CY\u22121X\u22121\u27e9)"
+    },
+    {
+      "label": "Equation (12)",
+      "latex": "$$ E_{YX}^{L+45^\\circ} = (|2C_{Y-1,X+1}\\rangle + |C_{Y,X}\\rangle + |C_{Y+1,X-1}\\rangle) - (|C_{Y,X+1}\\rangle + |C_{Y+1,X}\\rangle + |C_{Y+1,X+1}\\rangle) - (|C_{Y,X-1}\\rangle + |C_{Y-1,X}\\rangle + |C_{Y-1,X-1}\\rangle) $$",
+      "description": "This equation calculates the +45 degrees diagonal line edge detection mask for the quantum image.",
+      "page": 9,
+      "section": "Step 3: Quantum Line Calculation in Different Directions",
+      "raw_text": "(|2CY,X\u22121\u27e9+ |2CY,X\u27e9+ |2CY,X+1\u27e9) \u2212(|CY+1,X\u22121\u27e9+ |CY+1,X\u27e9+ |CY+1,X+1\u27e9)\n\u2212(|CY\u22121,X\u22121\u27e9+ |CY\u22121,X\u27e9+ |CY\u22121,X+1\u27e9)\n(10)\nLV\nYX\nE||| =\n(|2CY\u22121,X\u27e9+ |2CY,X\u27e9+ |2CY+1,X\u27e9) \u2212(|CY\u22121,X+1\u27e9+ |CY,X+1\u27e9+ |CY+1,X+1\u27e9)\n\u2212(|CY\u22121,X\u22121\u27e9+ |CY,X\u22121\u27e9+ |CY+1,X\u22121\u27e9)\n(11)\nL+45\u25e6\nYX\nE||| =\n(|2CY\u22121,X+1\u27e9+ |2CY,X\u27e9+ |2CY+1,X\u22121\u27e9) \u2212(|CY,X+1\u27e9+ |CY+1,X\u27e9+ |CY+1,X+1\u27e9)\n\u2212(|CY,X\u22121\u27e9+ |CY\u22121,X\u27e9+ |CY\u22121X\u22121\u27e9)\n(12)"
+    },
+    {
+      "label": "Equation [Unnumbered-71]",
+      "latex": "$$YX\nE||| =\n(|2CY\u22121,X\u27e9+ |2CY,X\u27e9+ |2CY+1,X\u27e9) \u2212(|CY\u22121,X+1\u27e9+ |CY,X+1\u27e9+ |CY+1,X+1\u27e9)\n\u2212(|CY\u22121,X\u22121\u27e9+ |CY,X\u22121\u27e9+ |CY+1,X\u22121\u27e9)\n(11)\nL+45\u25e6\nYX\nE||| =\n(|2CY\u22121,X+1\u27e9+ |2CY,X\u27e9+ |2CY+1,X\u22121\u27e9) \u2212(|CY,X+1\u27e9+ |CY+1,X\u27e9+ |CY+1,X+1\u27e9)\n\u2212(|CY,X\u22121\u27e9+ |CY\u22121,X\u27e9+ |CY\u22121X\u22121\u27e9)\n(12)\nL\u221245\u25e6\nYX\nE||| =\n(|2CY\u22121,X\u22121\u27e9+ |2CY,X\u27e9+ |2CY+1,X+1\u27e9) \u2212(|CY\u22121,X\u27e9+ |CY,X+1\u27e9+ |CY\u22121,X+1\u27e9)$$",
+      "description": "Mathematical equation reference.",
+      "page": 9,
+      "section": "Step 3: Quantum Line Calculation in Different Directions",
+      "raw_text": "YX\nE||| =\n(|2CY\u22121,X\u27e9+ |2CY,X\u27e9+ |2CY+1,X\u27e9) \u2212(|CY\u22121,X+1\u27e9+ |CY,X+1\u27e9+ |CY+1,X+1\u27e9)\n\u2212(|CY\u22121,X\u22121\u27e9+ |CY,X\u22121\u27e9+ |CY+1,X\u22121\u27e9)\n(11)\nL+45\u25e6\nYX\nE||| =\n(|2CY\u22121,X+1\u27e9+ |2CY,X\u27e9+ |2CY+1,X\u22121\u27e9) \u2212(|CY,X+1\u27e9+ |CY+1,X\u27e9+ |CY+1,X+1\u27e9)\n\u2212(|CY,X\u22121\u27e9+ |CY\u22121,X\u27e9+ |CY\u22121X\u22121\u27e9)\n(12)\nL\u221245\u25e6\nYX\nE||| =\n(|2CY\u22121,X\u22121\u27e9+ |2CY,X\u27e9+ |2CY+1,X+1\u27e9) \u2212(|CY\u22121,X\u27e9+ |CY,X+1\u27e9+ |CY\u22121,X+1\u27e9)"
+    },
+    {
+      "label": "Equation [Unnumbered-72]",
+      "latex": "$$E||| =\n(|2CY\u22121,X\u27e9+ |2CY,X\u27e9+ |2CY+1,X\u27e9) \u2212(|CY\u22121,X+1\u27e9+ |CY,X+1\u27e9+ |CY+1,X+1\u27e9)\n\u2212(|CY\u22121,X\u22121\u27e9+ |CY,X\u22121\u27e9+ |CY+1,X\u22121\u27e9)\n(11)\nL+45\u25e6\nYX\nE||| =\n(|2CY\u22121,X+1\u27e9+ |2CY,X\u27e9+ |2CY+1,X\u22121\u27e9) \u2212(|CY,X+1\u27e9+ |CY+1,X\u27e9+ |CY+1,X+1\u27e9)\n\u2212(|CY,X\u22121\u27e9+ |CY\u22121,X\u27e9+ |CY\u22121X\u22121\u27e9)\n(12)\nL\u221245\u25e6\nYX\nE||| =\n(|2CY\u22121,X\u22121\u27e9+ |2CY,X\u27e9+ |2CY+1,X+1\u27e9) \u2212(|CY\u22121,X\u27e9+ |CY,X+1\u27e9+ |CY\u22121,X+1\u27e9)\n\u2212(|CY+1,X\u27e9+ |CY,X\u22121\u27e9+ |CY+1X\u22121\u27e9)$$",
+      "description": "Mathematical equation reference.",
+      "page": 9,
+      "section": "Step 3: Quantum Line Calculation in Different Directions",
+      "raw_text": "E||| =\n(|2CY\u22121,X\u27e9+ |2CY,X\u27e9+ |2CY+1,X\u27e9) \u2212(|CY\u22121,X+1\u27e9+ |CY,X+1\u27e9+ |CY+1,X+1\u27e9)\n\u2212(|CY\u22121,X\u22121\u27e9+ |CY,X\u22121\u27e9+ |CY+1,X\u22121\u27e9)\n(11)\nL+45\u25e6\nYX\nE||| =\n(|2CY\u22121,X+1\u27e9+ |2CY,X\u27e9+ |2CY+1,X\u22121\u27e9) \u2212(|CY,X+1\u27e9+ |CY+1,X\u27e9+ |CY+1,X+1\u27e9)\n\u2212(|CY,X\u22121\u27e9+ |CY\u22121,X\u27e9+ |CY\u22121X\u22121\u27e9)\n(12)\nL\u221245\u25e6\nYX\nE||| =\n(|2CY\u22121,X\u22121\u27e9+ |2CY,X\u27e9+ |2CY+1,X+1\u27e9) \u2212(|CY\u22121,X\u27e9+ |CY,X+1\u27e9+ |CY\u22121,X+1\u27e9)\n\u2212(|CY+1,X\u27e9+ |CY,X\u22121\u27e9+ |CY+1X\u22121\u27e9)"
+    },
+    {
+      "label": "Equation (13)",
+      "latex": "$$ E_{YX}^{L-45^\\circ} = (|2C_{Y-1,X-1}\\rangle + |C_{Y,X}\\rangle + |C_{Y+1,X+1}\\rangle) - (|C_{Y-1,X}\\rangle + |C_{Y,X+1}\\rangle + |C_{Y-1,X+1}\\rangle) - (|C_{Y+1,X}\\rangle + |C_{Y,X-1}\\rangle + |C_{Y+1,X-1}\\rangle) $$",
+      "description": "This equation calculates the -45 degrees diagonal line edge detection mask for the quantum image.",
+      "page": 9,
+      "section": "Step 3: Quantum Line Calculation in Different Directions",
+      "raw_text": "(|2CY\u22121,X\u27e9+ |2CY,X\u27e9+ |2CY+1,X\u27e9) \u2212(|CY\u22121,X+1\u27e9+ |CY,X+1\u27e9+ |CY+1,X+1\u27e9)\n\u2212(|CY\u22121,X\u22121\u27e9+ |CY,X\u22121\u27e9+ |CY+1,X\u22121\u27e9)\n(11)\nL+45\u25e6\nYX\nE||| =\n(|2CY\u22121,X+1\u27e9+ |2CY,X\u27e9+ |2CY+1,X\u22121\u27e9) \u2212(|CY,X+1\u27e9+ |CY+1,X\u27e9+ |CY+1,X+1\u27e9)\n\u2212(|CY,X\u22121\u27e9+ |CY\u22121,X\u27e9+ |CY\u22121X\u22121\u27e9)\n(12)\nL\u221245\u25e6\nYX\nE||| =\n(|2CY\u22121,X\u22121\u27e9+ |2CY,X\u27e9+ |2CY+1,X+1\u27e9) \u2212(|CY\u22121,X\u27e9+ |CY,X+1\u27e9+ |CY\u22121,X+1\u27e9)\n\u2212(|CY+1,X\u27e9+ |CY,X\u22121\u27e9+ |CY+1X\u22121\u27e9)\n(13)"
+    },
+    {
+      "label": "Equation [Unnumbered-73]",
+      "latex": "$$3.4. Step 4: Quantum Threshold Value Classi\ufb01cation\n!\nUT\n2n\u22121\n\u2211\nY=0$$",
+      "description": "Mathematical equation reference.",
+      "page": 10,
+      "section": "Complexity Analysis",
+      "raw_text": "3.4. Step 4: Quantum Threshold Value Classi\ufb01cation\n!\nUT\n2n\u22121\n\u2211\nY=0"
+    },
+    {
+      "label": "Equation [Unnumbered-74]",
+      "latex": "$$3.4. Step 4: Quantum Threshold Value Classi\ufb01cation\n!\nUT\n2n\u22121\n\u2211\nY=0\n2n\u22121\n\u2211\nX=0$$",
+      "description": "Mathematical equation reference.",
+      "page": 10,
+      "section": "Complexity Analysis",
+      "raw_text": "3.4. Step 4: Quantum Threshold Value Classi\ufb01cation\n!\nUT\n2n\u22121\n\u2211\nY=0\n2n\u22121\n\u2211\nX=0"
+    },
+    {
+      "label": "Equation (14)",
+      "latex": "$$ U_T \\sum_{Y=0}^{2^n-1} \\sum_{X=0}^{2^n-1} |L_{YX}\\rangle |0\\rangle^{\\otimes 2q-1} = \\sum_{L_{YX} > T} |E_{YX}\\rangle + \\sum_{L_{YX} \\leq T} |0\\rangle |YX\\rangle $$",
+      "description": "This equation defines the quantum threshold value classification operation used to binarize or classify the detected line features based on a threshold T.",
+      "page": 10,
+      "section": "Complexity Analysis",
+      "raw_text": "3.4. Step 4: Quantum Threshold Value Classi\ufb01cation\n!\nUT\n2n\u22121\n\u2211\nY=0\n2n\u22121\n\u2211\nX=0\n|LYX\u27e9|0\u27e9\u22972q\u22121\n= \u2211\n2q\u22121E\n|YX\u27e9+ \u2211\n|0\u27e9|YX\u27e9\n(14)"
+    },
+    {
+      "label": "Equation [Unnumbered-75]",
+      "latex": "$$\\mathcal{O}\\left(q n^2 2^n + (n^2 + q) + q^2 + (q^2 + q)\\right) = \\mathcal{O}\\left(q n^2 2^n + n^2 + q^2\\right)$$",
+      "description": "This equation defines the overall theoretical time complexity of the entire quantum circuit for the proposed line detection algorithm.",
+      "page": 10,
+      "section": "Complexity Analysis",
+      "raw_text": "In summary, according to the above analysis, the overall complexity is O[qn22n + (n2\n+ q) + q2 + (q2 + q)] = O(qn22n + n2 + q2) in the whole circuit. It is O(n2 + q2) except for"
+    },
+    {
+      "label": "Equation (22n)",
+      "latex": "$$\\mathcal{O}(n^2 + q^2)$$",
+      "description": "This expression represents the specific complexity of the quantum line detection process excluding the initial NEQR image representation.",
+      "page": 11,
+      "section": "Simulation Analysis",
+      "raw_text": "Line detection\n-\n-\nO(22n)\nPrewitt [17]\n-\n-\nO(22n)\nSobel [19]\n-\n-\nO(22n)\nClassical Sobel\u2013Fan [15]\nNEQR\nO(qn22n)\nO(n2 + 2q+4)\nImproved Prewitt\u2013Zhou [17]\nNEQR\nO(qn22n)\nO(n2 + 2q+3)\nImproved Sober\u2013Chetia [19]\nNEQR\nO(qn22n)\nO(n2 + q3)\nKirsch\u2013Xu [21]\nNEQR\nO(qn22n)\nO(n2 + 2q+3)\nRobinson\u2013Chakraborty [22]\nNEQR\nO(qn22n)\nO(n2 + 2q+3)\nOur scheme\nNEQR\nO(qn22n)\nO(n2 + q2)"
+    }
+  ]
+}

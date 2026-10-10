@@ -8,12 +8,7 @@ from dotenv import load_dotenv
 import google.generativeai as genai
 from pipeline.logger import log_info, log_warn, log_error, log_debug
 
-# Automatically load environment variables from root .env if present
-env_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), ".env")
-if os.path.exists(env_path):
-    load_dotenv(dotenv_path=env_path, override=True)
-else:
-    load_dotenv(override=True)
+import _bootstrap  # noqa: F401 - Initialize sys.path, env & encoding
 
 class AdaptiveTokenBucketRateLimiter:
     """
@@ -137,7 +132,7 @@ def get_fallback_model_list(primary_model=None):
     1. Primary: LLM_MODEL or AGENT_MODEL (or explicit primary_model parameter)
     2. Fallbacks: LLM_FALLBACK_MODELS (comma-separated list from .env)
     """
-    raw_fallbacks = os.environ.get("LLM_FALLBACK_MODELS", "gemini-1.5-flash,gemini-2.5-flash-lite,gemini-2.0-flash,gemini-1.5-pro")
+    raw_fallbacks = os.environ.get("LLM_FALLBACK_MODELS", "gemini-3.5-flash-lite,gemini-3.8-flash,gemini-1.5-flash-8b,gemini-1.5-pro")
     models = [m.strip() for m in raw_fallbacks.split(",") if m.strip()]
     
     # Resolve primary model
@@ -147,9 +142,9 @@ def get_fallback_model_list(primary_model=None):
         elif hasattr(primary_model, "model_name"):
             primary_name = primary_model.model_name.replace("models/", "")
         else:
-            primary_name = os.environ.get("LLM_MODEL") or os.environ.get("AGENT_MODEL") or "gemini-1.5-flash"
+            primary_name = os.environ.get("LLM_MODEL") or os.environ.get("AGENT_MODEL") or "gemini-3.5-flash-lite"
     else:
-        primary_name = os.environ.get("LLM_MODEL") or os.environ.get("AGENT_MODEL") or "gemini-1.5-flash"
+        primary_name = os.environ.get("LLM_MODEL") or os.environ.get("AGENT_MODEL") or "gemini-3.5-flash-lite"
 
     # Avoid duplication
     models = [m for m in models if m != primary_name]
@@ -186,9 +181,9 @@ def call_gemini_with_retry(model, prompt, generation_config=None, max_retries=1,
         except Exception as e:
             last_exception = e
             err_msg = str(e).lower()
-            if "429" in err_msg or "resource_exhausted" in err_msg or "quota" in err_msg:
-                log_warn(f"Gemini API: Model '{candidate_name}' hit rate limit / HTTP 429. Triggering adaptive backoff & rotating...")
-                gemini_rate_limiter.report_quota_error(pause_seconds=6.0)
+            if any(k in err_msg for k in ["429", "503", "500", "resource_exhausted", "quota", "unavailable", "capacity"]):
+                log_warn(f"Gemini API: Model '{candidate_name}' returned capacity/quota error ({e}). Rotating to next fallback model...")
+                gemini_rate_limiter.report_quota_error(pause_seconds=2.0)
                 continue
             else:
                 # Non-quota error: retry once after short pause

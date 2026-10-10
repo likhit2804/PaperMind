@@ -1,32 +1,9 @@
-import sys
-import os
-import json
-import re
-import google.generativeai as genai
-from dotenv import load_dotenv
+from _bootstrap import *
 from pydantic import BaseModel, ConfigDict, Field
-
-# Enforce UTF-8 output encoding for Windows consoles
-sys.stdout.reconfigure(encoding='utf-8')
-
-# Ensure both workspace root and pipeline folder are in sys.path
-current_dir = os.path.dirname(os.path.abspath(__file__))
-pipeline_dir = os.path.dirname(current_dir)
-workspace_root = os.path.dirname(pipeline_dir)
-if workspace_root not in sys.path:
-    sys.path.insert(0, workspace_root)
-if pipeline_dir not in sys.path:
-    sys.path.insert(0, pipeline_dir)
-if current_dir not in sys.path:
-    sys.path.insert(0, current_dir)
-
 from pipeline.research_paper.extract_paper_concepts import parse_pdf_into_sections, clean_text
 from pipeline.utils import parse_json_robust, call_gemini_with_retry, get_gemini_model
 from pipeline.research_paper.pdf_utils import split_sentences
 from pipeline.research_paper.tex_utils import extract_tex_sections
-
-# Load environment variables
-load_dotenv(override=True)
 
 
 class ConceptDefinition(BaseModel):
