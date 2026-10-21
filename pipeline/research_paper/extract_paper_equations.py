@@ -1,8 +1,20 @@
-from _bootstrap import *
+import json
+import os
+import re
+import sys
+import fitz
+
+try:
+    from _bootstrap import *  # noqa: F403, F401
+except ImportError:
+    from pipeline.research_paper._bootstrap import *  # noqa: F403, F401
+
 from pipeline.research_paper.extract_paper_concepts import clean_text
 from pipeline.utils import parse_json_robust, call_gemini_with_retry, get_gemini_model, get_pdf_title
 from pipeline.research_paper.pdf_utils import parse_toc, get_section_for_page
 from pipeline.research_paper.tex_utils import extract_tex_equations, get_tex_title
+from pipeline.prompts import load_prompt
+from pipeline.schemas import BatchedEquationsOutput
 
 
 def sort_blocks_naturally(blocks):
@@ -403,43 +415,37 @@ def format_equations_via_ai(candidates, title):
         
     consolidated_input = "\n\n".join(prompt_list)
     
-    prompt = f"""You are an expert mathematical typesetter and scientific annotator.
-We are compiling a mathematical reference for a research paper titled "{title}".
-We have extracted several raw complex equation blocks and their local context sentences.
+    active_prompt = load_prompt("equation_extraction_v1.txt", title=title, consolidated_input=consolidated_input)
+    max_repair_attempts = 1
+    validated_output = None
 
-{consolidated_input}
-
-Instructions for each item:
-1. **Clean & Convert to LaTeX**: Reconstruct the raw text into a single mathematically correct, standard LaTeX expression. Format it as a display math block enclosed in double dollar signs (e.g. $$\\mathbf{{M}} = \\sum ...$$). Correct any OCR glitches, brackets, subscripts, and symbols.
-- STRICT GROUNDING: Do NOT invent or add any new variables, constants, or terms that do not exist in the raw text or context.
-2. **Contextual Explanation**: Generate a clear 1-sentence description explaining what this equation computes or defines.
-3. **Symbol Notation Definitions**: Identify key mathematical variables, symbols, or operators appearing in this equation and provide their exact contextual definitions.
-
-Return your response strictly in JSON format matching this schema:
-{{
-  "equations": [
-    {{
-      "label": "Original label here",
-      "latex_equation": "$$ clean LaTeX equation block here $$",
-      "explanation": "1-sentence contextual description here",
-      "notations": [
-        {{
-          "symbol": "Variable/symbol here",
-          "definition": "Exact contextual meaning of symbol"
-        }}
-      ]
-    }}
-  ]
-}}
-"""
     try:
-        response = call_gemini_with_retry(
-            model,
-            prompt,
-            generation_config={"response_mime_type": "application/json"}
-        )
-        data = parse_latex_json_robust(response.text)
-        eq_list = data.get("equations", []) if isinstance(data, dict) else []
+        for attempt in range(max_repair_attempts + 1):
+            response = call_gemini_with_retry(
+                model,
+                active_prompt,
+                generation_config={"response_mime_type": "application/json"}
+            )
+            raw_dict = parse_latex_json_robust(response.text)
+            try:
+                if isinstance(raw_dict, dict):
+                    validated_output = BatchedEquationsOutput.model_validate(raw_dict)
+                    break
+                raise ValueError("Parsed output is not a JSON object")
+            except Exception as val_err:
+                if attempt < max_repair_attempts:
+                    active_prompt = (
+                        f"Your previous JSON output failed validation: {val_err}.\n"
+                        f"Ensure strictly valid JSON containing an 'equations' array matching this schema:\n"
+                        f"- label: string\n- latex_equation: string enclosed in $$\n- explanation: string\n- notations: list of {{symbol: string, definition: string}}\n\n"
+                        f"Items:\n{consolidated_input}"
+                    )
+                else:
+                    # Final fallback: best-effort extraction from raw_dict if present
+                    if isinstance(raw_dict, dict) and "equations" in raw_dict:
+                        validated_output = BatchedEquationsOutput.model_validate(raw_dict)
+
+        eq_list = [eq.model_dump() for eq in validated_output.equations] if validated_output else []
         
         for idx, c in enumerate(complex_candidates):
             label = c["label"]

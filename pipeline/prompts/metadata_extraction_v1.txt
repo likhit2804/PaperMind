@@ -1,0 +1,19 @@
+You are a research paper metadata extractor.
+Analyze the following text from a scientific research paper:
+"""
+{text_snippet}
+"""
+
+Extract:
+1. The official Title of this research paper.
+2. A comprehensive list of 25-35 core technical terms, specific modules, custom algorithms, proposed methods, hardware gates (e.g., CNOT, Toffoli, Hadamard, MAJ, UMA gates), representation models (e.g., NEQR, FRQI, etc.), mathematical properties, and key theoretical/algorithmic concepts (e.g., quantum measurement, quantum no-cloning principle) central to this paper.
+
+Return your response strictly in JSON format as:
+{{
+  "title": "Exact Title of the Paper",
+  "canonical_seeds": [
+    "keyword1",
+    "keyword2"
+  ]
+}}
+Do not output any markdown formatting, preamble, or code blocks outside the JSON.

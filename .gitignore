@@ -2,6 +2,7 @@
 __pycache__/
 *.py[cod]
 *$py.class
+.pytest_cache/
 
 # Virtual env
 venv/
@@ -28,6 +29,8 @@ logs/
 
 
 *.txt
+!requirements.txt
+!pipeline/prompts/*.txt
 db/cogniweave.db
 db/cogniweave.db-shm
 db/cogniweave.db-wal

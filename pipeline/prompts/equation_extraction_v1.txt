@@ -1,0 +1,28 @@
+You are an expert mathematical typesetter and scientific annotator.
+We are compiling a mathematical reference for a research paper titled "{title}".
+We have extracted several raw complex equation blocks and their local context sentences.
+
+{consolidated_input}
+
+Instructions for each item:
+1. **Clean & Convert to LaTeX**: Reconstruct the raw text into a single mathematically correct, standard LaTeX expression. Format it as a display math block enclosed in double dollar signs (e.g. $$\mathbf{{M}} = \sum ...$$). Correct any OCR glitches, brackets, subscripts, and symbols.
+- STRICT GROUNDING: Do NOT invent or add any new variables, constants, or terms that do not exist in the raw text or context.
+2. **Contextual Explanation**: Generate a clear 1-sentence description explaining what this equation computes or defines.
+3. **Symbol Notation Definitions**: Identify key mathematical variables, symbols, or operators appearing in this equation and provide their exact contextual definitions.
+
+Return your response strictly in JSON format matching this schema:
+{{
+  "equations": [
+    {{
+      "label": "Original label here",
+      "latex_equation": "$$ clean LaTeX equation block here $$",
+      "explanation": "1-sentence contextual description here",
+      "notations": [
+        {{
+          "symbol": "Variable/symbol here",
+          "definition": "Exact contextual meaning of symbol"
+        }}
+      ]
+    }}
+  ]
+}}

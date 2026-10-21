@@ -19,10 +19,30 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 import warnings
 warnings.filterwarnings("ignore")
 
-def run_script(script_name, args):
+import threading
+
+def _stream_pipe(pipe, script_name):
+    """Safely stream subprocess stdout line-by-line in a background thread."""
+    try:
+        for line in iter(pipe.readline, ""):
+            if line:
+                print(f"[{script_name}] {line.rstrip()}", flush=True)
+    except Exception:
+        pass
+    finally:
+        try:
+            pipe.close()
+        except Exception:
+            pass
+
+def run_script(script_name, args, timeout_seconds=300):
+    """
+    Executes an individual pipeline script with streaming logs and strict timeout protection.
+    Default timeout: 300 seconds (5 minutes) per extraction stage.
+    """
     script_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), script_name)
     cmd = [sys.executable, "-u", "-W", "ignore", script_path] + args
-    print(f"\n---> [Pipeline Step] Launching {script_name}...", flush=True)
+    print(f"\n---> [Pipeline Step] Launching {script_name} (timeout={timeout_seconds}s)...", flush=True)
     
     t0 = time.time()
     env = dict(os.environ)
@@ -38,14 +58,30 @@ def run_script(script_name, args):
         bufsize=1
     )
     
-    for line in iter(proc.stdout.readline, ""):
-        if line:
-            print(f"[{script_name}] {line.rstrip()}", flush=True)
-            
-    proc.stdout.close()
-    return_code = proc.wait()
+    # Stream logs asynchronously so a hung process cannot block the timeout monitor
+    reader = threading.Thread(target=_stream_pipe, args=(proc.stdout, script_name), daemon=True)
+    reader.start()
+
+    try:
+        return_code = proc.wait(timeout=timeout_seconds)
+        reader.join(timeout=2.0)
+    except subprocess.TimeoutExpired:
+        elapsed = time.time() - t0
+        print(f"❌ Error: {script_name} timed out after {elapsed:.1f}s (limit={timeout_seconds}s). Terminating process...", flush=True)
+        try:
+            proc.kill()
+        except Exception as kill_err:
+            print(f"Warning: Failed to kill process {proc.pid}: {kill_err}", flush=True)
+        return False
+    except Exception as exc:
+        print(f"❌ Error: Unexpected failure in {script_name}: {exc}", flush=True)
+        try:
+            proc.kill()
+        except Exception:
+            pass
+        return False
+
     elapsed = time.time() - t0
-    
     if return_code != 0:
         print(f"❌ Error: {script_name} failed with exit code {return_code} ({elapsed:.2f}s)", flush=True)
         return False

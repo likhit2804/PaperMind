@@ -1,0 +1,138 @@
+# pyproject.toml — PaperMind Python Toolchain Configuration (Ruff, Mypy, Pytest)
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "papermind-pipeline"
+version = "0.2.0"
+description = "PaperMind 7-Stage Autonomous AI Research Paper Processing Pipeline"
+requires-python = ">=3.11"
+dependencies = []
+
+# ==============================================================================
+# Ruff Code Formatter
+# ==============================================================================
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+exclude = [
+    ".git",
+    "__pycache__",
+    ".venv",
+    "venv",
+    "node_modules",
+    "backend-node",
+    "frontend-react",
+    "ablation_results",
+    "data",
+    "logs",
+    "docs",
+]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"
+
+# ==============================================================================
+# Ruff Linter
+# ==============================================================================
+[tool.ruff.lint]
+# E / F: Pycodestyle and Pyflakes
+# I: Isort (deterministic import order)
+# B: Flake8-Bugbear (likely bugs and anti-patterns)
+# UP: Pyupgrade (modern Python 3.11+ syntax)
+# S: Flake8-Bandit (security checks and common vulnerabilities)
+# C90: McCabe (cyclomatic complexity tracking)
+# SIM: Flake8-Simplify (eliminates redundant conditional logic)
+select = ["E", "F", "I", "B", "UP", "S", "C90", "SIM"]
+
+ignore = [
+    "E501",  # Line length handled automatically by ruff format
+]
+
+[tool.ruff.lint.mccabe]
+max-complexity = 12
+
+[tool.ruff.lint.per-file-ignores]
+# Asserts and stdout prints are legitimate in test suites
+"tests/**" = ["S101", "T201"]
+# Allow subprocess and stdout logging in pipeline orchestration
+"pipeline/research_paper/unified_paper_pipeline.py" = ["S603", "S607"]
+# Allow existing extraction scripts during ratchet adoption
+"pipeline/research_paper/*" = ["S101"]
+
+# ==============================================================================
+# Mypy Static Type Checker (With Ratchet for Existing Pipeline)
+# ==============================================================================
+[tool.mypy]
+python_version = "3.11"
+strict = true
+warn_unused_configs = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_return_any = true
+no_implicit_reexport = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
+
+# The Ratchet: Relax strict typing for existing legacy extraction scripts
+# When developers touch a script under the Boy Scout rule, types are added incrementally.
+[[tool.mypy.overrides]]
+module = [
+    "pipeline.research_paper.*",
+    "PaperMind.pipeline.research_paper.*",
+    "PaperMind.pipeline.*",
+    "pipeline.*",
+    "pdf_utils",
+    "tex_utils",
+    "extract_paper_concepts",
+    "extract_paper_equations",
+    "extract_paper_references",
+    "extract_notations_local",
+    "generate_architecture_notes",
+    "generate_paper_notes",
+    "generate_paper_summary",
+    "unified_paper_pipeline",
+]
+ignore_errors = true
+disallow_untyped_defs = false
+disallow_incomplete_defs = false
+check_untyped_defs = false
+warn_return_any = false
+
+# ==============================================================================
+# Pytest Test Runner
+# ==============================================================================
+[tool.pytest.ini_options]
+minversion = "7.0"
+testpaths = ["tests", "pipeline/tests"]
+python_files = ["test_*.py", "*_test.py"]
+addopts = "-ra -q --strict-markers"
+markers = [
+    "eval: AI and LLM evaluation tests against golden datasets (may incur latency/cost)",
+    "integration: Integration tests requiring external or containerized dependencies",
+    "flaky: Quarantined tests pending investigation",
+]
+
+# ==============================================================================
+# Coverage Configuration
+# ==============================================================================
+[tool.coverage.run]
+branch = true
+source = ["pipeline"]
+omit = ["tests/*", "**/__pycache__/*", "pipeline/tests/*"]
+
+[tool.coverage.report]
+show_missing = true
+fail_under = 70
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:",
+]

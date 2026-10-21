@@ -1,8 +1,20 @@
-from _bootstrap import *
+import json
+import math
+import os
+import re
+import sys
+import fitz
+
+try:
+    from _bootstrap import *  # noqa: F403, F401
+except ImportError:
+    from pipeline.research_paper._bootstrap import *  # noqa: F403, F401
 
 from pipeline.utils import parse_json_robust, call_gemini_with_retry, get_gemini_model, clean_text
 from pipeline.research_paper.pdf_utils import parse_toc
 from pipeline.research_paper.tex_utils import extract_tex_sections, get_tex_title
+from pipeline.prompts import load_prompt
+from pipeline.schemas import ConceptMetadataOutput
 
 # Generic English stop words
 STOPWORDS = set([
@@ -79,41 +91,44 @@ def extract_paper_metadata_via_ai(text_snippet, pdf_metadata_title=None):
     if not model:
         title = pdf_metadata_title if (pdf_metadata_title and len(pdf_metadata_title.strip()) > 3) else "Research Paper"
         return title, set()
-
     try:
-        
-        prompt = f"""You are a research paper metadata extractor.
-Analyze the following text from a scientific research paper:
-\"\"\"
-{text_snippet}
-\"\"\"
+        active_prompt = load_prompt("metadata_extraction_v1.txt", text_snippet=text_snippet)
+        validated_metadata = None
+        max_repair_attempts = 1
 
-Extract:
-1. The official Title of this research paper.
-2. A comprehensive list of 25-35 core technical terms, specific modules, custom algorithms, proposed methods, hardware gates (e.g., CNOT, Toffoli, Hadamard, MAJ, UMA gates), representation models (e.g., NEQR, FRQI, etc.), mathematical properties, and key theoretical/algorithmic concepts (e.g., quantum measurement, quantum no-cloning principle) central to this paper.
+        for attempt in range(max_repair_attempts + 1):
+            response = call_gemini_with_retry(
+                model,
+                active_prompt,
+                generation_config={"response_mime_type": "application/json"}
+            )
+            raw_dict = parse_json_robust(response.text)
+            try:
+                validated_metadata = ConceptMetadataOutput.model_validate(raw_dict)
+                break  # Successful schema validation
+            except Exception as val_err:
+                if attempt < max_repair_attempts:
+                    active_prompt = (
+                        f"Your previous JSON output failed validation: {val_err}.\n"
+                        f"Ensure strictly valid JSON containing 'title' (string) and 'canonical_seeds' (list of strings).\n"
+                        f"Paper text:\n{text_snippet}"
+                    )
+                else:
+                    # Final fallback: use raw dict if available
+                    if isinstance(raw_dict, dict):
+                        validated_metadata = ConceptMetadataOutput(
+                            title=raw_dict.get("title") or "Research Paper",
+                            canonical_seeds=raw_dict.get("canonical_seeds") or []
+                        )
 
-Return your response strictly in JSON format as:
-{{
-  "title": "Exact Title of the Paper",
-  "canonical_seeds": [
-    "keyword1",
-    "keyword2"
-  ]
-}}
-"""
-        response = call_gemini_with_retry(
-            model,
-            prompt,
-            generation_config={"response_mime_type": "application/json"}
-        )
-        data = parse_json_robust(response.text)
-        title = data.get("title", "").strip()
+        title = validated_metadata.title.strip() if validated_metadata else ""
         if not title and pdf_metadata_title:
             title = pdf_metadata_title
         if not title:
             title = "Research Paper"
             
-        seeds = {clean_text(s.strip().lower()) for s in data.get("canonical_seeds", []) if s.strip()}
+        seed_list = validated_metadata.canonical_seeds if validated_metadata else []
+        seeds = {clean_text(s.strip().lower()) for s in seed_list if isinstance(s, str) and s.strip()}
         
         # Also try to extract keywords via regex from text as a backup/supplement
         kw_match = re.search(r'(?:Keywords|Key\s*words|Index\s*terms)[:\s]+([^\n.]+)', text_snippet, re.IGNORECASE)

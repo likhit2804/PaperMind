@@ -1,0 +1,13 @@
+# .git-blame-ignore-revs
+#
+# List of commits to ignore when computing `git blame`.
+# Used to exclude repository-wide reformatting and automated styling commits
+# so that the historical authorship of lines is preserved.
+#
+# To tell git to use this file automatically:
+#   git config blame.ignoreRevsFile .git-blame-ignore-revs
+#
+# Syntax: Full 40-character commit hash followed by a comment describing the commit.
+
+# Example:
+# 6d4b29c1e7a4f9103c8342125bb79339e31998e1 # style: apply ruff format repository-wide

@@ -1,0 +1,114 @@
+# pyproject.toml — Standard Python Linting, Formatting, Typing & Test Config
+# Usage: Copy this to your project root (e.g., pipeline/ or project root)
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "project"
+version = "0.1.0"
+requires-python = ">=3.11"
+dependencies = []
+
+# ==============================================================================
+# Ruff Formatter Configuration
+# ==============================================================================
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+exclude = [
+    ".git",
+    "__pycache__",
+    "build",
+    "dist",
+    ".venv",
+    "venv",
+    "node_modules",
+]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"
+
+# ==============================================================================
+# Ruff Linter Configuration
+# ==============================================================================
+[tool.ruff.lint]
+# Selected rule sets:
+# E / F: Pycodestyle and Pyflakes
+# I: Isort (import order enforcement)
+# B: Flake8-Bugbear (likely bugs and design anti-patterns)
+# UP: Pyupgrade (modern Python syntax)
+# S: Flake8-Bandit (security checks and common vulnerabilities)
+# C90: McCabe (cyclomatic complexity limits)
+# SIM: Flake8-Simplify (eliminates redundant code constructs)
+# T20: Flake8-Print (flags leftover print statements in production code)
+select = ["E", "F", "I", "B", "UP", "S", "C90", "SIM", "T20"]
+
+ignore = [
+    "E501",  # Line length handled automatically by ruff format
+]
+
+[tool.ruff.lint.mccabe]
+max-complexity = 10
+
+[tool.ruff.lint.per-file-ignores]
+# Asserts and print statements are legitimate in test suites and local benchmarks
+"tests/**" = ["S101", "T201"]
+"scripts/**" = ["T201"]
+
+# ==============================================================================
+# Mypy Static Type Checker Configuration
+# ==============================================================================
+[tool.mypy]
+python_version = "3.11"
+strict = true
+warn_unused_configs = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_return_any = true
+no_implicit_reexport = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
+
+# The Ratchet: Relax rules temporarily for legacy modules during brownfield adoption
+# [[tool.mypy.overrides]]
+# module = "app.legacy.*"
+# disallow_untyped_defs = false
+
+# ==============================================================================
+# Pytest Configuration
+# ==============================================================================
+[tool.pytest.ini_options]
+minversion = "7.0"
+testpaths = ["tests"]
+python_files = ["test_*.py", "*_test.py"]
+addopts = "-ra -q --strict-markers"
+markers = [
+    "eval: AI and LLM evaluation tests (may incur latency/cost)",
+    "integration: Tests requiring external or containerized dependencies",
+    "flaky: Quarantined tests pending investigation",
+]
+
+# ==============================================================================
+# Coverage Configuration
+# ==============================================================================
+[tool.coverage.run]
+branch = true
+source = ["src", "pipeline"]
+omit = ["tests/*", "**/__pycache__/*"]
+
+[tool.coverage.report]
+show_missing = true
+fail_under = 80
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:",
+]

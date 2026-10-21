@@ -1,4 +1,14 @@
-from _bootstrap import *
+import json
+import os
+import re
+import sys
+import fitz
+
+try:
+    from _bootstrap import *  # noqa: F403, F401
+except ImportError:
+    from pipeline.research_paper._bootstrap import *  # noqa: F403, F401
+
 from pipeline.utils import parse_json_robust, call_gemini_with_retry, get_gemini_model, get_pdf_title
 from pipeline.research_paper.tex_utils import extract_tex_notations, get_tex_title
 
