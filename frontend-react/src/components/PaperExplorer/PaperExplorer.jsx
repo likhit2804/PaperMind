@@ -554,7 +554,14 @@ export default function PaperExplorer() {
         )}
 
         <div className="nd-section" style={{ padding: "14px 0" }}>
-          <p className="nd-label">{getLabelForType(node.type)}</p>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "6px" }}>
+            <p className="nd-label" style={{ margin: 0 }}>{getLabelForType(node.type)}</p>
+            {node.rawText && (
+              <span style={{ fontSize: "0.72rem", background: "rgba(234, 179, 8, 0.15)", color: "#b45309", border: "1px solid rgba(234, 179, 8, 0.4)", borderRadius: "3px", padding: "1px 6px", fontWeight: 700, fontFamily: "var(--font-mono)" }}>
+                📄 Direct Paper Text
+              </span>
+            )}
+          </div>
           <p className="nd-definition">{cleanDefinition}</p>
         </div>
 
@@ -567,7 +574,7 @@ export default function PaperExplorer() {
             </div>
             {node.rawText && (
               <details className="pe-equation-raw">
-                <summary>View raw scanned text context</summary>
+                <summary>📄 View raw scanned text context (Direct Document Text)</summary>
                 <pre>{node.rawText}</pre>
               </details>
             )}

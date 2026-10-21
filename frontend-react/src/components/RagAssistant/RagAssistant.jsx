@@ -549,6 +549,8 @@ export default function RagAssistant({
         let citations = [];
 
         let suggestedFollowUps = [];
+        let responseModel = null;
+        let isDirectText = false;
 
         // Attempt backend RAG endpoint call
         if (sessionId) {
@@ -575,6 +577,8 @@ export default function RagAssistant({
                 answerText = data.answer;
                 citations = data.citations || [];
                 suggestedFollowUps = data.suggestedFollowUps || [];
+                responseModel = data.model;
+                isDirectText = Boolean(data.isDirectText ?? (data.model === "local-rag" || !data.model || data.model.startsWith("local")));
               }
             }
           } catch (err) {
@@ -594,6 +598,8 @@ export default function RagAssistant({
           );
           answerText = fallback.answerText;
           citations = fallback.citations;
+          responseModel = "client-direct-text";
+          isDirectText = true;
         }
 
         const hexiMsg = {
@@ -602,6 +608,8 @@ export default function RagAssistant({
           text: answerText,
           citations,
           suggestedFollowUps,
+          model: responseModel,
+          isDirectText: Boolean(isDirectText),
           timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
         };
 
@@ -706,9 +714,33 @@ export default function RagAssistant({
 
             <div className="rag-msg-bubble">
               <div className="rag-msg-sender">
-                <span>{msg.sender === "user" ? "You" : "HexaMind"}</span>
+                <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
+                  <span>{msg.sender === "user" ? "You" : "HexaMind"}</span>
+                  {msg.sender !== "user" && (
+                    (msg.isDirectText || !msg.model || msg.model === "local-rag" || msg.model === "client-direct-text" || msg.model.startsWith("local")) ? (
+                      <span className="rag-source-badge direct-text" title="Direct Paper Text: Extracted directly from paper content without generative AI">
+                        <span className="rag-badge-icon">📄</span>
+                        <span className="rag-badge-text">Direct Paper Text (No AI)</span>
+                      </span>
+                    ) : (
+                      <span className="rag-source-badge ai-generated" title={`Synthesized using AI model: ${msg.model}`}>
+                        <span className="rag-badge-icon">✨</span>
+                        <span className="rag-badge-text">AI Generated ({msg.model})</span>
+                      </span>
+                    )
+                  )}
+                </div>
                 <span style={{ fontSize: "0.7rem", opacity: 0.7 }}>{msg.timestamp}</span>
               </div>
+
+              {msg.sender !== "user" && (msg.isDirectText || !msg.model || msg.model === "local-rag" || msg.model === "client-direct-text" || msg.model.startsWith("local")) && (
+                <div className="rag-direct-text-banner">
+                  <span className="rag-direct-banner-icon">ℹ️</span>
+                  <span className="rag-direct-banner-text">
+                    <strong>Direct Paper Text:</strong> Generative AI was not used for this response. This answer is drawn directly from the paper's extracted sections, outline, and formulas.
+                  </span>
+                </div>
+              )}
 
               <FormattedRagText text={msg.text} />
 
