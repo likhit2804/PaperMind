@@ -706,21 +706,27 @@ class TraceLogger:
                 pass
 
 def clean_sentence_definition(sentence):
-    """Strips narrative preambles to convert raw paper sentences into crisp formal concept definitions."""
-    s = re.sub(r'^(The (circuit|architecture|algorithm|model|system|framework) operates in [^:]+:\s*–?\s*|As (shown|discussed) in [^,]+,\s*|In this paper,\s*|We (propose|observe|find|introduce) (that\s*)?)', '', sentence, flags=re.IGNORECASE)
+    """Strips narrative preambles to convert raw paper sentences into clean context definitions."""
+    s = re.sub(
+        r'^(The (circuit|architecture|algorithm|model|system|framework) operates in [^:]+:\s*–?\s*|As (shown|discussed) in [^,]+,\s*|In this paper,\s*|We (propose|observe|find|introduce) (that\s*)?)',
+        '',
+        sentence,
+        flags=re.IGNORECASE
+    )
     s = s.strip()
     if s:
         s = s[0].upper() + s[1:]
     return s
 
+
 def extract_concept_context_sentences(sections, verified_terms):
     """
-    Extracts the exact sentence from paper text where each verified concept first appears,
-    providing grounding context definitions.
+    Extracts the first occurrence sentence from paper text for each verified concept,
+    serving as grounding context for AI synthesis or direct-text fallback.
     """
     context_map = {}
     full_text = "\n".join([sec.get("raw_text", "") for sec in sections])
-    
+
     # Split text into sentences
     raw_sentences = re.split(r'(?<=[.!?])\s+', full_text)
     clean_sentences = []
@@ -742,10 +748,106 @@ def extract_concept_context_sentences(sections, verified_terms):
                 break
         if found_sentence:
             clean_def = clean_sentence_definition(found_sentence)
-            # Format both definition and operational contribution role for UI display
-            context_map[term_clean] = f"{clean_def} [Role: Key structural concept used in paper execution]"
+            context_map[term_clean] = {
+                "text": clean_def,
+                "found_sentence": found_sentence,
+            }
 
     return context_map
+
+
+def format_fallback_definitions(verified_terms, raw_context_map):
+    """Option B: Direct paper context sentence labeled as direct text."""
+    fallback_map = {}
+    for term in verified_terms:
+        term_clean = term.strip().lower()
+        ctx_info = raw_context_map.get(term_clean, {})
+        clean_def = ctx_info.get("text")
+        if clean_def:
+            fallback_map[term_clean] = f"{clean_def} [Role: Paper Context Extract] [Source: direct_text]"
+        else:
+            fallback_map[term_clean] = "Technical concept identified in paper text. [Role: Paper Context Extract] [Source: direct_text]"
+    return fallback_map
+
+
+def generate_concept_definitions(sections, verified_terms, title):
+    """
+    Generates definitions for verified concepts:
+    - Option A: Synthesize crisp 1-2 sentence definition + operational paper role via Gemini using mined context sentences.
+    - Option B: If AI is unavailable or fails, fall back cleanly to raw context sentence labeled as direct text.
+    """
+    raw_context_map = extract_concept_context_sentences(sections, verified_terms)
+
+    model, api_key = get_gemini_model()
+    if not model or not verified_terms:
+        print("Notice: AI model unavailable or no verified terms. Using Option B (Direct Paper Context).")
+        return format_fallback_definitions(verified_terms, raw_context_map)
+
+    try:
+        terms_list = sorted(list(verified_terms))
+        batch_size = 15
+        final_definitions = {}
+
+        for i in range(0, len(terms_list), batch_size):
+            batch = terms_list[i : i + batch_size]
+            prompt_items = []
+            for idx, term in enumerate(batch):
+                term_lower = term.lower().strip()
+                ctx = raw_context_map.get(term_lower, {}).get("found_sentence") or "Mentioned in paper text."
+                prompt_items.append(f'{idx + 1}. Concept: "{term}"\n   Context: "{ctx}"')
+
+            prompt_text = "\n\n".join(prompt_items)
+
+            prompt = f"""You are an expert scientific dictionary editor and domain specialist.
+The research paper is titled: "{title}".
+Synthesize concise, high-fidelity formal definitions and operational roles for each concept based on its context in the paper.
+
+{prompt_text}
+
+Instructions:
+1. "definition": Synthesize a clear, formal 1-2 sentence definition explaining what this concept is in the context of this paper. Do not simply repeat the raw context sentence verbatim.
+2. "role": What specific operational role does this concept play in this paper (e.g., "Primary proposed architecture", "Loss function", "Baseline comparison", "Mathematical framework", "Evaluation metric", "Hardware gate")? Keep role under 6 words.
+
+Return your response strictly in JSON format matching this schema:
+{{
+  "definitions": [
+    {{
+      "term": "concept name",
+      "definition": "Synthesized 1-2 sentence definition.",
+      "role": "Operational role in paper"
+    }}
+  ]
+}}
+"""
+            response = call_gemini_with_retry(
+                model,
+                prompt,
+                generation_config={"response_mime_type": "application/json"},
+            )
+            data = parse_json_robust(response.text)
+            defs_list = data.get("definitions", []) if isinstance(data, dict) else []
+
+            for item in defs_list:
+                t = (item.get("term") or "").lower().strip()
+                d = (item.get("definition") or "").strip()
+                r = (item.get("role") or "").strip() or "Key concept in paper"
+                if t and d:
+                    final_definitions[t] = f"{d} [Role: {r}] [Source: ai_generated]"
+
+        # Fill any missing terms with Option B fallback
+        for term in verified_terms:
+            t_lower = term.lower().strip()
+            if t_lower not in final_definitions:
+                ctx_info = raw_context_map.get(t_lower, {})
+                clean_def = ctx_info.get("text") or "Technical concept identified in paper text."
+                final_definitions[t_lower] = f"{clean_def} [Role: Paper Context Extract] [Source: direct_text]"
+
+        print(f"Generated AI definitions for {len(final_definitions)} concepts.")
+        return final_definitions
+
+    except Exception as e:
+        print(f"Warning: AI definition synthesis failed ({e}). Falling back to Option B (Direct Paper Context).")
+        return format_fallback_definitions(verified_terms, raw_context_map)
 
 def main():
     if len(sys.argv) < 3:
@@ -837,8 +939,9 @@ def main():
     for label, candidates in section_candidates.items():
         filtered_section = [c for c in candidates if c.strip().lower() in verified_set]
         filtered_section_candidates[label] = filtered_section
-        
-    concept_definitions = extract_concept_context_sentences(sections, verified_set)
+
+    logger.console_print("Phase 5: Synthesizing concept definitions and operational roles...")
+    concept_definitions = generate_concept_definitions(sections, verified_set, title)
 
     logger.stop()
     

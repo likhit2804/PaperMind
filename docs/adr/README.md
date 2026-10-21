@@ -5,7 +5,7 @@ Records are permanent historical artifacts: decisions are superseded by new ADRs
 
 ---
 
-## 📑 Index of Records
+## Index of Records
 
 | ADR | Title | Date | Status | Scope |
 | :---: | :--- | :---: | :---: | :--- |
@@ -14,6 +14,8 @@ Records are permanent historical artifacts: decisions are superseded by new ADRs
 | **[ADR-0003](file:///c:/Users/likhi/OneDrive/Pictures/Desktop/CollabProj/PaperMind/docs/adr/0003-automated-ci-and-pull-request-gates.md)** | Automated CI Pipeline, Security Scanning & Pull Request Gates | 2026-10-21 | **Accepted** | CI/CD, GitHub Actions & PR Review Quality |
 | **[ADR-0004](file:///c:/Users/likhi/OneDrive/Pictures/Desktop/CollabProj/PaperMind/docs/adr/0004-offline-golden-benchmarks-and-evaluation-harness.md)** | Offline Golden Benchmarks and Automated Evaluation Harness | 2026-10-21 | **Accepted** | AI Evaluation, Schema Conformity & Hermetic Testing |
 | **[ADR-0005](file:///c:/Users/likhi/OneDrive/Pictures/Desktop/CollabProj/PaperMind/docs/adr/0005-rag-citation-verification-and-hallucination-defense.md)** | RAG Citation Verification and Hallucination Defense | 2026-10-21 | **Accepted** | RAG Reliability, HexiBot Citations & Grounding Metrics |
+| **[ADR-0006](file:///c:/Users/likhi/OneDrive/Pictures/Desktop/CollabProj/PaperMind/docs/adr/0006-direct-paper-text-transparency-and-source-indicators.md)** | Direct Paper Text Transparency and Non-Intrusive Source Indicators | 2026-10-21 | **Accepted** | UI/UX, AI Transparency & Provenance Communication |
+| **[ADR-0007](file:///c:/Users/likhi/OneDrive/Pictures/Desktop/CollabProj/PaperMind/docs/adr/0007-concept-definition-synthesis-and-context-fallback.md)** | Concept Definition Synthesis with Resilient Direct-Text Fallback | 2026-10-21 | **Accepted** | Concept Pipeline, Gemini Batching & Fault-Tolerant Fallback |
 
 ---
 

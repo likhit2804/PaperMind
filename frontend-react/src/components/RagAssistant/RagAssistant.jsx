@@ -438,7 +438,10 @@ function generateRagAnswer(query, paperTitle, nodes, summary, architectureNotes,
   } else if (topMatched.length > 0) {
     answerText = `### Retrieval Results for "${query}"\n\nBased on semantic analysis of **${paperTitle || "this paper"}**, here are the top matching concepts:\n\n`;
     topMatched.forEach((n) => {
-      answerText += `- **${n.label}** (${n.type || "concept"}): ${n.definition}\n`;
+      const cleanDef = (n.definition || "")
+        .replace(/\[(Role|Source|Connections):[^\]]+\]/gi, "")
+        .trim();
+      answerText += `- **${n.label}** (${n.type || "concept"}): ${cleanDef}\n`;
     });
   } else {
     answerText = `### Hexi Search Analysis\n\nI searched the index for **"${query}"** across ${nodes.length} extracted paper elements.\n\nWhile no exact phrase match was found, the paper discusses concepts related to **${paperTitle || "the domain"}**. Try asking about specific equations, architecture, or section contents!`;

@@ -481,26 +481,57 @@ export default function PaperExplorer() {
     return used;
   };
 
+  const cleanPreviewDefinition = (text) => {
+    if (!text) return "";
+    return text
+      .replace(/^\[Role:\s*.+?\]\s*/i, "")
+      .replace(/\[Source:\s*.+?\]/gi, "")
+      .replace(/\[Role:\s*.+?\]/gi, "")
+      .replace(/\[Connections:\s*.+?\]/gi, "")
+      .trim();
+  };
+
   // ── Render Detail View Content ───────────────────────────────────────────
   const renderDetailContent = (node) => {
-    let cleanDefinition = node.definition;
+    let cleanDefinition = node.definition || "";
     let roleBadge = null;
     let connections = [];
+    let isDirectTextConcept = false;
 
     if (node.type === "reference") {
-      const roleMatch = node.definition.match(/^\[Role:\s*(.+?)\]\s*(.+)$/i);
+      const roleMatch = (node.definition || "").match(/^\[Role:\s*(.+?)\]\s*(.+)$/i);
       if (roleMatch) {
         roleBadge = roleMatch[1];
         cleanDefinition = roleMatch[2];
       }
     } else if (node.type === "concept") {
-      // Parse: "Def text [Role: Role explanation] [Connections: term1, term2]"
-      let currentText = node.definition;
+      let currentText = node.definition || "";
+
+      // Detect if concept is direct text (Option B) vs AI synthesized (Option A)
+      if (
+        currentText.includes("[Source: direct_text]") ||
+        currentText.includes("[Role: Paper Context Extract]") ||
+        currentText.includes("[Role: Key structural concept used in paper execution]") ||
+        currentText.includes("Core technical concept introduced in") ||
+        currentText.includes("Key domain term extracted from")
+      ) {
+        isDirectTextConcept = true;
+        currentText = currentText
+          .replace(/\[Source:\s*direct_text\]/i, "")
+          .replace(/\[Role:\s*Key structural concept used in paper execution\]/i, "")
+          .trim();
+      } else if (currentText.includes("[Source: ai_generated]")) {
+        currentText = currentText.replace(/\[Source:\s*ai_generated\]/i, "").trim();
+      }
+
       const roleMatch = currentText.match(/\[Role:\s*(.+?)\]/i);
       if (roleMatch) {
-        roleBadge = roleMatch[1];
+        roleBadge = roleMatch[1].trim();
         currentText = currentText.replace(/\[Role:\s*(.+?)\]/i, "").trim();
+      } else if (isDirectTextConcept) {
+        roleBadge = "Paper Context Extract";
       }
+
       const connMatch = currentText.match(/\[Connections:\s*(.+?)\]/i);
       if (connMatch) {
         connections = connMatch[1].split(",").map(c => c.trim()).filter(Boolean);
@@ -556,7 +587,7 @@ export default function PaperExplorer() {
         <div className="nd-section" style={{ padding: "14px 0" }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "6px" }}>
             <p className="nd-label" style={{ margin: 0 }}>{getLabelForType(node.type)}</p>
-            {node.rawText && (
+            {(node.rawText || (node.type === "concept" && isDirectTextConcept)) && (
               <span style={{ fontSize: "0.72rem", background: "rgba(234, 179, 8, 0.15)", color: "#b45309", border: "1px solid rgba(234, 179, 8, 0.4)", borderRadius: "3px", padding: "1px 6px", fontWeight: 700, fontFamily: "var(--font-mono)" }}>
                 Direct Paper Text
               </span>
@@ -1174,7 +1205,7 @@ export default function PaperExplorer() {
                                 </div>
                               </div>
                             </div>
-                            <p className="ktp-item-def">{node.definition}</p>
+                            <p className="ktp-item-def">{cleanPreviewDefinition(node.definition)}</p>
                           </div>
                         );
                       })}
