@@ -326,9 +326,20 @@
   border-color: rgba(16, 185, 129, 0.45);
 }
 
-.rag-badge-icon {
-  font-size: 0.78rem;
-  line-height: 1;
+.rag-badge-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+.rag-badge-dot.direct {
+  background-color: #d97706;
+}
+
+.rag-badge-dot.ai {
+  background-color: #059669;
 }
 
 /* Prominent Direct Text Notification Banner */

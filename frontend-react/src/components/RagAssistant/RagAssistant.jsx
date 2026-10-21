@@ -719,12 +719,12 @@ export default function RagAssistant({
                   {msg.sender !== "user" && (
                     (msg.isDirectText || !msg.model || msg.model === "local-rag" || msg.model === "client-direct-text" || msg.model.startsWith("local")) ? (
                       <span className="rag-source-badge direct-text" title="Direct Paper Text: Extracted directly from paper content without generative AI">
-                        <span className="rag-badge-icon">📄</span>
+                        <span className="rag-badge-dot direct" />
                         <span className="rag-badge-text">Direct Paper Text (No AI)</span>
                       </span>
                     ) : (
                       <span className="rag-source-badge ai-generated" title={`Synthesized using AI model: ${msg.model}`}>
-                        <span className="rag-badge-icon">✨</span>
+                        <span className="rag-badge-dot ai" />
                         <span className="rag-badge-text">AI Generated ({msg.model})</span>
                       </span>
                     )
@@ -735,7 +735,6 @@ export default function RagAssistant({
 
               {msg.sender !== "user" && (msg.isDirectText || !msg.model || msg.model === "local-rag" || msg.model === "client-direct-text" || msg.model.startsWith("local")) && (
                 <div className="rag-direct-text-banner">
-                  <span className="rag-direct-banner-icon">ℹ️</span>
                   <span className="rag-direct-banner-text">
                     <strong>Direct Paper Text:</strong> Generative AI was not used for this response. This answer is drawn directly from the paper's extracted sections, outline, and formulas.
                   </span>
