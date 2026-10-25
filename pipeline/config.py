@@ -2,7 +2,9 @@
 pipeline/config.py — Strongly-typed 12-factor configuration for PaperMind Python Pipeline.
 Validates environment variables at boot and masks API keys with SecretStr.
 """
+
 from pathlib import Path
+
 from pydantic import Field, SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 

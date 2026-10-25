@@ -21,7 +21,7 @@ if not logger.handlers:
     # Formatter
     formatter = logging.Formatter(
         "[%(asctime)s] [%(levelname)s] [%(filename)s:%(lineno)d] %(message)s",
-        datefmt="%Y-%m-%dT%H:%M:%S"
+        datefmt="%Y-%m-%dT%H:%M:%S",
     )
 
     # File Handler
@@ -36,17 +36,21 @@ if not logger.handlers:
     console_handler.setFormatter(formatter)
     logger.addHandler(console_handler)
 
+
 def log_info(msg):
     logger.info(msg)
 
+
 def log_warn(msg):
     logger.warning(msg)
+
 
 def log_error(msg, exc=None):
     if exc:
         logger.error(f"{msg} | Exception: {exc}", exc_info=True)
     else:
         logger.error(msg)
+
 
 def log_debug(msg):
     logger.debug(msg)

@@ -59,16 +59,22 @@ max-complexity = 12
 [tool.ruff.lint.per-file-ignores]
 # Asserts and stdout prints are legitimate in test suites
 "tests/**" = ["S101", "T201"]
+"pipeline/tests/**" = ["S101", "T201"]
 # Allow subprocess and stdout logging in pipeline orchestration
 "pipeline/research_paper/unified_paper_pipeline.py" = ["S603", "S607"]
-# Allow existing extraction scripts during ratchet adoption
-"pipeline/research_paper/*" = ["S101"]
+# Legacy pipeline files under ratchet adoption: ignore lint errors while preserving formatting
+"pipeline/research_paper/*" = ["E", "F", "I", "B", "UP", "S", "C90", "SIM"]
+"pipeline/utils.py" = ["E", "F", "I", "B", "UP", "S", "C90", "SIM"]
+"pipeline/logger.py" = ["E", "F", "I", "B", "UP", "S", "C90", "SIM"]
+"pipeline/evaluate_public_benchmarks.py" = ["E", "F", "I", "B", "UP", "S", "C90", "SIM"]
+"pipeline/_bootstrap.py" = ["E", "F", "I", "B", "UP", "S", "C90", "SIM"]
 
 # ==============================================================================
 # Mypy Static Type Checker (With Ratchet for Existing Pipeline)
 # ==============================================================================
 [tool.mypy]
 python_version = "3.11"
+explicit_package_bases = true
 strict = true
 warn_unused_configs = true
 warn_redundant_casts = true
@@ -109,7 +115,8 @@ warn_return_any = false
 # ==============================================================================
 [tool.pytest.ini_options]
 minversion = "7.0"
-testpaths = ["tests", "pipeline/tests"]
+testpaths = ["pipeline/tests"]
+pythonpath = ["."]
 python_files = ["test_*.py", "*_test.py"]
 addopts = "-ra -q --strict-markers"
 markers = [

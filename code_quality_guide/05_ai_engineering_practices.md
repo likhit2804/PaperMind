@@ -47,10 +47,12 @@ Wrap external provider SDKs (Google GenAI, OpenAI, Anthropic) behind an internal
 from dataclasses import dataclass
 from typing import Literal, Protocol
 
+
 @dataclass(frozen=True)
 class Message:
-    role: Literal['system', 'user', 'assistant']
+    role: Literal["system", "user", "assistant"]
     content: str
+
 
 @dataclass(frozen=True)
 class LLMRequest:
@@ -58,16 +60,18 @@ class LLMRequest:
     messages: tuple[Message, ...]
     max_output_tokens: int
     temperature: float = 0.0
-    prompt_version: str = ""       # Crucial for telemetry and evaluation tracking
+    prompt_version: str = ""  # Crucial for telemetry and evaluation tracking
+
 
 @dataclass(frozen=True)
 class LLMResponse:
     text: str
-    model: str                     # Actual model that answered
+    model: str  # Actual model that answered
     input_tokens: int
     output_tokens: int
     latency_ms: int
-    finish_reason: str             # 'stop', 'length' (truncated), 'safety'
+    finish_reason: str  # 'stop', 'length' (truncated), 'safety'
+
 
 class LLMClient(Protocol):
     def complete(self, request: LLMRequest) -> LLMResponse: ...
@@ -79,6 +83,7 @@ Cross-cutting operational concerns live exclusively inside the client implementa
 ```python
 import time
 
+
 class ProviderClient:
     def __init__(self, sdk_client, *, timeout_s: float, usage_log: UsageLog) -> None:
         self._sdk = sdk_client
@@ -87,16 +92,16 @@ class ProviderClient:
 
     def complete(self, request: LLMRequest) -> LLMResponse:
         start_time = time.monotonic()
-        
+
         # Bounded retries on transient errors only (429, timeouts)
         raw_response = call_with_retry(
             lambda: self._sdk.generate_content(request),
             retry_on=(RateLimitError, TimeoutError, ServiceUnavailableError),
         )
-        
+
         elapsed_ms = int((time.monotonic() - start_time) * 1000)
         response = self._parse_response(raw_response, elapsed_ms)
-        
+
         # Centralized observability: track tokens, latency, cost, and prompt version
         self._usage_log.record(request, response)
         return response
@@ -111,31 +116,34 @@ Whenever code consumes model output, enforce a strict JSON schema and handle par
 ```python
 from pydantic import BaseModel, Field, ValidationError
 
+
 class ConceptExtractionResult(BaseModel):
     concept_name: str = Field(min_length=1, max_length=100)
     category: str
     definition: str = Field(min_length=10)
     confidence: float = Field(ge=0.0, le=1.0)
 
+
 MAX_REPAIR_ATTEMPTS = 1
+
 
 def extract_concepts(llm: LLMClient, context_text: str) -> ConceptExtractionResult:
     request = build_concept_request(context_text)
-    
+
     for attempt in range(MAX_REPAIR_ATTEMPTS + 1):
         response = llm.complete(request)
-        
+
         # 1. Truncation Check: A truncated response is an invalid response
-        if response.finish_reason == 'length':
+        if response.finish_reason == "length":
             raise LLMOutputTruncatedError("Model output truncated by token limit")
-            
+
         # 2. Schema Validation
         try:
             return ConceptExtractionResult.model_validate_json(extract_json(response.text))
         except ValidationError as exc:
             if attempt == MAX_REPAIR_ATTEMPTS:
                 raise LLMOutputInvalidError(f"Validation failed after repair: {exc}")
-                
+
             # One bounded repair attempt: show the model its own error
             request = with_repair_instruction(request, response.text, str(exc))
 ```
@@ -188,12 +196,15 @@ class FakeLLM:
             finish_reason="stop",
         )
 
+
 def test_repair_loop_recovers_from_single_malformed_json():
-    fake_llm = FakeLLM([
-        "Malformed JSON output: { name: 'Transformer' }", # Attempt 1 fails
-        '{"concept_name": "Transformer", "category": "Model", "definition": "Attention-based architecture.", "confidence": 0.95}' # Attempt 2 succeeds
-    ])
-    
+    fake_llm = FakeLLM(
+        [
+            "Malformed JSON output: { name: 'Transformer' }",  # Attempt 1 fails
+            '{"concept_name": "Transformer", "category": "Model", "definition": "Attention-based architecture.", "confidence": 0.95}',  # Attempt 2 succeeds
+        ]
+    )
+
     result = extract_concepts(fake_llm, "Paper excerpt...")
     assert result.concept_name == "Transformer"
     assert len(fake_llm.recorded_requests) == 2  # Proves exactly one repair attempt occurred

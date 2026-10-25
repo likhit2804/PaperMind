@@ -32,7 +32,7 @@ jobs:
         run: ruff check .
 
       - name: Mypy Type Check
-        run: mypy pipeline/
+        run: mypy --explicit-package-bases pipeline/
 
   # ─── Job 2: Python Pipeline Tests ─────────────────────────────────────────
   pipeline-tests:
@@ -51,6 +51,8 @@ jobs:
           pip install -r requirements.txt pytest
 
       - name: Run Pipeline Unit Tests
+        env:
+          PYTHONPATH: .
         run: pytest pipeline/tests/ -v --durations=10
 
   # ─── Job 3: Node.js Backend Tests & Checks ────────────────────────────────
@@ -77,6 +79,9 @@ jobs:
   security-audit:
     name: Secret & Vulnerability Scan
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
     steps:
       - uses: actions/checkout@v4
         with:
@@ -86,3 +91,4 @@ jobs:
         uses: gitleaks/gitleaks-action@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+

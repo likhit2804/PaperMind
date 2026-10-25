@@ -3,16 +3,15 @@ pipeline/evals/run_eval.py — Golden Benchmark Offline Evaluation Harness.
 Evaluates extraction accuracy, schema conformity, and LaTeX grounding against
 curated golden benchmarks without requiring live external network downloads.
 """
+
 import json
 import os
-import re
 import sys
 
 # Ensure pipeline root is in sys.path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
-from pipeline.schemas import ConceptMetadataOutput, BatchedEquationsOutput
-
+from pipeline.schemas import BatchedEquationsOutput, ConceptMetadataOutput
 
 BENCHMARK_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "golden_benchmark.jsonl")
 
@@ -23,7 +22,7 @@ def load_golden_benchmarks(path=BENCHMARK_PATH):
         raise FileNotFoundError(f"Golden benchmark file not found at: {path}")
 
     cases = []
-    with open(path, "r", encoding="utf-8") as f:
+    with open(path, encoding="utf-8") as f:
         for line in f:
             line = line.strip()
             if line:
@@ -75,7 +74,10 @@ def verify_equation_formatting(equation_obj):
         return False, "Empty equation body"
 
     # Check for basic LaTeX math syntax
-    if any(tok in inner for tok in ["\\frac", "\\text", "\\min", "\\sum", "^", "_", "\\mathbf", "\\mathcal"]):
+    if any(
+        tok in inner
+        for tok in ["\\frac", "\\text", "\\min", "\\sum", "^", "_", "\\mathbf", "\\mathcal"]
+    ):
         return True, "Valid display LaTeX"
 
     return True, "Valid display LaTeX"

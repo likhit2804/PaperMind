@@ -35,19 +35,24 @@ from datetime import datetime, timezone, timedelta
 # Inject fixed time to eliminate clock drift bugs
 FROZEN_TIME = datetime(2026, 1, 15, 12, 0, 0, tzinfo=timezone.utc)
 
+
 def test_expired_token_is_rejected():
     # Arrange: Explicitly inject expired timestamp
     token = make_token(expires_at=FROZEN_TIME - timedelta(minutes=1))
-    
+
     # Act & Assert
     with pytest.raises(TokenExpiredError):
         validate_session(token, current_time=FROZEN_TIME)
 
-@pytest.mark.parametrize("total_cents, discount_pct, expected_cents", [
-    (10_000, 10, 9_000),
-    (999, 10, 899),      # Explicit test for fractional rounding behavior
-    (0, 50, 0),
-])
+
+@pytest.mark.parametrize(
+    "total_cents, discount_pct, expected_cents",
+    [
+        (10_000, 10, 9_000),
+        (999, 10, 899),  # Explicit test for fractional rounding behavior
+        (0, 50, 0),
+    ],
+)
 def test_discount_calculation(total_cents, discount_pct, expected_cents):
     assert calculate_discount(total_cents, discount_pct) == expected_cents
 ```
@@ -99,6 +104,7 @@ Instead of hand-picking three arbitrary test inputs, define invariant properties
 
 ```python
 from hypothesis import given, strategies as st
+
 
 @given(st.text())
 def test_slugify_is_idempotent(text: str):

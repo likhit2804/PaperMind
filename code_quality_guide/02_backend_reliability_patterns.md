@@ -52,7 +52,8 @@ import random
 import time
 from typing import Callable, TypeVar
 
-T = TypeVar('T')
+T = TypeVar("T")
+
 
 def call_with_retry(
     fn: Callable[[], T],
@@ -156,6 +157,7 @@ Never deploy a migration requiring atomic deployment of application code and dat
 
 ```python
 import asyncio
+
 
 async def fetch_all_bounded(urls: list[str], max_concurrency: int = 10) -> list[dict]:
     semaphore = asyncio.Semaphore(max_concurrency)

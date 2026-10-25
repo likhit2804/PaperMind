@@ -2,6 +2,7 @@
 pipeline/prompts/__init__.py — Versioned Prompt Registry & Safe Template Loader
 Enforces strict variable substitution and tracks prompt versions.
 """
+
 from pathlib import Path
 
 PROMPTS_DIR = Path(__file__).resolve().parent
@@ -21,7 +22,7 @@ def load_prompt(template_filename: str, **variables: str) -> str:
         )
 
     template_text = template_path.read_text(encoding="utf-8")
-    
+
     # Safe format: ensures all kwargs match template placeholders
     try:
         return template_text.format(**variables)

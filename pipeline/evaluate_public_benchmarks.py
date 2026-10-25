@@ -7,22 +7,29 @@ import xml.etree.ElementTree as ET
 
 import _bootstrap  # noqa: F401 - Initialize sys.path, env & encoding
 
-from pipeline.research_paper.extract_paper_concepts import extract_noun_phrase_candidates, filter_terms_via_ai
+from pipeline.research_paper.extract_paper_concepts import (
+    extract_noun_phrase_candidates,
+    filter_terms_via_ai,
+)
 from pipeline.research_paper.extract_notations_local import is_valid_symbol
 
-DATASET_CACHE_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data", "public_benchmarks")
+DATASET_CACHE_DIR = os.path.join(
+    os.path.dirname(os.path.dirname(__file__)), "data", "public_benchmarks"
+)
+
 
 def stem_phrase(phrase):
     """Normalizes terms using lightweight Porter-style stemming to match academic gold ground truth."""
-    words = re.findall(r'\w+', phrase.lower())
+    words = re.findall(r"\w+", phrase.lower())
     stemmed = []
     for w in words:
-        for suff in ['ies', 'ing', 'es', 'ed', 's', 'i', 'e']:
+        for suff in ["ies", "ing", "es", "ed", "s", "i", "e"]:
             if len(w) > 3 and w.endswith(suff):
-                w = w[:-len(suff)]
+                w = w[: -len(suff)]
                 break
         stemmed.append(w)
-    return ' '.join(stemmed)
+    return " ".join(stemmed)
+
 
 def download_and_cache_dataset(url, cache_filename):
     """Downloads dataset file over HTTP with local caching under data/public_benchmarks/."""
@@ -35,7 +42,9 @@ def download_and_cache_dataset(url, cache_filename):
 
     print(f"  [Downloading Dataset] Fetching: {url} ...")
     try:
-        req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"})
+        req = urllib.request.Request(
+            url, headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"}
+        )
         with urllib.request.urlopen(req, timeout=10) as resp:
             content = resp.read().decode("utf-8")
             with open(cache_path, "w", encoding="utf-8") as f:
@@ -44,6 +53,7 @@ def download_and_cache_dataset(url, cache_filename):
     except Exception as e:
         print(f"  [Download Skipped] {e}")
         return None
+
 
 def fetch_semeval2010_batch(sample_ids=["C-1", "C-3", "C-4", "C-6", "C-7", "C-8", "C-10"]):
     """Fetches full-text paper XMLs and gold terms for SemEval-2010 Task 5 benchmark."""
@@ -72,7 +82,11 @@ def fetch_semeval2010_batch(sample_ids=["C-1", "C-3", "C-4", "C-6", "C-7", "C-8"
 
             for s in sentences:
                 sec = s.attrib.get("section", "")
-                s_words = [t.find("word").text for t in s.findall(".//token") if t.find("word") is not None and t.find("word").text]
+                s_words = [
+                    t.find("word").text
+                    for t in s.findall(".//token")
+                    if t.find("word") is not None and t.find("word").text
+                ]
                 sent_text = " ".join(s_words)
                 if sec == "title":
                     title_words.append(sent_text)
@@ -84,22 +98,29 @@ def fetch_semeval2010_batch(sample_ids=["C-1", "C-3", "C-4", "C-6", "C-7", "C-8"
             raw_gold = gold_map.get(sid, [])
             gold_keyphrases = []
             for item in raw_gold:
-                phrase = " ".join(item[0]) if isinstance(item, list) and item and isinstance(item[0], list) else (" ".join(item) if isinstance(item, list) else str(item))
+                phrase = (
+                    " ".join(item[0])
+                    if isinstance(item, list) and item and isinstance(item[0], list)
+                    else (" ".join(item) if isinstance(item, list) else str(item))
+                )
                 if phrase.strip():
                     gold_keyphrases.append(phrase.strip())
 
-            samples.append({
-                "id": f"SemEval-2010-{sid}",
-                "dataset": "SemEval-2010 Task 5 (Full Paper)",
-                "title": title,
-                "full_text": full_paper_text,
-                "gold_keyphrases": gold_keyphrases,
-                "gold_notations": ["G=(V,E)", "LP", "GCN", "W_i", "\\eta", "S"]
-            })
+            samples.append(
+                {
+                    "id": f"SemEval-2010-{sid}",
+                    "dataset": "SemEval-2010 Task 5 (Full Paper)",
+                    "title": title,
+                    "full_text": full_paper_text,
+                    "gold_keyphrases": gold_keyphrases,
+                    "gold_notations": ["G=(V,E)", "LP", "GCN", "W_i", "\\eta", "S"],
+                }
+            )
         except Exception as err:
             print(f"  ⚠️ Error parsing {sid}: {err}")
 
     return samples
+
 
 def evaluate_concept_extraction(sample):
     """Computes Precision, Recall, and F1 score against gold ground truth using Porter stemming normalization."""
@@ -117,22 +138,37 @@ def evaluate_concept_extraction(sample):
     stage1_matches = set()
     for g_stem in gold_stemmed_set:
         for cand, c_stem in candidate_terms_stemmed.items():
-            if g_stem in c_stem or c_stem in g_stem or any(w in c_stem for w in g_stem.split() if len(w) > 3):
+            if (
+                g_stem in c_stem
+                or c_stem in g_stem
+                or any(w in c_stem for w in g_stem.split() if len(w) > 3)
+            ):
                 stage1_matches.add(g_stem)
                 break
 
     stage1_recall = len(stage1_matches) / max(1, len(gold_stemmed_set))
 
     # Stage 2: AI / Rule-based Verification Pass
-    verified_terms = filter_terms_via_ai(candidate_terms[:150], title, gold_stemmed_set) if os.environ.get("GEMINI_API_KEY") else [
-        t for t in candidate_terms if any(g in stem_phrase(t) or stem_phrase(t) in g for g in gold_stemmed_set) or len(t.split()) >= 2
-    ]
+    verified_terms = (
+        filter_terms_via_ai(candidate_terms[:150], title, gold_stemmed_set)
+        if os.environ.get("GEMINI_API_KEY")
+        else [
+            t
+            for t in candidate_terms
+            if any(g in stem_phrase(t) or stem_phrase(t) in g for g in gold_stemmed_set)
+            or len(t.split()) >= 2
+        ]
+    )
 
     stage2_matches = set()
     for vterm in verified_terms:
         v_stem = stem_phrase(vterm)
         for g_stem in gold_stemmed_set:
-            if g_stem in v_stem or v_stem in g_stem or any(w in v_stem for w in g_stem.split() if len(w) > 3):
+            if (
+                g_stem in v_stem
+                or v_stem in g_stem
+                or any(w in v_stem for w in g_stem.split() if len(w) > 3)
+            ):
                 stage2_matches.add(g_stem)
                 break
 
@@ -151,8 +187,9 @@ def evaluate_concept_extraction(sample):
         "matched_count": len(stage2_matches),
         "final_precision": round(precision * 100, 2),
         "final_recall": round(recall * 100, 2),
-        "final_f1_score": round(f1 * 100, 2)
+        "final_f1_score": round(f1 * 100, 2),
     }
+
 
 def evaluate_notations_filter(sample):
     """Evaluates notation symbol structural validation."""
@@ -163,8 +200,9 @@ def evaluate_notations_filter(sample):
         "sample_id": sample["id"],
         "total_gold_notations": len(gold_notations),
         "passed_structural_filter": valid_count,
-        "symbol_accuracy": round(accuracy * 100, 2)
+        "symbol_accuracy": round(accuracy * 100, 2),
     }
+
 
 def main():
     print("=" * 75)
@@ -189,21 +227,27 @@ def main():
 
         print(f"  • Full Paper Text Length: {c_res['full_text_chars']} characters")
         print(f"  • Stage 1 Candidates Extracted: {c_res['stage1_raw_candidates']} terms")
-        print(f"  • Stage 1 Candidate Recall (Full Paper): {c_res['stage1_candidate_recall']}% (Captured {c_res['stage1_raw_candidates']} candidates $\\rightarrow$ {c_res['gold_count']} gold terms)")
+        print(
+            f"  • Stage 1 Candidate Recall (Full Paper): {c_res['stage1_candidate_recall']}% (Captured {c_res['stage1_raw_candidates']} candidates $\\rightarrow$ {c_res['gold_count']} gold terms)"
+        )
         print(f"  • Stage 2 Verified Terms: {c_res['stage2_verified_count']} terms")
-        print(f"  • Stage 2 Precision: {c_res['final_precision']}% | Recall: {c_res['final_recall']}% | F1: {c_res['final_f1_score']}%")
+        print(
+            f"  • Stage 2 Precision: {c_res['final_precision']}% | Recall: {c_res['final_recall']}% | F1: {c_res['final_f1_score']}%"
+        )
 
-        stage1_recalls.append(c_res['stage1_candidate_recall'])
-        final_precisions.append(c_res['final_precision'])
-        final_recalls.append(c_res['final_recall'])
-        final_f1s.append(c_res['final_f1_score'])
+        stage1_recalls.append(c_res["stage1_candidate_recall"])
+        final_precisions.append(c_res["final_precision"])
+        final_recalls.append(c_res["final_recall"])
+        final_f1s.append(c_res["final_f1_score"])
 
-        summary_results.append({
-            "id": sample["id"],
-            "dataset": sample.get("dataset", "Public Academic Dataset"),
-            "concepts": c_res,
-            "notations": n_res
-        })
+        summary_results.append(
+            {
+                "id": sample["id"],
+                "dataset": sample.get("dataset", "Public Academic Dataset"),
+                "concepts": c_res,
+                "notations": n_res,
+            }
+        )
 
     macro_s1_recall = round(sum(stage1_recalls) / len(stage1_recalls), 2)
     macro_precision = round(sum(final_precisions) / len(final_precisions), 2)
@@ -220,20 +264,29 @@ def main():
     print(f"  • Notation Symbol Accuracy:              100.0%")
     print("=" * 75)
 
-    out_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "ablation_results", "public_dataset_eval_results.json")
+    out_path = os.path.join(
+        os.path.dirname(os.path.dirname(__file__)),
+        "ablation_results",
+        "public_dataset_eval_results.json",
+    )
     os.makedirs(os.path.dirname(out_path), exist_ok=True)
     with open(out_path, "w", encoding="utf-8") as f:
-        json.dump({
-            "macro_metrics": {
-                "macro_stage1_candidate_recall": macro_s1_recall,
-                "macro_precision": macro_precision,
-                "macro_recall": macro_recall,
-                "macro_f1": macro_f1
+        json.dump(
+            {
+                "macro_metrics": {
+                    "macro_stage1_candidate_recall": macro_s1_recall,
+                    "macro_precision": macro_precision,
+                    "macro_recall": macro_recall,
+                    "macro_f1": macro_f1,
+                },
+                "per_paper_results": summary_results,
             },
-            "per_paper_results": summary_results
-        }, f, indent=2)
+            f,
+            indent=2,
+        )
 
     print(f"\n✅ Benchmark Evaluation Complete! Results saved to:\n   {out_path}")
+
 
 if __name__ == "__main__":
     main()

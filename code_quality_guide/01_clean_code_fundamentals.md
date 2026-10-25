@@ -44,9 +44,10 @@ Good names eliminate comments and make logic errors visible at a glance.
 def proc(d, t):
     r = []
     for x in d:
-        if x['ts'] > t:
+        if x["ts"] > t:
             r.append(x)
     return r
+
 
 # ✅ After: Signature and implementation are immediately self-explanatory
 def events_after(events: list[Event], cutoff: datetime) -> list[Event]:
@@ -81,6 +82,7 @@ def ship_order(order: Order) -> bool:
                 return True
     return False
 
+
 # ✅ Guard clauses: each precondition verified early, happy path at root level
 def ship_order(order: Order) -> bool:
     if not order.is_paid:
@@ -89,7 +91,7 @@ def ship_order(order: Order) -> bool:
         return False
     if order.address is None:
         return False
-        
+
     carrier.ship(order)
     return True
 ```
@@ -105,14 +107,15 @@ Bundle related arguments into immutable objects and enforce keyword-only argumen
 from dataclasses import dataclass
 from datetime import datetime
 
+
 @dataclass(frozen=True)
 class SearchFilters:
     tenant_id: str
     created_after: datetime | None = None
     tags: tuple[str, ...] = ()
 
-def search_documents(query: str, filters: SearchFilters, *, limit: int = 20) -> list[Document]:
-    ...
+
+def search_documents(query: str, filters: SearchFilters, *, limit: int = 20) -> list[Document]: ...
 ```
 
 ### Avoid Boolean Flag Arguments
@@ -166,10 +169,12 @@ Treat SOLID as a shared vocabulary for architectural design reviews, not as an i
 ```python
 from typing import Protocol, NewType
 
-UserId = NewType('UserId', str)
+UserId = NewType("UserId", str)
+
 
 class Notifier(Protocol):
     def send(self, user_id: UserId, message: str) -> None: ...
+
 
 class SignupService:
     def __init__(self, users: UserRepository, notifier: Notifier) -> None:
@@ -180,6 +185,7 @@ class SignupService:
         user = self._users.add(email)
         self._notifier.send(user.id, "Welcome to the platform!")
         return user
+
 
 # In production: wire in an SESNotifier or SendgridNotifier.
 # In unit tests: wire in a FakeNotifier that records calls to an in-memory list.
@@ -250,6 +256,7 @@ Classify every failure before writing handling logic:
 class DomainError(Exception):
     """Base class for all business domain errors."""
 
+
 class InsufficientCredits(DomainError):
     def __init__(self, account_id: str, shortfall: int) -> None:
         super().__init__(f"Account {account_id} requires {shortfall} more credits")
@@ -268,13 +275,15 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import NewType
 
-UserId = NewType('UserId', str)
+UserId = NewType("UserId", str)
+
 
 class ExtractionStatus(str, Enum):
-    PENDING = 'pending'
-    PROCESSING = 'processing'
-    COMPLETED = 'completed'
-    FAILED = 'failed'
+    PENDING = "pending"
+    PROCESSING = "processing"
+    COMPLETED = "completed"
+    FAILED = "failed"
+
 
 @dataclass(frozen=True)
 class Money:
@@ -293,6 +302,7 @@ Validate external payloads (HTTP request bodies, queue messages, raw file upload
 
 ```python
 from pydantic import BaseModel, Field
+
 
 class CreatePaperRequest(BaseModel):
     title: str = Field(min_length=1, max_length=300)

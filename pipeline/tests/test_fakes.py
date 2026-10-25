@@ -2,8 +2,10 @@
 pipeline/tests/test_fakes.py — Deterministic Test Doubles & Fake Gemini Client.
 Enables unit testing the extraction pipeline in CI without API keys or token costs.
 """
-from dataclasses import dataclass, field
-from pipeline.schemas import ConceptMetadataOutput, BatchedEquationsOutput
+
+from dataclasses import dataclass
+
+from pipeline.schemas import BatchedEquationsOutput, ConceptMetadataOutput
 
 
 @dataclass
@@ -13,6 +15,7 @@ class FakeLLMResponse:
 
 class FakeGeminiModel:
     """A deterministic in-memory fake Gemini client for unit tests."""
+
     def __init__(self, canned_responses: list[str] | None = None):
         self.canned_responses = list(canned_responses or [])
         self.calls: list[str] = []
@@ -34,7 +37,7 @@ def test_concept_metadata_schema_valid():
 
 def test_equation_schema_valid():
     """Verify equation output schema parses valid LaTeX outputs."""
-    raw = '''{
+    raw = r"""{
         "equations": [
             {
                 "label": "Equation (1)",
@@ -46,7 +49,7 @@ def test_equation_schema_valid():
                 ]
             }
         ]
-    }'''
+    }"""
     parsed = BatchedEquationsOutput.model_validate_json(raw)
     assert len(parsed.equations) == 1
     assert parsed.equations[0].label == "Equation (1)"
@@ -55,14 +58,16 @@ def test_equation_schema_valid():
 
 def test_fake_gemini_client():
     """Verify FakeGeminiModel replays canned responses deterministically."""
-    fake = FakeGeminiModel([
-        '{"title": "Paper A", "canonical_seeds": ["seed_a"]}',
-        '{"title": "Paper B", "canonical_seeds": ["seed_b"]}',
-    ])
-    
+    fake = FakeGeminiModel(
+        [
+            '{"title": "Paper A", "canonical_seeds": ["seed_a"]}',
+            '{"title": "Paper B", "canonical_seeds": ["seed_b"]}',
+        ]
+    )
+
     res1 = fake.generate_content("prompt 1")
     res2 = fake.generate_content("prompt 2")
-    
+
     assert "Paper A" in res1.text
     assert "Paper B" in res2.text
     assert len(fake.calls) == 2
@@ -71,6 +76,7 @@ def test_fake_gemini_client():
 def test_golden_benchmark_suite():
     """Verify that golden benchmark suite loads, validates schemas, and achieves target recall."""
     from pipeline.evals.run_eval import run_benchmark_suite
+
     results = run_benchmark_suite(verbose=False)
     assert results["total_cases"] >= 6
     assert results["schema_conformity_rate"] == 1.0

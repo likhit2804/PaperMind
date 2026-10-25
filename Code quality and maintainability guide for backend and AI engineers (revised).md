@@ -42,9 +42,10 @@ Good names remove the need for many comments and make bugs visible. Guidelines:
 def proc(d, t):
     r = []
     for x in d:
-        if x['ts'] > t:
+        if x["ts"] > t:
             r.append(x)
     return r
+
 
 # After: the signature and body explain themselves
 def events_after(events: list[Event], cutoff: datetime) -> list[Event]:
@@ -73,6 +74,7 @@ def ship_order(order: Order) -> bool:
                 return True
     return False
 
+
 # Guard clauses: one precondition per line, happy path at the end
 def ship_order(order: Order) -> bool:
     if not order.is_paid:
@@ -96,8 +98,8 @@ class SearchFilters:
     created_after: datetime | None = None
     tags: tuple[str, ...] = ()
 
-def search_documents(query: str, filters: SearchFilters, *, limit: int = 20) -> list[Document]:
-    ...
+
+def search_documents(query: str, filters: SearchFilters, *, limit: int = 20) -> list[Document]: ...
 ```
 
 **Avoid boolean flag arguments.** `send(message, True, False)` is unreadable, and a flag usually means the function does two jobs.
@@ -142,8 +144,10 @@ A concrete dependency-inversion example using a Python `Protocol`:
 ```python
 from typing import Protocol
 
+
 class Notifier(Protocol):
     def send(self, user_id: UserId, message: str) -> None: ...
+
 
 class SignupService:
     def __init__(self, users: UserRepository, notifier: Notifier) -> None:
@@ -152,8 +156,9 @@ class SignupService:
 
     def register(self, email: EmailAddress) -> User:
         user = self._users.add(email)
-        self._notifier.send(user.id, 'Welcome!')
+        self._notifier.send(user.id, "Welcome!")
         return user
+
 
 # Production wires in an SES or SMTP notifier; tests pass a FakeNotifier
 # that records messages in a list. No mocking library required.
@@ -220,17 +225,19 @@ Practices:
 class DomainError(Exception):
     """Base class for expected, business-level failures."""
 
+
 class InsufficientFunds(DomainError):
     def __init__(self, account_id: AccountId, shortfall_cents: int) -> None:
-        super().__init__(f'Account {account_id} is short by {shortfall_cents} cents')
+        super().__init__(f"Account {account_id} is short by {shortfall_cents} cents")
         self.account_id = account_id
         self.shortfall_cents = shortfall_cents
+
 
 def load_profile(user_id: UserId) -> Profile:
     try:
         row = db.fetch_one(PROFILE_QUERY, user_id)
     except DatabaseError as exc:
-        raise ProfileUnavailable(f'could not load profile for user {user_id}') from exc
+        raise ProfileUnavailable(f"could not load profile for user {user_id}") from exc
     return Profile.from_row(row)
 ```
 
@@ -243,12 +250,14 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import NewType
 
-UserId = NewType('UserId', str)
+UserId = NewType("UserId", str)
+
 
 class OrderStatus(str, Enum):
-    PENDING = 'pending'
-    PAID = 'paid'
-    SHIPPED = 'shipped'
+    PENDING = "pending"
+    PAID = "paid"
+    SHIPPED = "shipped"
+
 
 @dataclass(frozen=True)
 class Money:
@@ -257,9 +266,9 @@ class Money:
 
     def __post_init__(self) -> None:
         if self.amount_cents < 0:
-            raise ValueError('amount_cents must be non-negative')
+            raise ValueError("amount_cents must be non-negative")
         if len(self.currency) != 3:
-            raise ValueError('currency must be a 3-letter ISO code')
+            raise ValueError("currency must be a 3-letter ISO code")
 ```
 
 **Validate at system boundaries** (HTTP bodies, queue messages, file contents, LLM output), then trust the validated types inside. A schema library makes the boundary explicit:
@@ -267,9 +276,11 @@ class Money:
 ```python
 from pydantic import BaseModel, Field
 
+
 class OrderItem(BaseModel):
     sku: str
     quantity: int = Field(gt=0, le=1000)
+
 
 class CreateOrderRequest(BaseModel):
     customer_id: str
@@ -313,8 +324,10 @@ Retries turn transient failures into non-events, but careless retries amplify ou
 import random
 import time
 
-def call_with_retry(fn, *, attempts=4, base_delay_s=0.5, max_delay_s=8.0,
-                    retry_on=(TransientError,)):
+
+def call_with_retry(
+    fn, *, attempts=4, base_delay_s=0.5, max_delay_s=8.0, retry_on=(TransientError,)
+):
     for attempt in range(1, attempts + 1):
         try:
             return fn()
@@ -404,6 +417,7 @@ Also avoid long table locks: for example, build large indexes concurrently where
 
 ```python
 import asyncio
+
 
 async def fetch_all(urls: list[str], limit: int = 10) -> list[Response]:
     semaphore = asyncio.Semaphore(limit)
@@ -615,6 +629,7 @@ The pyramid is a default, not a law. A service that is mostly a thin layer over 
 ```python
 NOW = datetime(2026, 1, 15, tzinfo=timezone.utc)
 
+
 def test_expired_coupon_is_rejected():
     # Arrange: the clock is injected, so the test never depends on today's date
     coupon = make_coupon(expires_at=NOW - timedelta(days=1))
@@ -624,11 +639,15 @@ def test_expired_coupon_is_rejected():
     with pytest.raises(CouponExpired):
         apply_coupon(cart, coupon, now=NOW)
 
-@pytest.mark.parametrize('total_cents, percent, expected', [
-    (10_000, 10, 9_000),
-    (999, 10, 899),     # rounding behavior is part of the contract
-    (0, 50, 0),
-])
+
+@pytest.mark.parametrize(
+    "total_cents, percent, expected",
+    [
+        (10_000, 10, 9_000),
+        (999, 10, 899),  # rounding behavior is part of the contract
+        (0, 50, 0),
+    ],
+)
 def test_percentage_discount(total_cents, percent, expected):
     assert discounted_total(total_cents, percent) == expected
 ```
@@ -662,6 +681,7 @@ A flaky test is worse than no test because it teaches the team to ignore red bui
 
 ```python
 from hypothesis import given, strategies as st
+
 
 @given(st.text())
 def test_slugify_is_idempotent(text):
@@ -720,10 +740,12 @@ Wrap each provider SDK behind a small interface your code owns. Application code
 from dataclasses import dataclass
 from typing import Literal, Protocol
 
+
 @dataclass(frozen=True)
 class Message:
-    role: Literal['system', 'user', 'assistant']
+    role: Literal["system", "user", "assistant"]
     content: str
+
 
 @dataclass(frozen=True)
 class LLMRequest:
@@ -731,16 +753,18 @@ class LLMRequest:
     messages: tuple[Message, ...]
     max_output_tokens: int
     temperature: float = 0.0
-    prompt_version: str = ''      # recorded in logs for later analysis
+    prompt_version: str = ""  # recorded in logs for later analysis
+
 
 @dataclass(frozen=True)
 class LLMResponse:
     text: str
-    model: str                    # the model that actually answered
+    model: str  # the model that actually answered
     input_tokens: int
     output_tokens: int
     latency_ms: int
-    finish_reason: str            # for example 'stop' or 'length' (truncated)
+    finish_reason: str  # for example 'stop' or 'length' (truncated)
+
 
 class LLMClient(Protocol):
     def complete(self, request: LLMRequest) -> LLMResponse: ...
@@ -757,12 +781,12 @@ class ProviderClient:
 
     def complete(self, request: LLMRequest) -> LLMResponse:
         started = time.monotonic()
-        raw = call_with_retry(              # section 3.2: only transient errors
+        raw = call_with_retry(  # section 3.2: only transient errors
             lambda: self._sdk_call(request),
             retry_on=(RateLimited, ProviderUnavailable, TimeoutError),
         )
         response = self._to_response(raw, latency_ms=int((time.monotonic() - started) * 1000))
-        self._usage_log.record(request, response)   # tokens, latency, cost, prompt version
+        self._usage_log.record(request, response)  # tokens, latency, cost, prompt version
         return response
 ```
 
@@ -776,25 +800,28 @@ Whenever code consumes model output, ask for a schema and validate it. Provider 
 from typing import Literal
 from pydantic import BaseModel, Field, ValidationError
 
+
 class TicketTriage(BaseModel):
-    category: Literal['billing', 'bug', 'feature_request', 'other']
+    category: Literal["billing", "bug", "feature_request", "other"]
     urgency: int = Field(ge=1, le=5)
     summary: str = Field(max_length=300)
 
+
 MAX_REPAIR_ATTEMPTS = 1
+
 
 def triage_ticket(llm: LLMClient, ticket_text: str) -> TicketTriage:
     request = build_triage_request(ticket_text)
     for _ in range(MAX_REPAIR_ATTEMPTS + 1):
         response = llm.complete(request)
-        if response.finish_reason == 'length':
-            raise LLMOutputTruncated('triage output hit the token limit')
+        if response.finish_reason == "length":
+            raise LLMOutputTruncated("triage output hit the token limit")
         try:
             return TicketTriage.model_validate_json(extract_json(response.text))
         except ValidationError as exc:
             # One bounded repair attempt: show the model its own error.
             request = with_repair_instruction(request, response.text, str(exc))
-    raise LLMOutputInvalid('triage output failed validation after repair')
+    raise LLMOutputInvalid("triage output failed validation after repair")
 ```
 
 Points worth noting:
@@ -825,10 +852,11 @@ prompts/
 ```python
 from jinja2 import Environment, FileSystemLoader, StrictUndefined
 
-env = Environment(loader=FileSystemLoader('prompts'), undefined=StrictUndefined)
+env = Environment(loader=FileSystemLoader("prompts"), undefined=StrictUndefined)
+
 
 def render_triage_prompt(ticket_text: str) -> str:
-    return env.get_template('triage/v3.user.jinja').render(ticket_text=ticket_text)
+    return env.get_template("triage/v3.user.jinja").render(ticket_text=ticket_text)
 ```
 
 ### 6.6 Testing the deterministic parts and faking the model
@@ -843,23 +871,32 @@ class FakeLLM:
 
     def complete(self, request: LLMRequest) -> LLMResponse:
         self.requests.append(request)
-        return LLMResponse(text=self._responses.pop(0), model=request.model,
-                           input_tokens=0, output_tokens=0, latency_ms=0,
-                           finish_reason='stop')
+        return LLMResponse(
+            text=self._responses.pop(0),
+            model=request.model,
+            input_tokens=0,
+            output_tokens=0,
+            latency_ms=0,
+            finish_reason="stop",
+        )
+
 
 def test_triage_repairs_invalid_output_once():
-    llm = FakeLLM([
-        'Sure! Here you go: category=bug',
-        '{"category": "bug", "urgency": 4, "summary": "Login fails on mobile"}',
-    ])
-    result = triage_ticket(llm, 'I cannot log in on my phone')
-    assert result.category == 'bug'
-    assert len(llm.requests) == 2       # exactly one repair attempt
+    llm = FakeLLM(
+        [
+            "Sure! Here you go: category=bug",
+            '{"category": "bug", "urgency": 4, "summary": "Login fails on mobile"}',
+        ]
+    )
+    result = triage_ticket(llm, "I cannot log in on my phone")
+    assert result.category == "bug"
+    assert len(llm.requests) == 2  # exactly one repair attempt
+
 
 def test_triage_gives_up_after_one_repair():
-    llm = FakeLLM(['nope', 'still nope'])
+    llm = FakeLLM(["nope", "still nope"])
     with pytest.raises(LLMOutputInvalid):
-        triage_ticket(llm, 'anything')
+        triage_ticket(llm, "anything")
 ```
 
 Cover the failure modes explicitly, because they are where production bugs live: timeout, rate limit, refusal, empty output, truncated output, malformed JSON, valid JSON with out-of-range values, and context that exceeds the model's window.
@@ -902,20 +939,22 @@ class EvalCase:
     ticket_text: str
     expected_category: str
 
+
 def run_triage_eval(cases: list[EvalCase], llm: LLMClient) -> EvalReport:
     results = []
     for case in cases:
         try:
             predicted = triage_ticket(llm, case.ticket_text).category
         except LLMOutputError:
-            predicted = None            # an invalid output counts as a failure
+            predicted = None  # an invalid output counts as a failure
         results.append(CaseResult(case.id, predicted, predicted == case.expected_category))
     return EvalReport.from_results(results)
+
 
 # Run on demand and in CI, not as part of the default fast unit suite
 @pytest.mark.eval
 def test_triage_has_not_regressed(real_llm):
-    report = run_triage_eval(load_cases('evals/triage_smoke.jsonl'), real_llm)
+    report = run_triage_eval(load_cases("evals/triage_smoke.jsonl"), real_llm)
     assert report.accuracy >= BASELINE_ACCURACY - TOLERANCE
 ```
 
@@ -956,11 +995,12 @@ class RefundArgs(BaseModel):
     amount_cents: int = Field(gt=0)
     reason: str = Field(max_length=200)
 
+
 def refund_tool(args: RefundArgs, ctx: ToolContext) -> ToolResult:
-    ctx.require_permission('refunds:create')          # authorization lives in code
+    ctx.require_permission("refunds:create")  # authorization lives in code
     order = orders.get(args.order_id, tenant_id=ctx.tenant_id)
     if args.amount_cents > order.refundable_cents:
-        raise ToolRejected('amount exceeds refundable balance')
+        raise ToolRejected("amount exceeds refundable balance")
     if args.amount_cents > AUTO_APPROVE_LIMIT_CENTS:
         return ToolResult.needs_human_approval(args)  # the model cannot self-approve
     refunds.create(order, args.amount_cents, args.reason, idempotency_key=ctx.call_id)
@@ -1109,13 +1149,14 @@ A small example of replacing a growing conditional with data:
 ```python
 # Before: every new shipping method edits this function
 def shipping_cost_cents(order):
-    if order.method == 'standard':
+    if order.method == "standard":
         return 500
-    elif order.method == 'express':
+    elif order.method == "express":
         return 1500
-    elif order.method == 'overnight':
+    elif order.method == "overnight":
         return 3500
     raise ValueError(order.method)
+
 
 # After: adding a method is a one-line data change
 SHIPPING_COST_CENTS = {
@@ -1123,6 +1164,7 @@ SHIPPING_COST_CENTS = {
     ShippingMethod.EXPRESS: 1500,
     ShippingMethod.OVERNIGHT: 3500,
 }
+
 
 def shipping_cost_cents(order: Order) -> int:
     return SHIPPING_COST_CENTS[order.method]
@@ -1316,10 +1358,14 @@ class AnswerService:
         self._llm = llm
         self._cache = cache
 
+
 # main.py: the only place that knows the concrete classes
 def build_app(settings: Settings) -> App:
-    llm = ProviderClient(make_sdk(settings.llm_api_key.get_secret_value()),
-                         timeout_s=settings.llm_timeout_s, usage_log=UsageLog(db))
+    llm = ProviderClient(
+        make_sdk(settings.llm_api_key.get_secret_value()),
+        timeout_s=settings.llm_timeout_s,
+        usage_log=UsageLog(db),
+    )
     retriever = Retriever(PgVectorIndex(db))
     return App(AnswerService(retriever, llm, RedisCache(settings.redis_url)))
 ```
@@ -1334,6 +1380,7 @@ def build_app(settings: Settings) -> App:
 ```python
 from pydantic import SecretStr
 from pydantic_settings import BaseSettings
+
 
 class Settings(BaseSettings):
     database_url: str
@@ -1389,12 +1436,12 @@ Code you cannot observe is code you cannot maintain.
 
 ```python
 logger.info(
-    'payment_created',
+    "payment_created",
     extra={
-        'request_id': ctx.request_id,
-        'payment_id': payment.id,
-        'amount_cents': payment.amount_cents,
-        'duration_ms': elapsed_ms,
+        "request_id": ctx.request_id,
+        "payment_id": payment.id,
+        "amount_cents": payment.amount_cents,
+        "duration_ms": elapsed_ms,
     },
 )
 ```

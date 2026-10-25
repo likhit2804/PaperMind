@@ -71,17 +71,18 @@ class AnswerService:
         self._llm = llm
         self._cache = cache
 
+
 # main.py: The only file that instantiates concrete infrastructure adapters
 def build_application(settings: Settings) -> App:
     db_pool = create_postgres_pool(settings.database_url)
-    
+
     llm_client = GeminiAdapter(
         api_key=settings.gemini_api_key.get_secret_value(),
         timeout_s=settings.llm_timeout_s,
     )
     retriever = PgVectorRetriever(db_pool)
     cache = RedisCache(settings.redis_url)
-    
+
     answer_service = AnswerService(retriever, llm_client, cache)
     return App(answer_service)
 ```
@@ -97,6 +98,7 @@ def build_application(settings: Settings) -> App:
 ```python
 from pydantic import SecretStr, Field
 from pydantic_settings import BaseSettings
+
 
 class Settings(BaseSettings):
     database_url: str = Field(..., description="PostgreSQL connection string")

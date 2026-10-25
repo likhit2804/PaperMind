@@ -51,9 +51,11 @@ import json
 
 logger = logging.getLogger("app")
 
+
 def log_event(event_name: str, **kwargs):
     payload = {"event": event_name, **kwargs}
     logger.info(json.dumps(payload))
+
 
 # Production output example:
 # {"event": "paper_extraction_started", "request_id": "req_19283", "paper_id": "p_881", "pages": 14}

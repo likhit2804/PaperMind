@@ -38,13 +38,14 @@ Refactoring is defined as **changing the internal structure of code without alte
 ```python
 # ❌ Before: Every new shipping method requires editing this brittle conditional function
 def shipping_cost_cents(order: Order) -> int:
-    if order.method == 'standard':
+    if order.method == "standard":
         return 500
-    elif order.method == 'express':
+    elif order.method == "express":
         return 1500
-    elif order.method == 'overnight':
+    elif order.method == "overnight":
         return 3500
     raise ValueError(f"Unknown method: {order.method}")
+
 
 # ✅ After: Adding a shipping tier is a zero-risk, one-line dictionary addition
 SHIPPING_COST_CENTS: dict[ShippingMethod, int] = {
@@ -52,6 +53,7 @@ SHIPPING_COST_CENTS: dict[ShippingMethod, int] = {
     ShippingMethod.EXPRESS: 1500,
     ShippingMethod.OVERNIGHT: 3500,
 }
+
 
 def shipping_cost_cents(order: Order) -> int:
     return SHIPPING_COST_CENTS[order.method]

@@ -6,6 +6,7 @@ Centralises three patterns that were copy-pasted across every script:
   • Section lookup by page number     → get_section_for_page()
   • Heuristic sentence splitting      → split_sentences()
 """
+
 import re
 from typing import Any
 
@@ -71,4 +72,4 @@ def split_sentences(text: str) -> list[str]:
     Split *text* into sentences using a heuristic boundary regex that avoids
     splitting on common abbreviations such as ``Dr.``, ``e.g.``, or ``U.S.``.
     """
-    return [s for s in re.split(r'(?<!\w\.\w.)(?<![A-Z][a-z]\.)(?<=\.|\?)\s', text) if s]
+    return [s for s in re.split(r"(?<!\w\.\w.)(?<![A-Z][a-z]\.)(?<=\.|\?)\s", text) if s]
