@@ -45,8 +45,8 @@ export function verifyRagCitations(answer = "", candidateCitations = [], retriev
     });
   }
 
-  // Extract explicit page references in synthesized answer text: e.g. "Page 4", "page 12", "p. 5"
-  const textPageRegex = /\b(?:page|p\.)\s*(\d+)\b/gi;
+  // Extract explicit page references in synthesized answer text: e.g. "Page 4", "pages 12", "p. 5", "pp. 8"
+  const textPageRegex = /\b(?:pages?|pp?\.)\s*(\d+)\b/gi;
   const mentionedPages = [];
   let match;
   while ((match = textPageRegex.exec(answer || "")) !== null) {

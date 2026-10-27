@@ -1361,20 +1361,26 @@ Return your response strictly in JSON format matching this schema:
   ]
 }}
 """
-            response = call_gemini_with_retry(
-                model,
-                prompt,
-                generation_config={"response_mime_type": "application/json"},
-            )
-            data = parse_json_robust(response.text)
-            defs_list = data.get("definitions", []) if isinstance(data, dict) else []
+            try:
+                response = call_gemini_with_retry(
+                    model,
+                    prompt,
+                    generation_config={"response_mime_type": "application/json"},
+                )
+                data = parse_json_robust(response.text)
+                defs_list = data.get("definitions", []) if isinstance(data, dict) else []
 
-            for item in defs_list:
-                t = (item.get("term") or "").lower().strip()
-                d = (item.get("definition") or "").strip()
-                r = (item.get("role") or "").strip() or "Key concept in paper"
-                if t and d:
-                    final_definitions[t] = f"{d} [Role: {r}] [Source: ai_generated]"
+                for item in defs_list:
+                    t = (item.get("term") or "").lower().strip()
+                    d = (item.get("definition") or "").strip()
+                    r = (item.get("role") or "").strip() or "Key concept in paper"
+                    if t and d:
+                        final_definitions[t] = f"{d} [Role: {r}] [Source: ai_generated]"
+            except Exception as batch_err:
+                print(
+                    f"Warning: Batch {i // batch_size + 1} AI definition synthesis failed ({batch_err}). "
+                    f"Terms in this batch will use Option B fallback."
+                )
 
         # Fill any missing terms with Option B fallback
         for term in verified_terms:

@@ -430,7 +430,10 @@ function generateRagAnswer(query, paperTitle, nodes, summary, architectureNotes,
     if (refNodes.length > 0) {
       answerText = `### Cited Literature & Key References\n\nHere are primary references identified in the paper:\n\n`;
       refNodes.slice(0, 5).forEach((ref) => {
-        answerText += `- **${ref.label}**: ${ref.definition}\n`;
+        const cleanRefDef = (ref.definition || "")
+          .replace(/\[(Role|Source|Connections):[^\]]+\]/gi, "")
+          .trim();
+        answerText += `- **${ref.label}**: ${cleanRefDef || ref.definition}\n`;
       });
     } else {
       answerText = `### Literature References\n\nReferences are cited throughout the discussion and methodology sections. You can filter by 'Refs' tab in the Glossary list.`;

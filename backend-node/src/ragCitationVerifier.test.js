@@ -66,6 +66,19 @@ function runTests() {
     console.log("✓ Test 4 Passed: Clean answer with no explicit page mentions scores 1.0");
   }
 
+  // Test 5: Plural and abbreviated page mentions (pages 4, pp. 5) are verified
+  {
+    const answer = "Discussed on pages 4 and pp. 5 in detail.";
+    const candidateCitations = [{ page: 4, section: "Section 3" }, { page: 5, section: "Section 4" }];
+    const retrievedChunks = [{ page: 4, section: "Section 3" }, { page: 5, section: "Section 4" }];
+
+    const result = verifyRagCitations(answer, candidateCitations, retrievedChunks, 10);
+    assert.strictEqual(result.grounding.isFullyGrounded, true, "Both pages 4 and 5 should be grounded");
+    assert.strictEqual(result.grounding.totalMentionedPages, 2, "Should detect 2 mentioned pages");
+    assert.strictEqual(result.grounding.groundingScore, 1.0);
+    console.log("✓ Test 5 Passed: Correctly parses and verifies plural (pages) and abbreviated (pp.) page citations");
+  }
+
   console.log("\nAll RAG Citation Verifier tests passed successfully!\n");
 }
 

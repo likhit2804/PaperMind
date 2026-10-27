@@ -2,7 +2,7 @@ import { Router } from "express";
 import multer from "multer";
 import fs from "fs";
 import path from "path";
-import { spawn } from "child_process";
+import { spawn, exec } from "child_process";
 import { v4 as uuidv4 } from "uuid";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import settings from "../config.js";
@@ -69,14 +69,26 @@ function runPythonWithTimeout(args, cwd, timeoutMs = 15 * 60 * 1000) {
       isTimedOut = true;
       logger.error(`[paper/analyze] Python pipeline timed out after ${timeoutMs}ms. Terminating process...`);
       try {
-        proc.kill("SIGTERM");
-        // Force-kill fallback if process does not exit within 3 seconds
-        const forceKillTimer = setTimeout(() => {
-          try {
-            proc.kill("SIGKILL");
-          } catch (_) {}
-        }, 3000);
-        if (forceKillTimer.unref) forceKillTimer.unref();
+        if (process.platform === "win32" && proc.pid) {
+          // On Windows, child process trees require taskkill to reliably terminate
+          exec(`taskkill /pid ${proc.pid} /T /F`, (err) => {
+            if (err) {
+              logger.warn(`[paper/analyze] taskkill fallback returned: ${err.message}`);
+              try {
+                proc.kill("SIGKILL");
+              } catch (_) {}
+            }
+          });
+        } else {
+          proc.kill("SIGTERM");
+          // Force-kill fallback if process does not exit within 3 seconds
+          const forceKillTimer = setTimeout(() => {
+            try {
+              proc.kill("SIGKILL");
+            } catch (_) {}
+          }, 3000);
+          if (forceKillTimer.unref) forceKillTimer.unref();
+        }
       } catch (killErr) {
         logger.warn(`[paper/analyze] Error killing timed-out Python process: ${killErr.message}`);
       }
@@ -922,9 +934,11 @@ USER QUESTION: "${effectiveQuery}"
       suggestedFollowUps.push("Explain the key mathematical equations and notations");
     }
 
-    const totalPages = summary && summary.sections && summary.sections.length > 0
-      ? Math.max(...summary.sections.map((s) => s.page_start || 1)) + 5
-      : null;
+    const totalPages = summary && typeof summary.total_pages === "number" && summary.total_pages > 0
+      ? summary.total_pages
+      : summary && summary.sections && summary.sections.length > 0
+        ? Math.max(...summary.sections.map((s) => s.page_start || 1)) + 5
+        : null;
 
     const { verifiedCitations, grounding } = verifyRagCitations(
       answer,
