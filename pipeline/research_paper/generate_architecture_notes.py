@@ -1,4 +1,14 @@
-from _bootstrap import *
+import json
+import os
+import re
+import sys
+import fitz
+
+try:
+    from _bootstrap import *  # noqa: F403, F401
+except ImportError:
+    from pipeline.research_paper._bootstrap import *  # noqa: F403, F401
+
 from pipeline.research_paper.extract_paper_concepts import parse_pdf_into_sections, clean_text
 from pipeline.utils import parse_json_robust, call_gemini_with_retry, get_gemini_model
 from pipeline.research_paper.pdf_utils import split_sentences
@@ -36,6 +46,7 @@ ARCH_TOPICS = [
     "simulation",
 ]
 
+
 def get_sentences_for_topic(sections, topic, max_sentences=6):
     """
     Locally scans all sections page-by-page, finds sentences that mention
@@ -55,16 +66,18 @@ def get_sentences_for_topic(sections, topic, max_sentences=6):
             # Split on sentence boundaries (heuristic, same as paper_notes.py)
             sentences = split_sentences(page_clean)
             for idx, sent in enumerate(sentences):
-                if re.search(r'\b' + re.escape(topic_lower) + r'\b', sent.lower()):
+                if re.search(r"\b" + re.escape(topic_lower) + r"\b", sent.lower()):
                     # Include one sentence of context before and after
                     before = sentences[idx - 1] if idx > 0 else ""
-                    after  = sentences[idx + 1] if idx < len(sentences) - 1 else ""
-                    full   = " ".join(filter(None, [before, sent, after])).strip()
-                    hits.append({
-                        "sentence": full,
-                        "page": page_num,
-                        "section": sec_label,
-                    })
+                    after = sentences[idx + 1] if idx < len(sentences) - 1 else ""
+                    full = " ".join(filter(None, [before, sent, after])).strip()
+                    hits.append(
+                        {
+                            "sentence": full,
+                            "page": page_num,
+                            "section": sec_label,
+                        }
+                    )
                     if len(hits) >= max_sentences:
                         return hits
     return hits
@@ -83,7 +96,7 @@ def get_key_term_occurrences(sections, key_terms):
         for sec in sections:
             for page_num, page_text in sec["pages_data"]:
                 page_clean = clean_text(page_text).lower()
-                if re.search(r'\b' + re.escape(term_lower) + r'\b', page_clean):
+                if re.search(r"\b" + re.escape(term_lower) + r"\b", page_clean):
                     entry = (page_num, sec["label"])
                     if entry not in found:
                         found.append(entry)
@@ -120,7 +133,7 @@ def build_grounded_evidence_block(sections, key_terms):
     lines.append("")
 
     for topic, hits in topic_evidence.items():
-        lines.append(f"[Topic: \"{topic}\"]")
+        lines.append(f'[Topic: "{topic}"]')
         for h in hits:
             lines.append(f"  • (Page {h['page']}, Section '{h['section']}'): {h['sentence']}")
         lines.append("")
@@ -134,7 +147,7 @@ def build_grounded_evidence_block(sections, key_terms):
             src_str = "; ".join([f"Page {p} ('{s}')" for p, s in sources])
         else:
             src_str = "NOT FOUND in paper text"
-        lines.append(f"  • \"{term}\": {src_str}")
+        lines.append(f'  • "{term}": {src_str}')
 
     lines.append("")
     lines.append("=== END OF VERIFIED EVIDENCE ===")
@@ -145,6 +158,7 @@ def build_grounded_evidence_block(sections, key_terms):
 # ─────────────────────────────────────────────────────────────────────────────
 # GEMINI SYNTHESIS — ONLY CALLED AFTER LOCAL EVIDENCE IS READY
 # ─────────────────────────────────────────────────────────────────────────────
+
 
 def generate_architecture_notes_via_ai(sections, title, key_terms):
     """
@@ -160,7 +174,6 @@ def generate_architecture_notes_via_ai(sections, title, key_terms):
         return "Architecture notes not available (GEMINI_API_KEY not set)."
 
     try:
-
         # ── Phase 1: Build offline evidence block ─────────────────────────
         evidence_block = build_grounded_evidence_block(sections, key_terms)
         terms_str = ", ".join(key_terms)
@@ -222,9 +235,12 @@ Return your response directly as markdown.
 # ENTRY POINT
 # ─────────────────────────────────────────────────────────────────────────────
 
+
 def main():
     if len(sys.argv) < 4:
-        print("Usage: python generate_architecture_notes.py <pdf_path> <concepts_json> <output_md_path>")
+        print(
+            "Usage: python generate_architecture_notes.py <pdf_path> <concepts_json> <output_md_path>"
+        )
         sys.exit(1)
 
     pdf = sys.argv[1]
@@ -246,7 +262,7 @@ def main():
     title = concepts_data.get("paper_title", "Research Paper")
     unique_key_terms = concepts_data.get("unique_key_terms", [])
 
-    if pdf.lower().endswith('.tex'):
+    if pdf.lower().endswith(".tex"):
         print("Parsing LaTeX sections...")
         sections = extract_tex_sections(pdf)
     else:

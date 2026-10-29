@@ -1,0 +1,19 @@
+{
+  "include": [
+    "."
+  ],
+  "extraPaths": [
+    ".",
+    "pipeline",
+    "pipeline/research_paper"
+  ],
+  "typeCheckingMode": "off",
+  "reportMissingImports": "none",
+  "reportWildcardImportFromLibrary": "none",
+  "reportUnknownParameterType": "none",
+  "reportUnknownVariableType": "none",
+  "reportUnknownMemberType": "none",
+  "reportMissingParameterType": "none",
+  "reportUnknownLambdaType": "none",
+  "reportMissingTypeArgument": "none"
+}

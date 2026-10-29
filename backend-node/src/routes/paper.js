@@ -2,11 +2,12 @@ import { Router } from "express";
 import multer from "multer";
 import fs from "fs";
 import path from "path";
-import { spawn } from "child_process";
+import { spawn, exec } from "child_process";
 import { v4 as uuidv4 } from "uuid";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import settings from "../config.js";
 import { logger } from "../logger.js";
+import { verifyRagCitations } from "../ragCitationVerifier.js";
 
 const router = Router();
 
@@ -54,36 +55,74 @@ function getPythonExecutable() {
   return process.platform === "win32" ? "python" : "python3";
 }
 
-function runPython(args, cwd) {
+function runPythonWithTimeout(args, cwd, timeoutMs = 15 * 60 * 1000) {
   return new Promise((resolve, reject) => {
     const pythonExe = getPythonExecutable();
-
     const proc = spawn(pythonExe, ["-u", ...args], { cwd, env: { ...process.env } });
+
     let stdout = "";
     let stderr = "";
+    let isTimedOut = false;
+
+    // Timeout guard: terminate child process tree if execution exceeds timeoutMs
+    const timer = setTimeout(() => {
+      isTimedOut = true;
+      logger.error(`[paper/analyze] Python pipeline timed out after ${timeoutMs}ms. Terminating process...`);
+      try {
+        if (process.platform === "win32" && proc.pid) {
+          // On Windows, child process trees require taskkill to reliably terminate
+          exec(`taskkill /pid ${proc.pid} /T /F`, (err) => {
+            if (err) {
+              logger.warn(`[paper/analyze] taskkill fallback returned: ${err.message}`);
+              try {
+                proc.kill("SIGKILL");
+              } catch (_) {}
+            }
+          });
+        } else {
+          proc.kill("SIGTERM");
+          // Force-kill fallback if process does not exit within 3 seconds
+          const forceKillTimer = setTimeout(() => {
+            try {
+              proc.kill("SIGKILL");
+            } catch (_) {}
+          }, 3000);
+          if (forceKillTimer.unref) forceKillTimer.unref();
+        }
+      } catch (killErr) {
+        logger.warn(`[paper/analyze] Error killing timed-out Python process: ${killErr.message}`);
+      }
+      reject(new Error(`Paper pipeline timed out after ${timeoutMs}ms`));
+    }, timeoutMs);
+
     proc.stdout.on("data", (d) => {
       const str = d.toString();
       stdout += str;
       process.stdout.write(str);
     });
+
     proc.stderr.on("data", (d) => {
       const str = d.toString();
       stderr += str;
       process.stderr.write(str);
     });
+
     proc.on("close", (code) => {
+      clearTimeout(timer);
+      if (isTimedOut) return;
       if (code === 0) resolve(stdout);
       else reject(new Error(`Python exited ${code}:\n${stderr || stdout}`));
     });
-    proc.on("error", reject);
+
+    proc.on("error", (err) => {
+      clearTimeout(timer);
+      if (!isTimedOut) reject(err);
+    });
   });
 }
 
-function runPythonWithTimeout(args, cwd, timeoutMs = 15 * 60 * 1000) {
-  return Promise.race([
-    runPython(args, cwd),
-    new Promise((_, reject) => setTimeout(() => reject(new Error(`Paper pipeline timed out after ${timeoutMs}ms`)), timeoutMs)),
-  ]);
+function runPython(args, cwd) {
+  return runPythonWithTimeout(args, cwd);
 }
 
 // ─── Glossary parser ─────────────────────────────────────────────────────────
@@ -808,7 +847,12 @@ USER QUESTION: "${effectiveQuery}"
             },
           });
 
-          const result = await model.generateContent(promptContext);
+          // Timeout guard: 25 seconds for LLM generation
+          const generatePromise = model.generateContent(promptContext);
+          const timeoutPromise = new Promise((_, reject) =>
+            setTimeout(() => reject(new Error("LLM request timed out after 25s")), 25000)
+          );
+          const result = await Promise.race([generatePromise, timeoutPromise]);
           const responseText = result.response.text();
           if (responseText && responseText.trim()) {
             answer = responseText;
@@ -890,13 +934,31 @@ USER QUESTION: "${effectiveQuery}"
       suggestedFollowUps.push("Explain the key mathematical equations and notations");
     }
 
+    const totalPages = summary && typeof summary.total_pages === "number" && summary.total_pages > 0
+      ? summary.total_pages
+      : summary && summary.sections && summary.sections.length > 0
+        ? Math.max(...summary.sections.map((s) => s.page_start || 1)) + 5
+        : null;
+
+    const { verifiedCitations, grounding } = verifyRagCitations(
+      answer,
+      citations,
+      matchedChunks,
+      totalPages
+    );
+
+    const isDirectText = !usedModel || usedModel === "local-rag" || usedModel.startsWith("local");
+
     res.json({
       sessionId,
       query,
       answer,
-      citations,
+      citations: verifiedCitations,
+      grounding,
       suggestedFollowUps,
       model: usedModel,
+      isDirectText,
+      source: isDirectText ? "direct_text" : "ai_model",
     });
   } catch (err) {
     logger.error("[paper/rag/query] Error processing RAG query", err);

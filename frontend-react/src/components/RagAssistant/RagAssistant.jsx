@@ -430,7 +430,10 @@ function generateRagAnswer(query, paperTitle, nodes, summary, architectureNotes,
     if (refNodes.length > 0) {
       answerText = `### Cited Literature & Key References\n\nHere are primary references identified in the paper:\n\n`;
       refNodes.slice(0, 5).forEach((ref) => {
-        answerText += `- **${ref.label}**: ${ref.definition}\n`;
+        const cleanRefDef = (ref.definition || "")
+          .replace(/\[(Role|Source|Connections):[^\]]+\]/gi, "")
+          .trim();
+        answerText += `- **${ref.label}**: ${cleanRefDef || ref.definition}\n`;
       });
     } else {
       answerText = `### Literature References\n\nReferences are cited throughout the discussion and methodology sections. You can filter by 'Refs' tab in the Glossary list.`;
@@ -438,7 +441,10 @@ function generateRagAnswer(query, paperTitle, nodes, summary, architectureNotes,
   } else if (topMatched.length > 0) {
     answerText = `### Retrieval Results for "${query}"\n\nBased on semantic analysis of **${paperTitle || "this paper"}**, here are the top matching concepts:\n\n`;
     topMatched.forEach((n) => {
-      answerText += `- **${n.label}** (${n.type || "concept"}): ${n.definition}\n`;
+      const cleanDef = (n.definition || "")
+        .replace(/\[(Role|Source|Connections):[^\]]+\]/gi, "")
+        .trim();
+      answerText += `- **${n.label}** (${n.type || "concept"}): ${cleanDef}\n`;
     });
   } else {
     answerText = `### Hexi Search Analysis\n\nI searched the index for **"${query}"** across ${nodes.length} extracted paper elements.\n\nWhile no exact phrase match was found, the paper discusses concepts related to **${paperTitle || "the domain"}**. Try asking about specific equations, architecture, or section contents!`;
@@ -549,6 +555,8 @@ export default function RagAssistant({
         let citations = [];
 
         let suggestedFollowUps = [];
+        let responseModel = null;
+        let isDirectText = false;
 
         // Attempt backend RAG endpoint call
         if (sessionId) {
@@ -575,6 +583,8 @@ export default function RagAssistant({
                 answerText = data.answer;
                 citations = data.citations || [];
                 suggestedFollowUps = data.suggestedFollowUps || [];
+                responseModel = data.model;
+                isDirectText = Boolean(data.isDirectText ?? (data.model === "local-rag" || !data.model || data.model.startsWith("local")));
               }
             }
           } catch (err) {
@@ -594,6 +604,8 @@ export default function RagAssistant({
           );
           answerText = fallback.answerText;
           citations = fallback.citations;
+          responseModel = "client-direct-text";
+          isDirectText = true;
         }
 
         const hexiMsg = {
@@ -602,6 +614,8 @@ export default function RagAssistant({
           text: answerText,
           citations,
           suggestedFollowUps,
+          model: responseModel,
+          isDirectText: Boolean(isDirectText),
           timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
         };
 
@@ -706,9 +720,32 @@ export default function RagAssistant({
 
             <div className="rag-msg-bubble">
               <div className="rag-msg-sender">
-                <span>{msg.sender === "user" ? "You" : "HexaMind"}</span>
+                <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
+                  <span>{msg.sender === "user" ? "You" : "HexaMind"}</span>
+                  {msg.sender !== "user" && (
+                    (msg.isDirectText || !msg.model || msg.model === "local-rag" || msg.model === "client-direct-text" || msg.model.startsWith("local")) ? (
+                      <span className="rag-source-badge direct-text" title="Direct Paper Text: Extracted directly from paper content without generative AI">
+                        <span className="rag-badge-dot direct" />
+                        <span className="rag-badge-text">Direct Paper Text (No AI)</span>
+                      </span>
+                    ) : (
+                      <span className="rag-source-badge ai-generated" title={`Synthesized using AI model: ${msg.model}`}>
+                        <span className="rag-badge-dot ai" />
+                        <span className="rag-badge-text">AI Generated ({msg.model})</span>
+                      </span>
+                    )
+                  )}
+                </div>
                 <span style={{ fontSize: "0.7rem", opacity: 0.7 }}>{msg.timestamp}</span>
               </div>
+
+              {msg.sender !== "user" && (msg.isDirectText || !msg.model || msg.model === "local-rag" || msg.model === "client-direct-text" || msg.model.startsWith("local")) && (
+                <div className="rag-direct-text-banner">
+                  <span className="rag-direct-banner-text">
+                    <strong>Direct Paper Text:</strong> Generative AI was not used for this response. This answer is drawn directly from the paper's extracted sections, outline, and formulas.
+                  </span>
+                </div>
+              )}
 
               <FormattedRagText text={msg.text} />
 

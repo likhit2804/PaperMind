@@ -11,45 +11,89 @@ Architecture & Pairing:
 Usage:
   python unified_paper_pipeline.py <input_path> <output_dir>
 """
+
 from _bootstrap import *
 import subprocess
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 import warnings
+
 warnings.filterwarnings("ignore")
 
-def run_script(script_name, args):
+import threading
+
+
+def _stream_pipe(pipe, script_name):
+    """Safely stream subprocess stdout line-by-line in a background thread."""
+    try:
+        for line in iter(pipe.readline, ""):
+            if line:
+                print(f"[{script_name}] {line.rstrip()}", flush=True)
+    except Exception:
+        pass
+    finally:
+        try:
+            pipe.close()
+        except Exception:
+            pass
+
+
+def run_script(script_name, args, timeout_seconds=300):
+    """
+    Executes an individual pipeline script with streaming logs and strict timeout protection.
+    Default timeout: 300 seconds (5 minutes) per extraction stage.
+    """
     script_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), script_name)
     cmd = [sys.executable, "-u", "-W", "ignore", script_path] + args
-    print(f"\n---> [Pipeline Step] Launching {script_name}...", flush=True)
-    
+    print(
+        f"\n---> [Pipeline Step] Launching {script_name} (timeout={timeout_seconds}s)...",
+        flush=True,
+    )
+
     t0 = time.time()
     env = dict(os.environ)
     env["PYTHONWARNINGS"] = "ignore"
     env["PYTHONUNBUFFERED"] = "1"
-    
+
     proc = subprocess.Popen(
-        cmd,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.STDOUT,
-        text=True,
-        env=env,
-        bufsize=1
+        cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, env=env, bufsize=1
     )
-    
-    for line in iter(proc.stdout.readline, ""):
-        if line:
-            print(f"[{script_name}] {line.rstrip()}", flush=True)
-            
-    proc.stdout.close()
-    return_code = proc.wait()
-    elapsed = time.time() - t0
-    
-    if return_code != 0:
-        print(f"❌ Error: {script_name} failed with exit code {return_code} ({elapsed:.2f}s)", flush=True)
+
+    # Stream logs asynchronously so a hung process cannot block the timeout monitor
+    reader = threading.Thread(target=_stream_pipe, args=(proc.stdout, script_name), daemon=True)
+    reader.start()
+
+    try:
+        return_code = proc.wait(timeout=timeout_seconds)
+        reader.join(timeout=2.0)
+    except subprocess.TimeoutExpired:
+        elapsed = time.time() - t0
+        print(
+            f"❌ Error: {script_name} timed out after {elapsed:.1f}s (limit={timeout_seconds}s). Terminating process...",
+            flush=True,
+        )
+        try:
+            proc.kill()
+        except Exception as kill_err:
+            print(f"Warning: Failed to kill process {proc.pid}: {kill_err}", flush=True)
         return False
-        
+    except Exception as exc:
+        print(f"❌ Error: Unexpected failure in {script_name}: {exc}", flush=True)
+        try:
+            proc.kill()
+        except Exception:
+            pass
+        return False
+
+    elapsed = time.time() - t0
+    if return_code != 0:
+        print(
+            f"❌ Error: {script_name} failed with exit code {return_code} ({elapsed:.2f}s)",
+            flush=True,
+        )
+        return False
+
     print(f"✅ [Pipeline Step Completed] {script_name} finished in {elapsed:.2f}s", flush=True)
     return True
 
@@ -98,7 +142,12 @@ def main():
     ]
 
     try:
-        env_workers = int(os.environ.get("MAX_WORKERS") or os.environ.get("PIPELINE_WORKERS") or os.environ.get("NUM_WORKERS") or 3)
+        env_workers = int(
+            os.environ.get("MAX_WORKERS")
+            or os.environ.get("PIPELINE_WORKERS")
+            or os.environ.get("NUM_WORKERS")
+            or 3
+        )
     except (ValueError, TypeError):
         env_workers = 3
 
@@ -130,7 +179,11 @@ def main():
 
     if not os.path.exists(summary_json):
         with open(summary_json, "w", encoding="utf-8") as f:
-            json.dump({"overview": "Summary feature is under active upgrade.", "key_takeaways": []}, f, indent=2)
+            json.dump(
+                {"overview": "Summary feature is under active upgrade.", "key_takeaways": []},
+                f,
+                indent=2,
+            )
 
     if not os.path.exists(arch_notes_md):
         with open(arch_notes_md, "w", encoding="utf-8") as f:
