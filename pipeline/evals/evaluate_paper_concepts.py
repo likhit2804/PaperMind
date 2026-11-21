@@ -44,7 +44,9 @@ def evaluate_official_style(sample):
     predicted = [stem_phrase(term) for term in predictions]
     true_positives = sum(1 for term in predicted if term in gold)
     matched = [term for term in predictions if stem_phrase(term) in gold]
-    missed_gold = [term for term in sample["gold_keyphrases"] if stem_phrase(term) not in set(predicted)]
+    missed_gold = [
+        term for term in sample["gold_keyphrases"] if stem_phrase(term) not in set(predicted)
+    ]
     false_positives = [term for term in predictions if stem_phrase(term) not in gold]
     return {
         "sample_id": sample["id"],

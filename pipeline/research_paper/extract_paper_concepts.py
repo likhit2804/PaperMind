@@ -1073,8 +1073,7 @@ def extract_global_doc_concepts(sections, title="", canonical_seeds=None, max_ca
     # to avoid wasting thousands of operations on 1-occurrence noise strings.
     sorted_by_freq = sorted(term_tf.items(), key=lambda x: x[1], reverse=True)
     candidate_terms = [
-        t for t, cnt in sorted_by_freq
-        if cnt >= 2 or (canonical_seeds and t in canonical_seeds)
+        t for t, cnt in sorted_by_freq if cnt >= 2 or (canonical_seeds and t in canonical_seeds)
     ]
     if len(candidate_terms) < max_candidates:
         candidate_terms = [t for t, _ in sorted_by_freq[: max(max_candidates * 2, 200)]]
@@ -1159,9 +1158,28 @@ def filter_terms_offline(candidates, canonical_seeds=None, max_terms=None):
     """Deterministically filter and deduplicate candidates without an API call."""
     canonical_seeds = {str(term).strip().lower() for term in (canonical_seeds or set())}
     rejected_edges = STOPWORDS | {
-        "based", "using", "via", "from", "with", "will", "can", "may", "also",
-        "thereby", "making", "support", "supporting", "allowing", "resulted",
-        "essential", "success", "full", "abstract", "paper", "study", "method",
+        "based",
+        "using",
+        "via",
+        "from",
+        "with",
+        "will",
+        "can",
+        "may",
+        "also",
+        "thereby",
+        "making",
+        "support",
+        "supporting",
+        "allowing",
+        "resulted",
+        "essential",
+        "success",
+        "full",
+        "abstract",
+        "paper",
+        "study",
+        "method",
     }
     accepted = []
     seen = set()
@@ -1178,7 +1196,9 @@ def filter_terms_offline(candidates, canonical_seeds=None, max_terms=None):
             continue
         if re.fullmatch(r"[a-z]", term) or re.fullmatch(r"[a-z]\d+", term):
             continue
-        if any(fragment in words for fragment in ("figure", "table", "section", "page", "et", "al")):
+        if any(
+            fragment in words for fragment in ("figure", "table", "section", "page", "et", "al")
+        ):
             continue
         if term not in canonical_seeds and len(words) == 1 and term.islower() and len(term) < 5:
             continue
@@ -1188,12 +1208,17 @@ def filter_terms_offline(candidates, canonical_seeds=None, max_terms=None):
     # Prefer the longest informative phrase over its shorter nested fragments.
     reduced = []
     for term in accepted:
-        if any(term != other and term in other and len(other.split()) > len(term.split()) for other in accepted):
+        if any(
+            term != other and term in other and len(other.split()) > len(term.split())
+            for other in accepted
+        ):
             continue
         reduced.append(term)
     if max_terms:
         reduced = reduced[:max_terms]
-    print(f"Offline filtering: Input {len(candidates)} candidates -> Output {len(reduced)} concepts.")
+    print(
+        f"Offline filtering: Input {len(candidates)} candidates -> Output {len(reduced)} concepts."
+    )
     return reduced
 
 
@@ -1255,7 +1280,9 @@ Return your response strictly in JSON format as an object with the key "verified
         )
         return final_verified
     except Exception as e:
-        print(f"Warning: Gemini API call failed with error: {e}. Falling back to offline filtering.")
+        print(
+            f"Warning: Gemini API call failed with error: {e}. Falling back to offline filtering."
+        )
         return filter_terms_offline(candidates, canonical_seeds)
 
 
@@ -1388,7 +1415,9 @@ def generate_concept_definitions(sections, verified_terms, title, max_ai_definit
 
         ai_candidates = terms_list[:max_ai_terms] if max_ai_terms > 0 else []
         batch_size = 20
-        batches = [ai_candidates[i : i + batch_size] for i in range(0, len(ai_candidates), batch_size)]
+        batches = [
+            ai_candidates[i : i + batch_size] for i in range(0, len(ai_candidates), batch_size)
+        ]
         final_definitions = {}
 
         def _process_definition_batch(batch_idx, batch):
@@ -1447,7 +1476,10 @@ Return your response strictly in JSON format matching this schema:
         if batches:
             max_workers = min(3, len(batches))
             with ThreadPoolExecutor(max_workers=max_workers) as executor:
-                futures = [executor.submit(_process_definition_batch, b_idx, b) for b_idx, b in enumerate(batches)]
+                futures = [
+                    executor.submit(_process_definition_batch, b_idx, b)
+                    for b_idx, b in enumerate(batches)
+                ]
                 for f in as_completed(futures):
                     final_definitions.update(f.result())
 
@@ -1463,7 +1495,9 @@ Return your response strictly in JSON format matching this schema:
 
         ai_count = sum(1 for v in final_definitions.values() if "ai_generated" in v)
         direct_count = sum(1 for v in final_definitions.values() if "direct_text" in v)
-        print(f"Synthesized definitions for {len(final_definitions)} concepts ({ai_count} AI synthesized, {direct_count} direct paper context).")
+        print(
+            f"Synthesized definitions for {len(final_definitions)} concepts ({ai_count} AI synthesized, {direct_count} direct paper context)."
+        )
         return final_definitions
         return final_definitions
 

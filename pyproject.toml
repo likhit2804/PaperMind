@@ -64,6 +64,7 @@ max-complexity = 12
 "pipeline/research_paper/unified_paper_pipeline.py" = ["S603", "S607"]
 # Legacy pipeline files under ratchet adoption: ignore lint errors while preserving formatting
 "pipeline/research_paper/*" = ["E", "F", "I", "B", "UP", "S", "C90", "SIM"]
+"pipeline/evals/*" = ["E", "F", "I", "B", "UP", "S", "C90", "SIM"]
 "pipeline/utils.py" = ["E", "F", "I", "B", "UP", "S", "C90", "SIM"]
 "pipeline/logger.py" = ["E", "F", "I", "B", "UP", "S", "C90", "SIM"]
 "pipeline/evaluate_public_benchmarks.py" = ["E", "F", "I", "B", "UP", "S", "C90", "SIM"]

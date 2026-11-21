@@ -35,7 +35,6 @@ import re
 import sys
 import time
 import xml.etree.ElementTree as ET
-from collections import Counter
 
 # Add repo roots to sys.path
 EVALS_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -55,7 +54,6 @@ from pipeline.research_paper.extract_paper_concepts import (
     extract_global_doc_concepts,
     extract_paper_metadata_via_ai,
     filter_terms_via_ai,
-    format_fallback_definitions,
     generate_concept_definitions,
     parse_pdf_into_sections,
 )
@@ -97,7 +95,7 @@ def evaluate_pdf_paper_with_step_logging(pdf_path: str, label: str, domain: str)
     Executes end-to-end concept extraction on a real PDF while capturing
     intermediate terms and decisions at every phase.
     """
-    print(f"\n" + "=" * 75)
+    print("\n" + "=" * 75)
     print(f"📄 [Real PDF] Evaluating: {os.path.basename(pdf_path)} ({label})")
     print(f"   Domain: {domain}")
     print("=" * 75)
@@ -125,7 +123,9 @@ def evaluate_pdf_paper_with_step_logging(pdf_path: str, label: str, domain: str)
         "wall_clock_seconds": round(p1_time, 4),
         "ms_per_page": round((p1_time * 1000) / max(1, total_pages), 2),
     }
-    print(f"  • Phase 1 (PDF Slicing): {total_pages} pages parsed into {len(sections)} sections in {p1_time:.3f}s ({step_log['phase_1_slicing']['ms_per_page']} ms/p)")
+    print(
+        f"  • Phase 1 (PDF Slicing): {total_pages} pages parsed into {len(sections)} sections in {p1_time:.3f}s ({step_log['phase_1_slicing']['ms_per_page']} ms/p)"
+    )
 
     # --- Phase 0: Dynamic Metadata & Seed Discovery ---
     t_p0 = time.time()
@@ -139,12 +139,16 @@ def evaluate_pdf_paper_with_step_logging(pdf_path: str, label: str, domain: str)
         "canonical_seeds": sorted(list(canonical_seeds)),
         "wall_clock_seconds": round(p0_time, 2),
     }
-    print(f"  • Phase 0 (AI Seed Discovery): Extracted Title: '{title[:45]}...' | Seeds: {list(canonical_seeds)[:4]}")
+    print(
+        f"  • Phase 0 (AI Seed Discovery): Extracted Title: '{title[:45]}...' | Seeds: {list(canonical_seeds)[:4]}"
+    )
 
     # --- Phase 2: Local & Global POS-YAKE Candidate Generation ---
     t_p2 = time.time()
     section_candidates = calculate_pos_yake_concepts(sections, canonical_seeds)
-    global_doc_candidates = extract_global_doc_concepts(sections, title, canonical_seeds, max_candidates=75)
+    global_doc_candidates = extract_global_doc_concepts(
+        sections, title, canonical_seeds, max_candidates=75
+    )
     p2_time = time.time() - t_p2
 
     raw_candidates_set = set(global_doc_candidates)
@@ -159,7 +163,9 @@ def evaluate_pdf_paper_with_step_logging(pdf_path: str, label: str, domain: str)
         "raw_candidates_sample": raw_candidates_list[:15],
         "wall_clock_seconds": round(p2_time, 2),
     }
-    print(f"  • Phase 2 (POS-YAKE): Generated {len(raw_candidates_list)} unique raw candidates across {len(sections)} sections in {p2_time:.2f}s")
+    print(
+        f"  • Phase 2 (POS-YAKE): Generated {len(raw_candidates_list)} unique raw candidates across {len(sections)} sections in {p2_time:.2f}s"
+    )
 
     # --- Phase 3: Canonical Recovery & Deduplication ---
     t_p3 = time.time()
@@ -182,7 +188,9 @@ def evaluate_pdf_paper_with_step_logging(pdf_path: str, label: str, domain: str)
         "total_terms_sent_to_filter": len(sorted_unique_terms),
         "wall_clock_seconds": round(p3_time, 4),
     }
-    print(f"  • Phase 3 (Canonical Recovery): Rescued {len(recovered_canonical)} canonical domain terms into candidate pool")
+    print(
+        f"  • Phase 3 (Canonical Recovery): Rescued {len(recovered_canonical)} canonical domain terms into candidate pool"
+    )
 
     # --- Phase 4: AI Semantic Verification Filter ---
     t_p4 = time.time()
@@ -203,7 +211,9 @@ def evaluate_pdf_paper_with_step_logging(pdf_path: str, label: str, domain: str)
         "noise_elimination_rate_pct": noise_pruned_pct,
         "wall_clock_seconds": round(p4_time, 2),
     }
-    print(f"  • Phase 4 (AI Filter): Kept {len(verified_set)} concepts | Discarded {len(rejected_terms)} noise terms ({noise_pruned_pct}% noise filtered)")
+    print(
+        f"  • Phase 4 (AI Filter): Kept {len(verified_set)} concepts | Discarded {len(rejected_terms)} noise terms ({noise_pruned_pct}% noise filtered)"
+    )
 
     # --- Phase 5: Sentence Grounding & Operational Definitions ---
     t_p5 = time.time()
@@ -220,12 +230,14 @@ def evaluate_pdf_paper_with_step_logging(pdf_path: str, label: str, domain: str)
             verbatim_count += 1
         ctx = raw_context_map.get(term, {}).get("found_sentence") or "Context sentence in paper"
         def_text = concept_definitions.get(term, "Defined concept.")
-        grounded_records.append({
-            "concept": term,
-            "verbatim_in_paper": is_verbatim,
-            "source_sentence": ctx[:140] + ("..." if len(ctx) > 140 else ""),
-            "operational_definition": def_text[:140] + ("..." if len(def_text) > 140 else ""),
-        })
+        grounded_records.append(
+            {
+                "concept": term,
+                "verbatim_in_paper": is_verbatim,
+                "source_sentence": ctx[:140] + ("..." if len(ctx) > 140 else ""),
+                "operational_definition": def_text[:140] + ("..." if len(def_text) > 140 else ""),
+            }
+        )
 
     verbatim_rate = round(100.0 * verbatim_count / max(1, len(verified_set)), 2)
     step_log["phase_5_grounding_and_definitions"] = {
@@ -235,12 +247,16 @@ def evaluate_pdf_paper_with_step_logging(pdf_path: str, label: str, domain: str)
         "sample_grounded_concepts": grounded_records[:10],
         "wall_clock_seconds": round(p5_time, 2),
     }
-    print(f"  • Phase 5 (Grounding Proof): {verbatim_count}/{len(verified_set)} concepts grounded verbatim in paper text ({verbatim_rate}% Veracity)")
+    print(
+        f"  • Phase 5 (Grounding Proof): {verbatim_count}/{len(verified_set)} concepts grounded verbatim in paper text ({verbatim_rate}% Veracity)"
+    )
 
     total_time = time.time() - t_start
     step_log["total_wall_clock_seconds"] = round(total_time, 2)
     step_log["overall_throughput_pages_per_sec"] = round(total_pages / max(0.001, total_time), 2)
-    print(f"  ✅ Finished {label} in {total_time:.2f}s (Throughput: {step_log['overall_throughput_pages_per_sec']} pages/sec)")
+    print(
+        f"  ✅ Finished {label} in {total_time:.2f}s (Throughput: {step_log['overall_throughput_pages_per_sec']} pages/sec)"
+    )
 
     return step_log
 
@@ -280,8 +296,10 @@ def evaluate_semeval_paper_with_step_logging(paper_xml_path: str, gold_map: dict
     gold_raw = gold_map.get(pid, [])
     gold_phrases = []
     for item in gold_raw:
-        phrase = " ".join(item[0]) if isinstance(item, list) and item and isinstance(item[0], list) else (
-            " ".join(item) if isinstance(item, list) else str(item)
+        phrase = (
+            " ".join(item[0])
+            if isinstance(item, list) and item and isinstance(item[0], list)
+            else (" ".join(item) if isinstance(item, list) else str(item))
         )
         if phrase.strip():
             gold_phrases.append(phrase.strip())
@@ -297,8 +315,12 @@ def evaluate_semeval_paper_with_step_logging(paper_xml_path: str, gold_map: dict
 
     # Step 3: Phase 2 Raw Candidate Generation (Stage 1 Wide-Net)
     local_candidates = calculate_pos_yake_concepts(sections, canonical_seeds, max_candidates=25)
-    global_candidates = extract_global_doc_concepts(sections, title=title, canonical_seeds=canonical_seeds, max_candidates=75)
-    candidate_terms = list(dict.fromkeys(global_candidates + local_candidates.get("Full Paper", [])))
+    global_candidates = extract_global_doc_concepts(
+        sections, title=title, canonical_seeds=canonical_seeds, max_candidates=75
+    )
+    candidate_terms = list(
+        dict.fromkeys(global_candidates + local_candidates.get("Full Paper", []))
+    )
 
     # Step 4: Phase 3 Canonical Recovery
     all_terms = set(candidate_terms)
@@ -319,7 +341,9 @@ def evaluate_semeval_paper_with_step_logging(paper_xml_path: str, gold_map: dict
         else:
             gold_missed_in_stage1.append(g_stem)
 
-    stage1_coverage_pct = round(100.0 * len(gold_caught_in_stage1) / max(1, len(gold_stemmed_set)), 2)
+    stage1_coverage_pct = round(
+        100.0 * len(gold_caught_in_stage1) / max(1, len(gold_stemmed_set)), 2
+    )
 
     # Step 5: Phase 4 AI Semantic Verification Filter
     verified_terms = filter_terms_via_ai(sorted_candidates, title, canonical_seeds)
@@ -333,14 +357,19 @@ def evaluate_semeval_paper_with_step_logging(paper_xml_path: str, gold_map: dict
 
     # Metrics 1: Strict Exact Stemmed Match
     true_positives_strict = [t for t in predictions_top15 if stem_phrase(t) in gold_stemmed_set]
-    false_positives_strict = [t for t in predictions_top15 if stem_phrase(t) not in gold_stemmed_set]
+    false_positives_strict = [
+        t for t in predictions_top15 if stem_phrase(t) not in gold_stemmed_set
+    ]
     missed_gold_strict = [g for g in gold_stemmed_set if g not in set(pred_top15_stems)]
 
     # Metrics 2: Soft / Subphrase Containment Match
     true_positives_soft = []
     for t in predictions_top15:
         t_stem = stem_phrase(t)
-        if any(t_stem in g or g in t_stem or any(w in t_stem for w in g.split() if len(w) > 3) for g in gold_stemmed_set):
+        if any(
+            t_stem in g or g in t_stem or any(w in t_stem for w in g.split() if len(w) > 3)
+            for g in gold_stemmed_set
+        ):
             true_positives_soft.append(t)
 
     # Disaggregate Missed Gold: Why was it missed?
@@ -396,8 +425,14 @@ def evaluate_semeval_paper_with_step_logging(paper_xml_path: str, gold_map: dict
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Run comprehensive transparent concept extraction proof.")
-    parser.add_argument("--semeval-papers", default="C-1,C-3,C-4,C-6,C-8,I-1,I-4,H-2,H-4,J-1,J-4", help="Papers to evaluate.")
+    parser = argparse.ArgumentParser(
+        description="Run comprehensive transparent concept extraction proof."
+    )
+    parser.add_argument(
+        "--semeval-papers",
+        default="C-1,C-3,C-4,C-6,C-8,I-1,I-4,H-2,H-4,J-1,J-4",
+        help="Papers to evaluate.",
+    )
     args = parser.parse_args()
 
     os.makedirs(OUTPUT_DIR, exist_ok=True)
@@ -409,14 +444,28 @@ def main():
     # 1. Evaluate Real-World arXiv PDFs
     real_pdf_results = []
     pdf_targets = [
-        {"path": os.path.join(SAMPLE_PDFS_DIR, "arxiv_1512.03385_resnet.pdf"), "label": "Short Paper (12 pages)", "domain": "Deep Learning / ResNet"},
-        {"path": os.path.join(SAMPLE_PDFS_DIR, "arxiv_1706.03762_transformer.pdf"), "label": "Medium Paper (15 pages)", "domain": "NLP / Transformers"},
-        {"path": os.path.join(SAMPLE_PDFS_DIR, "arxiv_2303.18223_llm_survey.pdf"), "label": "Long Monograph (144 pages)", "domain": "Large Language Models & AI Systems"},
+        {
+            "path": os.path.join(SAMPLE_PDFS_DIR, "arxiv_1512.03385_resnet.pdf"),
+            "label": "Short Paper (12 pages)",
+            "domain": "Deep Learning / ResNet",
+        },
+        {
+            "path": os.path.join(SAMPLE_PDFS_DIR, "arxiv_1706.03762_transformer.pdf"),
+            "label": "Medium Paper (15 pages)",
+            "domain": "NLP / Transformers",
+        },
+        {
+            "path": os.path.join(SAMPLE_PDFS_DIR, "arxiv_2303.18223_llm_survey.pdf"),
+            "label": "Long Monograph (144 pages)",
+            "domain": "Large Language Models & AI Systems",
+        },
     ]
 
     for target in pdf_targets:
         if os.path.exists(target["path"]):
-            res = evaluate_pdf_paper_with_step_logging(target["path"], target["label"], target["domain"])
+            res = evaluate_pdf_paper_with_step_logging(
+                target["path"], target["label"], target["domain"]
+            )
             real_pdf_results.append(res)
         else:
             print(f"  ⚠️ Warning: Target PDF not found at {target['path']}")
@@ -431,7 +480,7 @@ def main():
         print(f"Fatal: Gold reference file missing at {combined_ref_path}")
         sys.exit(1)
 
-    with open(combined_ref_path, "r", encoding="utf-8") as f:
+    with open(combined_ref_path, encoding="utf-8") as f:
         gold_map = json.load(f)
 
     semeval_paper_ids = [pid.strip() for pid in args.semeval_papers.split(",") if pid.strip()]
@@ -448,17 +497,47 @@ def main():
         semeval_results.append(paper_res)
         s_exact = paper_res["scores"]["strict_exact"]
         s_soft = paper_res["scores"]["soft_containment"]
-        print(f"    -> Stage 1 Recall: {paper_res['stage1_candidate_coverage_pct']}% | Strict F1: {s_exact['f1']}% | Soft F1: {s_soft['f1']}% | Filtered Noise: {paper_res['phase_4_rejected_noise_count']}")
+        print(
+            f"    -> Stage 1 Recall: {paper_res['stage1_candidate_coverage_pct']}% | Strict F1: {s_exact['f1']}% | Soft F1: {s_soft['f1']}% | Filtered Noise: {paper_res['phase_4_rejected_noise_count']}"
+        )
 
     # Aggregate Benchmark Metrics
-    macro_stage1_recall = round(sum(p["stage1_candidate_coverage_pct"] for p in semeval_results) / max(1, len(semeval_results)), 2)
-    macro_strict_f1 = round(sum(p["scores"]["strict_exact"]["f1"] for p in semeval_results) / max(1, len(semeval_results)), 2)
-    macro_strict_p = round(sum(p["scores"]["strict_exact"]["precision"] for p in semeval_results) / max(1, len(semeval_results)), 2)
-    macro_strict_r = round(sum(p["scores"]["strict_exact"]["recall"] for p in semeval_results) / max(1, len(semeval_results)), 2)
+    macro_stage1_recall = round(
+        sum(p["stage1_candidate_coverage_pct"] for p in semeval_results)
+        / max(1, len(semeval_results)),
+        2,
+    )
+    macro_strict_f1 = round(
+        sum(p["scores"]["strict_exact"]["f1"] for p in semeval_results)
+        / max(1, len(semeval_results)),
+        2,
+    )
+    macro_strict_p = round(
+        sum(p["scores"]["strict_exact"]["precision"] for p in semeval_results)
+        / max(1, len(semeval_results)),
+        2,
+    )
+    macro_strict_r = round(
+        sum(p["scores"]["strict_exact"]["recall"] for p in semeval_results)
+        / max(1, len(semeval_results)),
+        2,
+    )
 
-    macro_soft_f1 = round(sum(p["scores"]["soft_containment"]["f1"] for p in semeval_results) / max(1, len(semeval_results)), 2)
-    macro_soft_p = round(sum(p["scores"]["soft_containment"]["precision"] for p in semeval_results) / max(1, len(semeval_results)), 2)
-    macro_soft_r = round(sum(p["scores"]["soft_containment"]["recall"] for p in semeval_results) / max(1, len(semeval_results)), 2)
+    macro_soft_f1 = round(
+        sum(p["scores"]["soft_containment"]["f1"] for p in semeval_results)
+        / max(1, len(semeval_results)),
+        2,
+    )
+    macro_soft_p = round(
+        sum(p["scores"]["soft_containment"]["precision"] for p in semeval_results)
+        / max(1, len(semeval_results)),
+        2,
+    )
+    macro_soft_r = round(
+        sum(p["scores"]["soft_containment"]["recall"] for p in semeval_results)
+        / max(1, len(semeval_results)),
+        2,
+    )
 
     total_noise_filtered = sum(p["phase_4_rejected_noise_count"] for p in semeval_results)
     total_candidates_analyzed = sum(p["stage1_raw_candidate_count"] for p in semeval_results)
@@ -479,7 +558,9 @@ def main():
         "noise_filtering": {
             "total_candidates_evaluated": total_candidates_analyzed,
             "total_noise_terms_eliminated": total_noise_filtered,
-            "overall_noise_filtering_pct": round(100.0 * total_noise_filtered / max(1, total_candidates_analyzed), 2),
+            "overall_noise_filtering_pct": round(
+                100.0 * total_noise_filtered / max(1, total_candidates_analyzed), 2
+            ),
         },
     }
 
@@ -514,13 +595,23 @@ def main():
     print("=" * 85)
     print(f"  • Real-World PDFs Evaluated: {len(real_pdf_results)} (12p, 15p, 144p)")
     for pdf_eval in real_pdf_results:
-        print(f"     - {pdf_eval['label']}: Verbatim Grounding = {pdf_eval['phase_5_grounding_and_definitions']['verbatim_grounding_rate_pct']}% | Throughput = {pdf_eval['overall_throughput_pages_per_sec']} p/s | Slicing = {pdf_eval['phase_1_slicing']['ms_per_page']} ms/p")
+        print(
+            f"     - {pdf_eval['label']}: Verbatim Grounding = {pdf_eval['phase_5_grounding_and_definitions']['verbatim_grounding_rate_pct']}% | Throughput = {pdf_eval['overall_throughput_pages_per_sec']} p/s | Slicing = {pdf_eval['phase_1_slicing']['ms_per_page']} ms/p"
+        )
 
-    print(f"\n  • SemEval-2010 Academic Papers Evaluated: {len(semeval_results)} across Tracks C, I, H, J")
+    print(
+        f"\n  • SemEval-2010 Academic Papers Evaluated: {len(semeval_results)} across Tracks C, I, H, J"
+    )
     print(f"     - Stage 1 Macro Candidate Recall: {macro_stage1_recall}%")
-    print(f"     - Strict Exact Match:  Precision = {macro_strict_p}% | Recall = {macro_strict_r}% | F1 = {macro_strict_f1}%")
-    print(f"     - Soft Containment:    Precision = {macro_soft_p}% | Recall = {macro_soft_r}% | F1 = {macro_soft_f1}%")
-    print(f"     - Noise Eliminated:    {total_noise_filtered} / {total_candidates_analyzed} candidates filtered ({summary_metrics['noise_filtering']['overall_noise_filtering_pct']}%)")
+    print(
+        f"     - Strict Exact Match:  Precision = {macro_strict_p}% | Recall = {macro_strict_r}% | F1 = {macro_strict_f1}%"
+    )
+    print(
+        f"     - Soft Containment:    Precision = {macro_soft_p}% | Recall = {macro_soft_r}% | F1 = {macro_soft_f1}%"
+    )
+    print(
+        f"     - Noise Eliminated:    {total_noise_filtered} / {total_candidates_analyzed} candidates filtered ({summary_metrics['noise_filtering']['overall_noise_filtering_pct']}%)"
+    )
     print(f"\n  • Results Artifact: {proof_output_path}")
     print(f"  • Step-by-Step Transparency Log: {log_output_path}")
     print("=" * 85)

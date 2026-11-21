@@ -14,9 +14,7 @@ from pipeline.research_paper.extract_paper_concepts import (
 from pipeline.research_paper.extract_notations_local import is_valid_symbol
 
 PROJECT_ROOT = os.path.dirname(os.path.dirname(__file__))
-DATASET_CACHE_DIR = os.path.join(
-    PROJECT_ROOT, "docs", "benchmarks", "semeval2010", "raw"
-)
+DATASET_CACHE_DIR = os.path.join(PROJECT_ROOT, "docs", "benchmarks", "semeval2010", "raw")
 
 
 def stem_phrase(phrase):

@@ -51,8 +51,7 @@ def parse_toc(doc: Any) -> tuple[list[tuple[int, str, int]], int]:
             for line in page_txt.split("\n"):
                 line_clean = line.strip().lower()
                 if line_clean in TERMINAL_KEYWORDS or any(
-                    line_clean == kw
-                    or re.match(rf"^(?:\d+\.?\s+)?{kw}\b", line_clean)
+                    line_clean == kw or re.match(rf"^(?:\d+\.?\s+)?{kw}\b", line_clean)
                     for kw in TERMINAL_KEYWORDS
                 ):
                     first_terminal_page = p + 1
@@ -97,10 +96,20 @@ def split_sentences(text: str) -> list[str]:
 def clean_page_text(text: str, title_clean: str = "") -> str:
     """Strip common academic boilerplate, margins, citations, and math-only lines."""
     boilerplate_patterns = [
-        r"entropy\s+\d{4}", r"doi\.org", r"distributed\s+under\s+the\s+terms",
-        r"creativecommons\.org", r"citation:", r"academic\s+editors",
-        r"received:", r"revised:", r"accepted:", r"published:", r"copyright:",
-        r"college\s+of\s+science", r"university", r"correspondence:",
+        r"entropy\s+\d{4}",
+        r"doi\.org",
+        r"distributed\s+under\s+the\s+terms",
+        r"creativecommons\.org",
+        r"citation:",
+        r"academic\s+editors",
+        r"received:",
+        r"revised:",
+        r"accepted:",
+        r"published:",
+        r"copyright:",
+        r"college\s+of\s+science",
+        r"university",
+        r"correspondence:",
     ]
     cleaned_lines = []
     for line in text.split("\n"):
@@ -114,7 +123,9 @@ def clean_page_text(text: str, title_clean: str = "") -> str:
         line_strip = re.sub(r"\([^)]*\)|\[[^\]]*\]", " ", line_strip)
         line_strip = re.sub(r"\|[^>⟩]+[>⟩]", " ", line_strip)
         line_strip = re.sub(r"[\$\\#_\^\{\}]", " ", line_strip)
-        if "=" in line_strip and any(c in line_strip for c in ["+", "-", "*", "/", "⟩", "|", "cos", "sin"]):
+        if "=" in line_strip and any(
+            c in line_strip for c in ["+", "-", "*", "/", "⟩", "|", "cos", "sin"]
+        ):
             continue
         cleaned_lines.append(line_strip)
     return "\n".join(cleaned_lines)
@@ -134,7 +145,19 @@ def extract_clean_text_from_page(page: Any, title_clean: str = "") -> str:
                 is_code_line = False
                 for span in line.get("spans", []):
                     font_name = span.get("font", "").lower()
-                    if any(marker in font_name for marker in ("courier", "mono", "consolas", "lucida", "crd", "tele", "code", "terminal")):
+                    if any(
+                        marker in font_name
+                        for marker in (
+                            "courier",
+                            "mono",
+                            "consolas",
+                            "lucida",
+                            "crd",
+                            "tele",
+                            "code",
+                            "terminal",
+                        )
+                    ):
                         is_code_line = True
                         break
                     line_spans.append(span.get("text", ""))
@@ -166,6 +189,13 @@ def parse_pdf_into_sections(pdf_path: str, title_clean: str = "") -> list[dict[s
             page_text = extract_clean_text_from_page(doc[page_index], title_clean)
             pages_data.append((page_index + 1, page_text))
             raw_text += page_text + "\n"
-        sections.append({"label": heading, "raw_text": raw_text, "page_start": start_page, "pages_data": pages_data})
+        sections.append(
+            {
+                "label": heading,
+                "raw_text": raw_text,
+                "page_start": start_page,
+                "pages_data": pages_data,
+            }
+        )
     doc.close()
     return sections

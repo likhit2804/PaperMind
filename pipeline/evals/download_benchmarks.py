@@ -23,7 +23,6 @@ Usage:
 import argparse
 import json
 import os
-import re
 import sys
 import time
 import urllib.request
@@ -37,7 +36,9 @@ DEFAULT_BENCHMARK_DIR = os.path.join(PROJECT_ROOT, "data", "public_benchmarks", 
 SAMPLE_PDFS_DIR = os.path.join(PROJECT_ROOT, "data", "public_benchmarks", "sample_pdfs")
 UPLOADS_PAPERS_DIR = os.path.join(PROJECT_ROOT, "backend-node", "src", "uploads", "papers")
 
-SEMEVAL_BASE_URL = "https://raw.githubusercontent.com/boudinfl/ake-datasets/master/datasets/SemEval-2010"
+SEMEVAL_BASE_URL = (
+    "https://raw.githubusercontent.com/boudinfl/ake-datasets/master/datasets/SemEval-2010"
+)
 
 DOMAIN_NAMES = {
     "C": "Computer Systems & Networks (Grid/Distributed)",
@@ -115,7 +116,11 @@ def validate_semeval_xml(xml_path: str) -> dict:
                 title_tokens.append(sent_str)
             body_words.append(sent_str)
 
-        title = " ".join(title_tokens) if title_tokens else os.path.basename(xml_path).replace(".xml", "")
+        title = (
+            " ".join(title_tokens)
+            if title_tokens
+            else os.path.basename(xml_path).replace(".xml", "")
+        )
         full_text = " ".join(body_words)
         return {
             "valid": True,
@@ -158,7 +163,7 @@ def fetch_gold_references(dest_dir: str) -> dict:
             if not success:
                 print(f"  ⚠️ Warning: Could not download {info['file']}")
                 continue
-        with open(dest, "r", encoding="utf-8") as f:
+        with open(dest, encoding="utf-8") as f:
             data = json.load(f)
             loaded_refs[key] = data
             print(f"  ✅ {info['desc']}: Loaded {len(data)} test paper ground-truth entries.")
@@ -185,8 +190,10 @@ def _download_single_paper(pid: str, papers_dir: str, gold_map: dict) -> dict:
     gold_entries = gold_map.get(pid, [])
     gold_keyphrases = []
     for item in gold_entries:
-        phrase = " ".join(item[0]) if isinstance(item, list) and item and isinstance(item[0], list) else (
-            " ".join(item) if isinstance(item, list) else str(item)
+        phrase = (
+            " ".join(item[0])
+            if isinstance(item, list) and item and isinstance(item[0], list)
+            else (" ".join(item) if isinstance(item, list) else str(item))
         )
         if phrase.strip():
             gold_keyphrases.append(phrase.strip())
@@ -204,13 +211,17 @@ def _download_single_paper(pid: str, papers_dir: str, gold_map: dict) -> dict:
     }
 
 
-def fetch_semeval_papers_concurrent(paper_ids: list, dest_dir: str, gold_map: dict, max_workers: int = 10) -> list:
+def fetch_semeval_papers_concurrent(
+    paper_ids: list, dest_dir: str, gold_map: dict, max_workers: int = 10
+) -> list:
     """Downloads XML files concurrently for the requested SemEval-2010 paper IDs."""
     papers_dir = os.path.join(dest_dir, "papers")
     os.makedirs(papers_dir, exist_ok=True)
     manifest = []
 
-    print(f"\n📄 [2/3] Downloading & Validating {len(paper_ids)} SemEval-2010 Full-Text XML Papers (Concurrency: {max_workers})...")
+    print(
+        f"\n📄 [2/3] Downloading & Validating {len(paper_ids)} SemEval-2010 Full-Text XML Papers (Concurrency: {max_workers})..."
+    )
     t0 = time.time()
 
     with ThreadPoolExecutor(max_workers=max_workers) as executor:
@@ -227,11 +238,18 @@ def fetch_semeval_papers_concurrent(paper_ids: list, dest_dir: str, gold_map: di
                 if result:
                     manifest.append(result)
                     if completed_count % 10 == 0 or completed_count == len(paper_ids):
-                        print(f"  Progress: {completed_count}/{len(paper_ids)} papers processed ({len(manifest)} valid)...")
+                        print(
+                            f"  Progress: {completed_count}/{len(paper_ids)} papers processed ({len(manifest)} valid)..."
+                        )
             except Exception as exc:
                 print(f"  ❌ Error processing {pid}: {exc}")
 
-    manifest.sort(key=lambda x: (x["track"], int(x["id"].split("-")[1]) if x["id"].split("-")[1].isdigit() else 999))
+    manifest.sort(
+        key=lambda x: (
+            x["track"],
+            int(x["id"].split("-")[1]) if x["id"].split("-")[1].isdigit() else 999,
+        )
+    )
     elapsed = time.time() - t0
     print(f"  ✅ Completed {len(manifest)}/{len(paper_ids)} SemEval papers in {elapsed:.2f}s!")
     return manifest
@@ -267,6 +285,7 @@ def download_sample_arxiv_pdfs(dest_dir: str = SAMPLE_PDFS_DIR) -> list:
         if not os.path.exists(upload_copy):
             try:
                 import shutil
+
                 shutil.copy2(dest_pdf, upload_copy)
             except Exception:
                 pass
@@ -298,17 +317,34 @@ def download_sample_arxiv_pdfs(dest_dir: str = SAMPLE_PDFS_DIR) -> list:
             "upload_path": upload_copy,
         }
         pdf_manifest.append(pdf_info)
-        print(f"  📄 [{item['key']}] {extracted_title[:45]:<45} | {pages} pages | {file_size_mb} MB | {item['domain']}")
+        print(
+            f"  📄 [{item['key']}] {extracted_title[:45]:<45} | {pages} pages | {file_size_mb} MB | {item['domain']}"
+        )
 
     return pdf_manifest
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Download and validate official benchmark datasets.")
-    parser.add_argument("--dest-dir", default=DEFAULT_BENCHMARK_DIR, help="Destination directory for benchmark data.")
-    parser.add_argument("--all", action="store_true", help="Download all 100 test papers from SemEval-2010.")
-    parser.add_argument("--download-pdfs", action="store_true", default=True, help="Download representative arXiv PDFs.")
-    parser.add_argument("--workers", type=int, default=10, help="Number of concurrent download workers.")
+    parser = argparse.ArgumentParser(
+        description="Download and validate official benchmark datasets."
+    )
+    parser.add_argument(
+        "--dest-dir",
+        default=DEFAULT_BENCHMARK_DIR,
+        help="Destination directory for benchmark data.",
+    )
+    parser.add_argument(
+        "--all", action="store_true", help="Download all 100 test papers from SemEval-2010."
+    )
+    parser.add_argument(
+        "--download-pdfs",
+        action="store_true",
+        default=True,
+        help="Download representative arXiv PDFs.",
+    )
+    parser.add_argument(
+        "--workers", type=int, default=10, help="Number of concurrent download workers."
+    )
     args = parser.parse_args()
 
     dest_dir = os.path.abspath(args.dest_dir)
@@ -328,14 +364,27 @@ def main():
         sys.exit(1)
 
     # 2. Papers list (All 100 or specific)
-    paper_ids = list(combined_gold.keys()) if args.all else [
-        "C-1", "C-3", "C-4", "C-6", "C-8",
-        "I-1", "I-4",
-        "H-2", "H-4",
-        "J-1", "J-4",
-    ]
+    paper_ids = (
+        list(combined_gold.keys())
+        if args.all
+        else [
+            "C-1",
+            "C-3",
+            "C-4",
+            "C-6",
+            "C-8",
+            "I-1",
+            "I-4",
+            "H-2",
+            "H-4",
+            "J-1",
+            "J-4",
+        ]
+    )
 
-    manifest = fetch_semeval_papers_concurrent(paper_ids, dest_dir, combined_gold, max_workers=args.workers)
+    manifest = fetch_semeval_papers_concurrent(
+        paper_ids, dest_dir, combined_gold, max_workers=args.workers
+    )
 
     # 3. Real arXiv PDFs
     pdf_manifest = download_sample_arxiv_pdfs() if args.download_pdfs else []
@@ -365,7 +414,9 @@ def main():
     print("  📊 Benchmark Download & Verification Summary")
     print("=" * 85)
     print(f"  • SemEval-2010 Papers Downloaded & Validated: {len(manifest)} / 100")
-    print(f"  • Track Breakdown: C={sum(1 for p in manifest if p['track'] == 'C')} | H={sum(1 for p in manifest if p['track'] == 'H')} | I={sum(1 for p in manifest if p['track'] == 'I')} | J={sum(1 for p in manifest if p['track'] == 'J')}")
+    print(
+        f"  • Track Breakdown: C={sum(1 for p in manifest if p['track'] == 'C')} | H={sum(1 for p in manifest if p['track'] == 'H')} | I={sum(1 for p in manifest if p['track'] == 'I')} | J={sum(1 for p in manifest if p['track'] == 'J')}"
+    )
     print(f"  • Real-World arXiv PDFs Downloaded: {len(pdf_manifest)}")
     for p in pdf_manifest:
         print(f"     - [{p['scale']}] {p['title']} ({p['pages']} pages, {p['size_mb']} MB)")
