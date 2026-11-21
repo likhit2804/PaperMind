@@ -1,0 +1,168 @@
+{
+  "timestamp": "2026-11-21T04:14:21Z",
+  "target_paper": "arxiv_2012.13349_mip_neural.pdf",
+  "total_sections": 26,
+  "total_characters": 97171,
+  "approach_counts": {
+    "A1_legacy_tfidf": 34,
+    "A2_local_pos_yake": 89,
+    "A3_dual_local_global": 108,
+    "A4_enhanced_global": 124,
+    "A5_tri_hybrid_wide_net": 266,
+    "A6_ai_verified_gold": 94
+  },
+  "transitions": {
+    "T1_A1_to_A2": {
+      "gained_count": 69,
+      "pruned_count": 14,
+      "sample_gained": [
+        "2017",
+        "2020",
+        "across",
+        "admm expert",
+        "architecture",
+        "best known primal bound",
+        "bipartite graph",
+        "bipartite graph representation",
+        "branch-and-bound",
+        "branching policy"
+      ],
+      "sample_pruned": [
+        "assignments",
+        "average primal",
+        "calibrated time",
+        "datasets",
+        "diving",
+        "expert",
+        "fraction problems",
+        "google production",
+        "instances",
+        "primal dual"
+      ]
+    },
+    "T2_A2_to_A3": {
+      "gained_count": 12,
+      "sample_gained": [
+        "electric grid",
+        "evaluation",
+        "expert",
+        "generative modelling",
+        "improvement",
+        "integer programming",
+        "joint",
+        "partial",
+        "prediction",
+        "primal heuristic"
+      ]
+    },
+    "T3_A3_to_A4": {
+      "gained_count": 13,
+      "sample_gained": [
+        "application",
+        "combining",
+        "electric grid optimization",
+        "graph convolutional network",
+        "implementation",
+        "neural network architecture",
+        "packing",
+        "performance",
+        "production packing",
+        "related"
+      ]
+    },
+    "T4_A4_to_A5": {
+      "gained_count": 143,
+      "sample_gained": [
+        "additional",
+        "admm",
+        "agent",
+        "algorithm",
+        "among",
+        "aspect",
+        "benchmark",
+        "best",
+        "binary",
+        "branch-and-bound procedure"
+      ]
+    },
+    "T5_A5_to_A6_ai_pruned": {
+      "pruned_count": 155,
+      "sample_pruned": [
+        "2017",
+        "2020",
+        "across",
+        "additional",
+        "admm expert",
+        "among",
+        "application",
+        "architecture",
+        "aspect",
+        "assignment"
+      ]
+    }
+  },
+  "pairwise_overlap_matrix": {
+    "A1 (Legacy TF-IDF)": {
+      "A1 (Legacy TF-IDF)": 34,
+      "A2 (Local POS-YAKE)": 20,
+      "A3 (Dual POS-YAKE)": 21,
+      "A4 (Enhanced Global)": 22,
+      "A5 (Tri-Hybrid Net)": 17,
+      "A6 (AI Gold Terms)": 10
+    },
+    "A2 (Local POS-YAKE)": {
+      "A1 (Legacy TF-IDF)": 20,
+      "A2 (Local POS-YAKE)": 89,
+      "A3 (Dual POS-YAKE)": 89,
+      "A4 (Enhanced Global)": 89,
+      "A5 (Tri-Hybrid Net)": 83,
+      "A6 (AI Gold Terms)": 43
+    },
+    "A3 (Dual POS-YAKE)": {
+      "A1 (Legacy TF-IDF)": 21,
+      "A2 (Local POS-YAKE)": 89,
+      "A3 (Dual POS-YAKE)": 101,
+      "A4 (Enhanced Global)": 101,
+      "A5 (Tri-Hybrid Net)": 95,
+      "A6 (AI Gold Terms)": 49
+    },
+    "A4 (Enhanced Global)": {
+      "A1 (Legacy TF-IDF)": 22,
+      "A2 (Local POS-YAKE)": 89,
+      "A3 (Dual POS-YAKE)": 101,
+      "A4 (Enhanced Global)": 114,
+      "A5 (Tri-Hybrid Net)": 106,
+      "A6 (AI Gold Terms)": 52
+    },
+    "A5 (Tri-Hybrid Net)": {
+      "A1 (Legacy TF-IDF)": 17,
+      "A2 (Local POS-YAKE)": 83,
+      "A3 (Dual POS-YAKE)": 95,
+      "A4 (Enhanced Global)": 106,
+      "A5 (Tri-Hybrid Net)": 249,
+      "A6 (AI Gold Terms)": 94
+    },
+    "A6 (AI Gold Terms)": {
+      "A1 (Legacy TF-IDF)": 10,
+      "A2 (Local POS-YAKE)": 43,
+      "A3 (Dual POS-YAKE)": 49,
+      "A4 (Enhanced Global)": 52,
+      "A5 (Tri-Hybrid Net)": 94,
+      "A6 (AI Gold Terms)": 94
+    }
+  },
+  "core_consensus_terms": {
+    "count": 9,
+    "terms": [
+      "branching",
+      "dual gap",
+      "integer",
+      "neural branching",
+      "neural diving",
+      "primal gap",
+      "scip",
+      "solver",
+      "tuned scip"
+    ]
+  }
+}

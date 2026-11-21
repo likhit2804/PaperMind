@@ -1,0 +1,50 @@
+{
+  "A1 (Legacy TF-IDF)": {
+    "A1 (Legacy TF-IDF)": 34,
+    "A2 (Local POS-YAKE)": 20,
+    "A3 (Dual POS-YAKE)": 21,
+    "A4 (Enhanced Global)": 22,
+    "A5 (Tri-Hybrid Net)": 17,
+    "A6 (AI Gold Terms)": 10
+  },
+  "A2 (Local POS-YAKE)": {
+    "A1 (Legacy TF-IDF)": 20,
+    "A2 (Local POS-YAKE)": 89,
+    "A3 (Dual POS-YAKE)": 89,
+    "A4 (Enhanced Global)": 89,
+    "A5 (Tri-Hybrid Net)": 83,
+    "A6 (AI Gold Terms)": 43
+  },
+  "A3 (Dual POS-YAKE)": {
+    "A1 (Legacy TF-IDF)": 21,
+    "A2 (Local POS-YAKE)": 89,
+    "A3 (Dual POS-YAKE)": 101,
+    "A4 (Enhanced Global)": 101,
+    "A5 (Tri-Hybrid Net)": 95,
+    "A6 (AI Gold Terms)": 49
+  },
+  "A4 (Enhanced Global)": {
+    "A1 (Legacy TF-IDF)": 22,
+    "A2 (Local POS-YAKE)": 89,
+    "A3 (Dual POS-YAKE)": 101,
+    "A4 (Enhanced Global)": 114,
+    "A5 (Tri-Hybrid Net)": 106,
+    "A6 (AI Gold Terms)": 52
+  },
+  "A5 (Tri-Hybrid Net)": {
+    "A1 (Legacy TF-IDF)": 17,
+    "A2 (Local POS-YAKE)": 83,
+    "A3 (Dual POS-YAKE)": 95,
+    "A4 (Enhanced Global)": 106,
+    "A5 (Tri-Hybrid Net)": 249,
+    "A6 (AI Gold Terms)": 94
+  },
+  "A6 (AI Gold Terms)": {
+    "A1 (Legacy TF-IDF)": 10,
+    "A2 (Local POS-YAKE)": 43,
+    "A3 (Dual POS-YAKE)": 49,
+    "A4 (Enhanced Global)": 52,
+    "A5 (Tri-Hybrid Net)": 94,
+    "A6 (AI Gold Terms)": 94
+  }
+}
