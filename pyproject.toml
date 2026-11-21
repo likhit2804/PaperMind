@@ -99,9 +99,6 @@ module = [
     "extract_paper_equations",
     "extract_paper_references",
     "extract_notations_local",
-    "generate_architecture_notes",
-    "generate_paper_notes",
-    "generate_paper_summary",
     "unified_paper_pipeline",
 ]
 ignore_errors = true

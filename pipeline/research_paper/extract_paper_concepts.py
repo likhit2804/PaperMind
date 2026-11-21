@@ -4,6 +4,7 @@ import os
 import re
 import sys
 import fitz
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 try:
     from _bootstrap import *  # noqa: F403, F401
@@ -1062,30 +1063,38 @@ def extract_global_doc_concepts(sections, title="", canonical_seeds=None, max_ca
 
     term_tf = {}
     first_pos = {}
-    casing_counts = {}
-    section_spread = {}
-
-    all_headings_str = (title + " " + " ".join([sec["label"] for sec in sections])).lower()
 
     for term, pos in phrase_entries:
         term_tf[term] = term_tf.get(term, 0) + 1
         if term not in first_pos:
             first_pos[term] = pos
-        if re.search(r"\b" + re.escape(term) + r"\b", full_paper_text, re.IGNORECASE):
-            matches = re.findall(r"\b" + re.escape(term) + r"\b", full_paper_text)
-            title_cased = sum(1 for m in matches if m.istitle() or m.isupper())
-            casing_counts[term] = title_cased
 
-    for term in term_tf:
-        sec_count = 0
-        for sec in sections:
-            if re.search(r"\b" + re.escape(term) + r"\b", sec["raw_text"], re.IGNORECASE):
-                sec_count += 1
-        section_spread[term] = sec_count
+    # Filter candidate terms: focus on terms appearing >= 2 times (or canonical seeds)
+    # to avoid wasting thousands of operations on 1-occurrence noise strings.
+    sorted_by_freq = sorted(term_tf.items(), key=lambda x: x[1], reverse=True)
+    candidate_terms = [
+        t for t, cnt in sorted_by_freq
+        if cnt >= 2 or (canonical_seeds and t in canonical_seeds)
+    ]
+    if len(candidate_terms) < max_candidates:
+        candidate_terms = [t for t, _ in sorted_by_freq[: max(max_candidates * 2, 200)]]
+
+    all_headings_str = (title + " " + " ".join([sec["label"] for sec in sections])).lower()
+    sec_texts_lower = [sec["raw_text"].lower() for sec in sections]
+
+    # Fast O(1) vectorized casing and section spread checks
+    casing_counts = {}
+    section_spread = {}
+    for term in candidate_terms:
+        c_term = term.lower()
+        title_term = term.title()
+        casing_counts[term] = 1 if (title_term != term and title_term in full_paper_text) else 0
+        section_spread[term] = sum(1 for st in sec_texts_lower if c_term in st)
 
     total_tokens = max(1, len(phrase_entries))
     scores = {}
-    for term, count in term_tf.items():
+    for term in candidate_terms:
+        count = term_tf[term]
         words_in_term = term.split()
         word_len = len(words_in_term)
 
@@ -1146,6 +1155,48 @@ def extract_global_doc_concepts(sections, title="", canonical_seeds=None, max_ca
     return selected
 
 
+def filter_terms_offline(candidates, canonical_seeds=None, max_terms=None):
+    """Deterministically filter and deduplicate candidates without an API call."""
+    canonical_seeds = {str(term).strip().lower() for term in (canonical_seeds or set())}
+    rejected_edges = STOPWORDS | {
+        "based", "using", "via", "from", "with", "will", "can", "may", "also",
+        "thereby", "making", "support", "supporting", "allowing", "resulted",
+        "essential", "success", "full", "abstract", "paper", "study", "method",
+    }
+    accepted = []
+    seen = set()
+    for raw_term in candidates:
+        term = re.sub(r"\s+", " ", str(raw_term).strip().lower())
+        words = term.split()
+        if not term or term in seen or len(words) > 4:
+            continue
+        if any(not re.search(r"[a-zA-Z]", word) for word in words):
+            continue
+        if words[0] in rejected_edges or words[-1] in rejected_edges:
+            continue
+        if len(words) == 1 and (len(words[0]) < 3 or words[0] in STOPWORDS):
+            continue
+        if re.fullmatch(r"[a-z]", term) or re.fullmatch(r"[a-z]\d+", term):
+            continue
+        if any(fragment in words for fragment in ("figure", "table", "section", "page", "et", "al")):
+            continue
+        if term not in canonical_seeds and len(words) == 1 and term.islower() and len(term) < 5:
+            continue
+        seen.add(term)
+        accepted.append(term)
+
+    # Prefer the longest informative phrase over its shorter nested fragments.
+    reduced = []
+    for term in accepted:
+        if any(term != other and term in other and len(other.split()) > len(term.split()) for other in accepted):
+            continue
+        reduced.append(term)
+    if max_terms:
+        reduced = reduced[:max_terms]
+    print(f"Offline filtering: Input {len(candidates)} candidates -> Output {len(reduced)} concepts.")
+    return reduced
+
+
 def filter_terms_via_ai(candidates, title, canonical_seeds):
     """
     Uses Gemini API to validate scientific research paper terms, filtering out math variables,
@@ -1153,8 +1204,8 @@ def filter_terms_via_ai(candidates, title, canonical_seeds):
     """
     model, api_key = get_gemini_model()
     if not model:
-        print("Warning: GEMINI_API_KEY not set. Skipping AI verification pass.")
-        return candidates
+        print("Warning: GEMINI_API_KEY not set. Using deterministic offline filtering.")
+        return filter_terms_offline(candidates, canonical_seeds)
 
     try:
         prompt = f"""You are an expert scientific journal peer reviewer and academic editor.
@@ -1204,8 +1255,8 @@ Return your response strictly in JSON format as an object with the key "verified
         )
         return final_verified
     except Exception as e:
-        print(f"Warning: Gemini API call failed with error: {e}. Falling back to unverified list.")
-        return candidates
+        print(f"Warning: Gemini API call failed with error: {e}. Falling back to offline filtering.")
+        return filter_terms_offline(candidates, canonical_seeds)
 
 
 class TraceLogger:
@@ -1307,11 +1358,13 @@ def format_fallback_definitions(verified_terms, raw_context_map):
     return fallback_map
 
 
-def generate_concept_definitions(sections, verified_terms, title):
+def generate_concept_definitions(sections, verified_terms, title, max_ai_definitions=None):
     """
     Generates definitions for verified concepts:
-    - Option A: Synthesize crisp 1-2 sentence definition + operational paper role via Gemini using mined context sentences.
-    - Option B: If AI is unavailable or fails, fall back cleanly to raw context sentence labeled as direct text.
+    - Option A: Synthesize crisp 1-2 sentence definition + operational paper role via Gemini
+      using mined context sentences. Runs concurrently across batches for low latency.
+    - Option B: If AI is unavailable or terms exceed max_ai_definitions, fall back cleanly
+      to raw context sentence labeled as direct text.
     """
     raw_context_map = extract_concept_context_sentences(sections, verified_terms)
 
@@ -1324,11 +1377,21 @@ def generate_concept_definitions(sections, verified_terms, title):
 
     try:
         terms_list = sorted(list(verified_terms))
-        batch_size = 15
+
+        # Priority Tiering: Synthesize AI definitions for up to max_ai_terms (default 35)
+        # Long-tail concepts cleanly use Option B direct paper sentences.
+        if max_ai_definitions is None:
+            env_limit = os.environ.get("MAX_AI_DEFINITIONS")
+            max_ai_terms = int(env_limit) if env_limit and env_limit.isdigit() else 35
+        else:
+            max_ai_terms = max_ai_definitions
+
+        ai_candidates = terms_list[:max_ai_terms] if max_ai_terms > 0 else []
+        batch_size = 20
+        batches = [ai_candidates[i : i + batch_size] for i in range(0, len(ai_candidates), batch_size)]
         final_definitions = {}
 
-        for i in range(0, len(terms_list), batch_size):
-            batch = terms_list[i : i + batch_size]
+        def _process_definition_batch(batch_idx, batch):
             prompt_items = []
             for idx, term in enumerate(batch):
                 term_lower = term.lower().strip()
@@ -1339,7 +1402,6 @@ def generate_concept_definitions(sections, verified_terms, title):
                 prompt_items.append(f'{idx + 1}. Concept: "{term}"\n   Context: "{ctx}"')
 
             prompt_text = "\n\n".join(prompt_items)
-
             prompt = f"""You are an expert scientific dictionary editor and domain specialist.
 The research paper is titled: "{title}".
 Synthesize concise, high-fidelity formal definitions and operational roles for each concept based on its context in the paper.
@@ -1361,6 +1423,7 @@ Return your response strictly in JSON format matching this schema:
   ]
 }}
 """
+            batch_defs = {}
             try:
                 response = call_gemini_with_retry(
                     model,
@@ -1369,20 +1432,26 @@ Return your response strictly in JSON format matching this schema:
                 )
                 data = parse_json_robust(response.text)
                 defs_list = data.get("definitions", []) if isinstance(data, dict) else []
-
                 for item in defs_list:
                     t = (item.get("term") or "").lower().strip()
                     d = (item.get("definition") or "").strip()
                     r = (item.get("role") or "").strip() or "Key concept in paper"
                     if t and d:
-                        final_definitions[t] = f"{d} [Role: {r}] [Source: ai_generated]"
+                        batch_defs[t] = f"{d} [Role: {r}] [Source: ai_generated]"
             except Exception as batch_err:
                 print(
-                    f"Warning: Batch {i // batch_size + 1} AI definition synthesis failed ({batch_err}). "
-                    f"Terms in this batch will use Option B fallback."
+                    f"Warning: Batch {batch_idx + 1} AI definition synthesis failed ({batch_err}). Using Option B fallback."
                 )
+            return batch_defs
 
-        # Fill any missing terms with Option B fallback
+        if batches:
+            max_workers = min(3, len(batches))
+            with ThreadPoolExecutor(max_workers=max_workers) as executor:
+                futures = [executor.submit(_process_definition_batch, b_idx, b) for b_idx, b in enumerate(batches)]
+                for f in as_completed(futures):
+                    final_definitions.update(f.result())
+
+        # Fill all remaining terms with Option B direct paper sentences
         for term in verified_terms:
             t_lower = term.lower().strip()
             if t_lower not in final_definitions:
@@ -1392,7 +1461,10 @@ Return your response strictly in JSON format matching this schema:
                     f"{clean_def} [Role: Paper Context Extract] [Source: direct_text]"
                 )
 
-        print(f"Generated AI definitions for {len(final_definitions)} concepts.")
+        ai_count = sum(1 for v in final_definitions.values() if "ai_generated" in v)
+        direct_count = sum(1 for v in final_definitions.values() if "direct_text" in v)
+        print(f"Synthesized definitions for {len(final_definitions)} concepts ({ai_count} AI synthesized, {direct_count} direct paper context).")
+        return final_definitions
         return final_definitions
 
     except Exception as e:

@@ -9,7 +9,7 @@ try:
 except ImportError:
     from pipeline.research_paper._bootstrap import *  # noqa: F403, F401
 
-from pipeline.research_paper.extract_paper_concepts import clean_text
+
 from pipeline.utils import (
     parse_json_robust,
     call_gemini_with_retry,

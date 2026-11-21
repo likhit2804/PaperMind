@@ -1,0 +1,1748 @@
+{
+  "dataset": "SemEval-2010 Task 5 (Academic Keyphrase Extraction) + arXiv Real PDFs",
+  "source": "https://raw.githubusercontent.com/boudinfl/ake-datasets/master/datasets/SemEval-2010",
+  "semeval_paper_count": 100,
+  "semeval_tracks": {
+    "C": 25,
+    "H": 25,
+    "I": 25,
+    "J": 25
+  },
+  "semeval_papers": [
+    {
+      "id": "C-1",
+      "track": "C",
+      "domain": "Computer Systems & Networks (Grid/Distributed)",
+      "title": "Scalable Grid Service Discovery Based on UDDI *",
+      "xml_path": "C:\\Users\\likhi\\OneDrive\\Pictures\\Desktop\\CollabProj\\PaperMind\\data\\public_benchmarks\\semeval2010\\papers\\C-1.xml",
+      "sentences": 252,
+      "words": 5145,
+      "gold_keyphrases_count": 19,
+      "gold_keyphrases_sample": [
+        "grid servic discoveri",
+        "uddi",
+        "distribut web-servic discoveri architectur",
+        "dht base uddi registri hierarchi",
+        "deploy issu"
+      ]
+    },
+    {
+      "id": "C-3",
+      "track": "C",
+      "domain": "Computer Systems & Networks (Grid/Distributed)",
+      "title": "Self-Adaptive Applications on the Grid",
+      "xml_path": "C:\\Users\\likhi\\OneDrive\\Pictures\\Desktop\\CollabProj\\PaperMind\\data\\public_benchmarks\\semeval2010\\papers\\C-3.xml",
+      "sentences": 398,
+      "words": 7225,
+      "gold_keyphrases_count": 15,
+      "gold_keyphrases_sample": [
+        "grid comput",
+        "resourc select",
+        "grid environ",
+        "parallel comput",
+        "homogen parallel environ"
+      ]
+    },
+    {
+      "id": "C-4",
+      "track": "C",
+      "domain": "Computer Systems & Networks (Grid/Distributed)",
+      "title": "Intra-flow Loss Recovery and Control for",
+      "xml_path": "C:\\Users\\likhi\\OneDrive\\Pictures\\Desktop\\CollabProj\\PaperMind\\data\\public_benchmarks\\semeval2010\\papers\\C-4.xml",
+      "sentences": 309,
+      "words": 7712,
+      "gold_keyphrases_count": 20,
+      "gold_keyphrases_sample": [
+        "end-to-end model",
+        "sampl-base codec",
+        "loss recoveri and control",
+        "loss sensit",
+        "network support for real-time multimedia"
+      ]
+    },
+    {
+      "id": "C-6",
+      "track": "C",
+      "domain": "Computer Systems & Networks (Grid/Distributed)",
+      "title": "Design and Implementation of a Distributed Content Management System",
+      "xml_path": "C:\\Users\\likhi\\OneDrive\\Pictures\\Desktop\\CollabProj\\PaperMind\\data\\public_benchmarks\\semeval2010\\papers\\C-6.xml",
+      "sentences": 314,
+      "words": 6401,
+      "gold_keyphrases_count": 11,
+      "gold_keyphrases_sample": [
+        "spectrum content manag system",
+        "continu media storag",
+        "home-network scenario",
+        "applic program interfac",
+        "content distribut network"
+      ]
+    },
+    {
+      "id": "C-8",
+      "track": "C",
+      "domain": "Computer Systems & Networks (Grid/Distributed)",
+      "title": "Operation Context and Context-based Operational Transformation",
+      "xml_path": "C:\\Users\\likhi\\OneDrive\\Pictures\\Desktop\\CollabProj\\PaperMind\\data\\public_benchmarks\\semeval2010\\papers\\C-8.xml",
+      "sentences": 425,
+      "words": 10233,
+      "gold_keyphrases_count": 21,
+      "gold_keyphrases_sample": [
+        "oper transform",
+        "cot",
+        "context-base ot",
+        "causal-depend",
+        "concurr condit"
+      ]
+    },
+    {
+      "id": "C-9",
+      "track": "C",
+      "domain": "Computer Systems & Networks (Grid/Distributed)",
+      "title": "EDAS : Providing an Environment for Decentralized Adaptive Services",
+      "xml_path": "C:\\Users\\likhi\\OneDrive\\Pictures\\Desktop\\CollabProj\\PaperMind\\data\\public_benchmarks\\semeval2010\\papers\\C-9.xml",
+      "sentences": 209,
+      "words": 4181,
+      "gold_keyphrases_count": 14,
+      "gold_keyphrases_sample": [
+        "decentr adapt servic",
+        "resourc manag",
+        "home environ",
+        "infrastructur",
+        "client"
+      ]
+    },
+    {
+      "id": "C-14",
+      "track": "C",
+      "domain": "Computer Systems & Networks (Grid/Distributed)",
+      "title": "Sensor Deployment Strategy for Target Detection",
+      "xml_path": "C:\\Users\\likhi\\OneDrive\\Pictures\\Desktop\\CollabProj\\PaperMind\\data\\public_benchmarks\\semeval2010\\papers\\C-14.xml",
+      "sentences": 252,
+      "words": 5261,
+      "gold_keyphrases_count": 13,
+      "gold_keyphrases_sample": [
+        "target detect",
+        "sensor network",
+        "path exposur",
+        "number of sensor sensor number",
+        "sequenti deploy"
+      ]
+    },
+    {
+      "id": "C-17",
+      "track": "C",
+      "domain": "Computer Systems & Networks (Grid/Distributed)",
+      "title": "Deployment Issues of a VoIP Conferencing System in a Virtual Conferencing Environment",
+      "xml_path": "C:\\Users\\likhi\\OneDrive\\Pictures\\Desktop\\CollabProj\\PaperMind\\data\\public_benchmarks\\semeval2010\\papers\\C-17.xml",
+      "sentences": 421,
+      "words": 8126,
+      "gold_keyphrases_count": 15,
+      "gold_keyphrases_sample": [
+        "voip conferenc system",
+        "packet-switch network",
+        "audio servic framework",
+        "virtual conferenc environ",
+        "confer server"
+      ]
+    },
+    {
+      "id": "C-18",
+      "track": "C",
+      "domain": "Computer Systems & Networks (Grid/Distributed)",
+      "title": "An Initial Analysis and Presentation of Malware Exhibiting Swarm-Like Behavior",
+      "xml_path": "C:\\Users\\likhi\\OneDrive\\Pictures\\Desktop\\CollabProj\\PaperMind\\data\\public_benchmarks\\semeval2010\\papers\\C-18.xml",
+      "sentences": 308,
+      "words": 6497,
+      "gold_keyphrases_count": 14,
+      "gold_keyphrases_sample": [
+        "malwar",
+        "swarm worm",
+        "emerg intellig",
+        "slammer worm",
+        "local commun mechan"
+      ]
+    },
+    {
+      "id": "C-19",
+      "track": "C",
+      "domain": "Computer Systems & Networks (Grid/Distributed)",
+      "title": "Service Interface : A New Abstraction for Implementing and Composing Protocols *",
+      "xml_path": "C:\\Users\\likhi\\OneDrive\\Pictures\\Desktop\\CollabProj\\PaperMind\\data\\public_benchmarks\\semeval2010\\papers\\C-19.xml",
+      "sentences": 298,
+      "words": 4786,
+      "gold_keyphrases_count": 13,
+      "gold_keyphrases_sample": [
+        "protocol framework",
+        "distribut algorithm",
+        "distribut system",
+        "servic interfac",
+        "network"
+      ]
+    },
+    {
+      "id": "C-20",
+      "track": "C",
+      "domain": "Computer Systems & Networks (Grid/Distributed)",
+      "title": "Live Data Center Migration across WANs : A Robust Cooperative Context Aware Approach",
+      "xml_path": "C:\\Users\\likhi\\OneDrive\\Pictures\\Desktop\\CollabProj\\PaperMind\\data\\public_benchmarks\\semeval2010\\papers\\C-20.xml",
+      "sentences": 191,
+      "words": 5114,
+      "gold_keyphrases_count": 13,
+      "gold_keyphrases_sample": [
+        "internet-base servic",
+        "data center migrat",
+        "wan",
+        "lan",
+        "virtual server"
+      ]
+    },
+    {
+      "id": "C-22",
+      "track": "C",
+      "domain": "Computer Systems & Networks (Grid/Distributed)",
+      "title": "Runtime Metrics Collection for Middleware Supported Adaptation of Mobile Applications",
+      "xml_path": "C:\\Users\\likhi\\OneDrive\\Pictures\\Desktop\\CollabProj\\PaperMind\\data\\public_benchmarks\\semeval2010\\papers\\C-22.xml",
+      "sentences": 187,
+      "words": 5471,
+      "gold_keyphrases_count": 14,
+      "gold_keyphrases_sample": [
+        "data",
+        "object-orient applic",
+        "mobil object framework",
+        "mobjex",
+        "java"
+      ]
+    },
+    {
+      "id": "C-23",
+      "track": "C",
+      "domain": "Computer Systems & Networks (Grid/Distributed)",
+      "title": "Implementation of a Dynamic Adjustment Mechanism with Efficient Replica Selection in Data Grid Environments",
+      "xml_path": "C:\\Users\\likhi\\OneDrive\\Pictures\\Desktop\\CollabProj\\PaperMind\\data\\public_benchmarks\\semeval2010\\papers\\C-23.xml",
+      "sentences": 327,
+      "words": 6114,
+      "gold_keyphrases_count": 16,
+      "gold_keyphrases_sample": [
+        "distribut resourc",
+        "data grid applic",
+        "replic",
+        "co-alloc",
+        "larg dataset"
+      ]
+    },
+    {
+      "id": "C-27",
+      "track": "C",
+      "domain": "Computer Systems & Networks (Grid/Distributed)",
+      "title": "A High-Accuracy , Low-Cost Localization System for Wireless Sensor Networks",
+      "xml_path": "C:\\Users\\likhi\\OneDrive\\Pictures\\Desktop\\CollabProj\\PaperMind\\data\\public_benchmarks\\semeval2010\\papers\\C-27.xml",
+      "sentences": 566,
+      "words": 11532,
+      "gold_keyphrases_count": 14,
+      "gold_keyphrases_sample": [
+        "wireless sensor network",
+        "local",
+        "rang-base local",
+        "rang-free scheme",
+        "transmiss"
+      ]
+    },
+    {
+      "id": "C-28",
+      "track": "C",
+      "domain": "Computer Systems & Networks (Grid/Distributed)",
+      "title": "PackageBLAST : An Adaptive Multi-Policy Grid Service for Biological Sequence Comparison *",
+      "xml_path": "C:\\Users\\likhi\\OneDrive\\Pictures\\Desktop\\CollabProj\\PaperMind\\data\\public_benchmarks\\semeval2010\\papers\\C-28.xml",
+      "sentences": 221,
+      "words": 3979,
+      "gold_keyphrases_count": 14,
+      "gold_keyphrases_sample": [
+        "biolog sequenc comparison",
+        "adapt multi-polici grid servic",
+        "task alloc",
+        "blast search",
+        "packageblast"
+      ]
+    },
+    {
+      "id": "C-29",
+      "track": "C",
+      "domain": "Computer Systems & Networks (Grid/Distributed)",
+      "title": "Implementation and Performance Evaluation of CONFLEX-G : Grid-enabled Molecular Conformational Space Search Program with OmniRPC",
+      "xml_path": "C:\\Users\\likhi\\OneDrive\\Pictures\\Desktop\\CollabProj\\PaperMind\\data\\public_benchmarks\\semeval2010\\papers\\C-29.xml",
+      "sentences": 331,
+      "words": 6761,
+      "gold_keyphrases_count": 13,
+      "gold_keyphrases_sample": [
+        "conflex-g",
+        "omnirpc",
+        "conform space search",
+        "bio-molecul",
+        "rpc modul"
+      ]
+    },
+    {
+      "id": "C-30",
+      "track": "C",
+      "domain": "Computer Systems & Networks (Grid/Distributed)",
+      "title": "Bullet : High Bandwidth Data Dissemination Using an Overlay Mesh",
+      "xml_path": "C:\\Users\\likhi\\OneDrive\\Pictures\\Desktop\\CollabProj\\PaperMind\\data\\public_benchmarks\\semeval2010\\papers\\C-30.xml",
+      "sentences": 623,
+      "words": 14097,
+      "gold_keyphrases_count": 16,
+      "gold_keyphrases_sample": [
+        "overlai mesh",
+        "data dissemin",
+        "overlai network",
+        "ip multicast",
+        "multipoint commun"
+      ]
+    },
+    {
+      "id": "C-31",
+      "track": "C",
+      "domain": "Computer Systems & Networks (Grid/Distributed)",
+      "title": "Apocrita : A Distributed Peer-to-Peer File Sharing System for Intranets",
+      "xml_path": "C:\\Users\\likhi\\OneDrive\\Pictures\\Desktop\\CollabProj\\PaperMind\\data\\public_benchmarks\\semeval2010\\papers\\C-31.xml",
+      "sentences": 260,
+      "words": 4778,
+      "gold_keyphrases_count": 15,
+      "gold_keyphrases_sample": [
+        "peer-to-peer",
+        "file share system",
+        "intranet",
+        "author",
+        "document"
+      ]
+    },
+    {
+      "id": "C-32",
+      "track": "C",
+      "domain": "Computer Systems & Networks (Grid/Distributed)",
+      "title": "BuddyCache : High-Performance Object Storage for Collaborative Strong-Consistency Applications in a WAN *",
+      "xml_path": "C:\\Users\\likhi\\OneDrive\\Pictures\\Desktop\\CollabProj\\PaperMind\\data\\public_benchmarks\\semeval2010\\papers\\C-32.xml",
+      "sentences": 492,
+      "words": 10913,
+      "gold_keyphrases_count": 15,
+      "gold_keyphrases_sample": [
+        "object storag system",
+        "collabor strong-consist applic",
+        "wide-area network",
+        "cooper web cach",
+        "fine-grain share"
+      ]
+    },
+    {
+      "id": "C-33",
+      "track": "C",
+      "domain": "Computer Systems & Networks (Grid/Distributed)",
+      "title": "Rewards-Based Negotiation for Providing Context Information",
+      "xml_path": "C:\\Users\\likhi\\OneDrive\\Pictures\\Desktop\\CollabProj\\PaperMind\\data\\public_benchmarks\\semeval2010\\papers\\C-33.xml",
+      "sentences": 265,
+      "words": 5370,
+      "gold_keyphrases_count": 10,
+      "gold_keyphrases_sample": [
+        "context-awar",
+        "context provid",
+        "negoti",
+        "context-awar comput",
+        "concret negoti model"
+      ]
+    },
+    {
+      "id": "C-34",
+      "track": "C",
+      "domain": "Computer Systems & Networks (Grid/Distributed)",
+      "title": "Researches on Scheme of Pairwise Key Establishment for Distributed Sensor Networks",
+      "xml_path": "C:\\Users\\likhi\\OneDrive\\Pictures\\Desktop\\CollabProj\\PaperMind\\data\\public_benchmarks\\semeval2010\\papers\\C-34.xml",
+      "sentences": 215,
+      "words": 8224,
+      "gold_keyphrases_count": 12,
+      "gold_keyphrases_sample": [
+        "sensor network",
+        "kei pool",
+        "kei predistribut",
+        "hierarch hypercub model",
+        "secur"
+      ]
+    },
+    {
+      "id": "C-36",
+      "track": "C",
+      "domain": "Computer Systems & Networks (Grid/Distributed)",
+      "title": "Encryption-Enforced Access Control in Dynamic Multi-Domain Publish/Subscribe Networks",
+      "xml_path": "C:\\Users\\likhi\\OneDrive\\Pictures\\Desktop\\CollabProj\\PaperMind\\data\\public_benchmarks\\semeval2010\\papers\\C-36.xml",
+      "sentences": 403,
+      "words": 8598,
+      "gold_keyphrases_count": 12,
+      "gold_keyphrases_sample": [
+        "secur publish/subscrib system",
+        "distribut access control",
+        "multipl administr domain",
+        "attribut encrypt",
+        "multi-domain"
+      ]
+    },
+    {
+      "id": "C-38",
+      "track": "C",
+      "domain": "Computer Systems & Networks (Grid/Distributed)",
+      "title": "A Framework for Architecting Peer-to-Peer Receiver-driven Overlays",
+      "xml_path": "C:\\Users\\likhi\\OneDrive\\Pictures\\Desktop\\CollabProj\\PaperMind\\data\\public_benchmarks\\semeval2010\\papers\\C-38.xml",
+      "sentences": 242,
+      "words": 6068,
+      "gold_keyphrases_count": 13,
+      "gold_keyphrases_sample": [
+        "peer-to-peer stream",
+        "congest control",
+        "receiv-driven approach",
+        "receiv-driven overlai",
+        "distribut system"
+      ]
+    },
+    {
+      "id": "C-40",
+      "track": "C",
+      "domain": "Computer Systems & Networks (Grid/Distributed)",
+      "title": "Edge Indexing in a Grid for Highly Dynamic Virtual Environments \u2217",
+      "xml_path": "C:\\Users\\likhi\\OneDrive\\Pictures\\Desktop\\CollabProj\\PaperMind\\data\\public_benchmarks\\semeval2010\\papers\\C-40.xml",
+      "sentences": 455,
+      "words": 10233,
+      "gold_keyphrases_count": 14,
+      "gold_keyphrases_sample": [
+        "edg index",
+        "dynam virtual environ",
+        "game-base applic",
+        "mutabl virtual content",
+        "spatial databas"
+      ]
+    },
+    {
+      "id": "C-86",
+      "track": "C",
+      "domain": "Computer Systems & Networks (Grid/Distributed)",
+      "title": "Addressing Strategic Behavior in a Deployed Microeconomic Resource Allocator",
+      "xml_path": "C:\\Users\\likhi\\OneDrive\\Pictures\\Desktop\\CollabProj\\PaperMind\\data\\public_benchmarks\\semeval2010\\papers\\C-86.xml",
+      "sentences": 216,
+      "words": 5101,
+      "gold_keyphrases_count": 15,
+      "gold_keyphrases_sample": [
+        "resourc alloc system",
+        "combinatori auction",
+        "market-base system",
+        "distribut system",
+        "strateg behavior"
+      ]
+    },
+    {
+      "id": "H-2",
+      "track": "H",
+      "domain": "Information Retrieval & Web Systems",
+      "title": "Personalized Query Expansion for the Web",
+      "xml_path": "C:\\Users\\likhi\\OneDrive\\Pictures\\Desktop\\CollabProj\\PaperMind\\data\\public_benchmarks\\semeval2010\\papers\\H-2.xml",
+      "sentences": 352,
+      "words": 8185,
+      "gold_keyphrases_count": 25,
+      "gold_keyphrases_sample": [
+        "short keyword queri",
+        "web retriev",
+        "web queri",
+        "person inform repositori",
+        "search output"
+      ]
+    },
+    {
+      "id": "H-3",
+      "track": "H",
+      "domain": "Information Retrieval & Web Systems",
+      "title": "Using Query Contexts in Information Retrieval",
+      "xml_path": "C:\\Users\\likhi\\OneDrive\\Pictures\\Desktop\\CollabProj\\PaperMind\\data\\public_benchmarks\\semeval2010\\papers\\H-3.xml",
+      "sentences": 397,
+      "words": 7247,
+      "gold_keyphrases_count": 19,
+      "gold_keyphrases_sample": [
+        "user profil",
+        "queri-specif context",
+        "user-centric on",
+        "domain of interest interest domain",
+        "context factor"
+      ]
+    },
+    {
+      "id": "H-4",
+      "track": "H",
+      "domain": "Information Retrieval & Web Systems",
+      "title": "Towards Task-based Personal Information Management Evaluations",
+      "xml_path": "C:\\Users\\likhi\\OneDrive\\Pictures\\Desktop\\CollabProj\\PaperMind\\data\\public_benchmarks\\semeval2010\\papers\\H-4.xml",
+      "sentences": 318,
+      "words": 7532,
+      "gold_keyphrases_count": 12,
+      "gold_keyphrases_sample": [
+        "person inform manag",
+        "measur",
+        "experiment",
+        "human factor",
+        "re-find inform"
+      ]
+    },
+    {
+      "id": "H-5",
+      "track": "H",
+      "domain": "Information Retrieval & Web Systems",
+      "title": "Utility-based Information Distillation Over Temporally Sequenced Documents",
+      "xml_path": "C:\\Users\\likhi\\OneDrive\\Pictures\\Desktop\\CollabProj\\PaperMind\\data\\public_benchmarks\\semeval2010\\papers\\H-5.xml",
+      "sentences": 262,
+      "words": 6242,
+      "gold_keyphrases_count": 17,
+      "gold_keyphrases_sample": [
+        "util-base inform distil",
+        "tempor order document",
+        "passag rank",
+        "adapt filter",
+        "ad-hoc retriev"
+      ]
+    },
+    {
+      "id": "H-7",
+      "track": "H",
+      "domain": "Information Retrieval & Web Systems",
+      "title": "Efficient Bayesian Hierarchical User Modeling for Recommendation Systems",
+      "xml_path": "C:\\Users\\likhi\\OneDrive\\Pictures\\Desktop\\CollabProj\\PaperMind\\data\\public_benchmarks\\semeval2010\\papers\\H-7.xml",
+      "sentences": 249,
+      "words": 5598,
+      "gold_keyphrases_count": 15,
+      "gold_keyphrases_sample": [
+        "model",
+        "content-base",
+        "recommend system",
+        "linear regress",
+        "collabor filter"
+      ]
+    },
+    {
+      "id": "H-8",
+      "track": "H",
+      "domain": "Information Retrieval & Web Systems",
+      "title": "Robust Test Collections for Retrieval Evaluation",
+      "xml_path": "C:\\Users\\likhi\\OneDrive\\Pictures\\Desktop\\CollabProj\\PaperMind\\data\\public_benchmarks\\semeval2010\\papers\\H-8.xml",
+      "sentences": 390,
+      "words": 7322,
+      "gold_keyphrases_count": 11,
+      "gold_keyphrases_sample": [
+        "inform retriev",
+        "evalu",
+        "relev judgement",
+        "reusabl",
+        "lowerest-confid comparison"
+      ]
+    },
+    {
+      "id": "H-9",
+      "track": "H",
+      "domain": "Information Retrieval & Web Systems",
+      "title": "Learn from Web Search Logs to Organize Search Results",
+      "xml_path": "C:\\Users\\likhi\\OneDrive\\Pictures\\Desktop\\CollabProj\\PaperMind\\data\\public_benchmarks\\semeval2010\\papers\\H-9.xml",
+      "sentences": 369,
+      "words": 7403,
+      "gold_keyphrases_count": 24,
+      "gold_keyphrases_sample": [
+        "retriev model",
+        "rank function",
+        "ambigu",
+        "cluster view",
+        "meaning cluster label"
+      ]
+    },
+    {
+      "id": "H-10",
+      "track": "H",
+      "domain": "Information Retrieval & Web Systems",
+      "title": "Regularized Clustering for Documents *",
+      "xml_path": "C:\\Users\\likhi\\OneDrive\\Pictures\\Desktop\\CollabProj\\PaperMind\\data\\public_benchmarks\\semeval2010\\papers\\H-10.xml",
+      "sentences": 305,
+      "words": 5937,
+      "gold_keyphrases_count": 12,
+      "gold_keyphrases_sample": [
+        "document cluster",
+        "regular",
+        "global regular",
+        "cluster hierarchi",
+        "spectrum"
+      ]
+    },
+    {
+      "id": "H-11",
+      "track": "H",
+      "domain": "Information Retrieval & Web Systems",
+      "title": "Laplacian Optimal Design for Imag e Retrieval",
+      "xml_path": "C:\\Users\\likhi\\OneDrive\\Pictures\\Desktop\\CollabProj\\PaperMind\\data\\public_benchmarks\\semeval2010\\papers\\H-11.xml",
+      "sentences": 307,
+      "words": 5641,
+      "gold_keyphrases_count": 13,
+      "gold_keyphrases_sample": [
+        "relev feedback",
+        "imag represent",
+        "contentbas imag retriev",
+        "activ learn",
+        "least squar regress model"
+      ]
+    },
+    {
+      "id": "H-12",
+      "track": "H",
+      "domain": "Information Retrieval & Web Systems",
+      "title": "Fast Generation of Result Snippets in Web Search",
+      "xml_path": "C:\\Users\\likhi\\OneDrive\\Pictures\\Desktop\\CollabProj\\PaperMind\\data\\public_benchmarks\\semeval2010\\papers\\H-12.xml",
+      "sentences": 310,
+      "words": 7535,
+      "gold_keyphrases_count": 14,
+      "gold_keyphrases_sample": [
+        "search engin",
+        "snippet gener",
+        "document cach",
+        "link graph measur",
+        "perform"
+      ]
+    },
+    {
+      "id": "H-13",
+      "track": "H",
+      "domain": "Information Retrieval & Web Systems",
+      "title": "The Influence of Caption Features on Clickthrough Patterns in Web Search",
+      "xml_path": "C:\\Users\\likhi\\OneDrive\\Pictures\\Desktop\\CollabProj\\PaperMind\\data\\public_benchmarks\\semeval2010\\papers\\H-13.xml",
+      "sentences": 285,
+      "words": 6616,
+      "gold_keyphrases_count": 13,
+      "gold_keyphrases_sample": [
+        "clickthrough pattern",
+        "caption featur",
+        "web search behavior",
+        "human factor",
+        "extract summar"
+      ]
+    },
+    {
+      "id": "H-14",
+      "track": "H",
+      "domain": "Information Retrieval & Web Systems",
+      "title": "Studying the Use of Popular Destinations to Enhance Web Search Interaction",
+      "xml_path": "C:\\Users\\likhi\\OneDrive\\Pictures\\Desktop\\CollabProj\\PaperMind\\data\\public_benchmarks\\semeval2010\\papers\\H-14.xml",
+      "sentences": 305,
+      "words": 7170,
+      "gold_keyphrases_count": 13,
+      "gold_keyphrases_sample": [
+        "popular destin",
+        "web search interact",
+        "improv queri",
+        "retriev perform",
+        "relat queri"
+      ]
+    },
+    {
+      "id": "H-16",
+      "track": "H",
+      "domain": "Information Retrieval & Web Systems",
+      "title": "The Impact of Caching on Search Engines",
+      "xml_path": "C:\\Users\\likhi\\OneDrive\\Pictures\\Desktop\\CollabProj\\PaperMind\\data\\public_benchmarks\\semeval2010\\papers\\H-16.xml",
+      "sentences": 321,
+      "words": 6918,
+      "gold_keyphrases_count": 17,
+      "gold_keyphrases_sample": [
+        "effici cach system",
+        "web search engin",
+        "static cach",
+        "dynam cach",
+        "cach queri result"
+      ]
+    },
+    {
+      "id": "H-17",
+      "track": "H",
+      "domain": "Information Retrieval & Web Systems",
+      "title": "Pruning Policies for Two-Tiered Inverted Index with Correctness Guarantee",
+      "xml_path": "C:\\Users\\likhi\\OneDrive\\Pictures\\Desktop\\CollabProj\\PaperMind\\data\\public_benchmarks\\semeval2010\\papers\\H-17.xml",
+      "sentences": 376,
+      "words": 9793,
+      "gold_keyphrases_count": 15,
+      "gold_keyphrases_sample": [
+        "web search engin",
+        "larg-scale invert index",
+        "queri load",
+        "prune index",
+        "onlin search market"
+      ]
+    },
+    {
+      "id": "H-18",
+      "track": "H",
+      "domain": "Information Retrieval & Web Systems",
+      "title": "Topic Segmentation with Shared Topic Detection and Alignment of Multiple Documents",
+      "xml_path": "C:\\Users\\likhi\\OneDrive\\Pictures\\Desktop\\CollabProj\\PaperMind\\data\\public_benchmarks\\semeval2010\\papers\\H-18.xml",
+      "sentences": 335,
+      "words": 7872,
+      "gold_keyphrases_count": 18,
+      "gold_keyphrases_sample": [
+        "topic detect",
+        "track",
+        "topic segment",
+        "local and sequenti inform of document",
+        "singl document"
+      ]
+    },
+    {
+      "id": "H-19",
+      "track": "H",
+      "domain": "Information Retrieval & Web Systems",
+      "title": "Analyzing Feature Trajectories for Event Detection",
+      "xml_path": "C:\\Users\\likhi\\OneDrive\\Pictures\\Desktop\\CollabProj\\PaperMind\\data\\public_benchmarks\\semeval2010\\papers\\H-19.xml",
+      "sentences": 268,
+      "words": 6184,
+      "gold_keyphrases_count": 14,
+      "gold_keyphrases_sample": [
+        "event detect",
+        "word trajectori",
+        "aperiod event",
+        "period event",
+        "word signal"
+      ]
+    },
+    {
+      "id": "H-20",
+      "track": "H",
+      "domain": "Information Retrieval & Web Systems",
+      "title": "New Event Detection Based on Indexing-tree and Named Entity",
+      "xml_path": "C:\\Users\\likhi\\OneDrive\\Pictures\\Desktop\\CollabProj\\PaperMind\\data\\public_benchmarks\\semeval2010\\papers\\H-20.xml",
+      "sentences": 313,
+      "words": 6531,
+      "gold_keyphrases_count": 17,
+      "gold_keyphrases_sample": [
+        "new event detect",
+        "stream of new stori new stori stream",
+        "volum of new new volum",
+        "new index-tree",
+        "term reweight approach"
+      ]
+    },
+    {
+      "id": "H-21",
+      "track": "H",
+      "domain": "Information Retrieval & Web Systems",
+      "title": "Robust Classification of Rare Queries Using Web Knowledge",
+      "xml_path": "C:\\Users\\likhi\\OneDrive\\Pictures\\Desktop\\CollabProj\\PaperMind\\data\\public_benchmarks\\semeval2010\\papers\\H-21.xml",
+      "sentences": 345,
+      "words": 7914,
+      "gold_keyphrases_count": 14,
+      "gold_keyphrases_sample": [
+        "queri classif",
+        "search engin",
+        "search advertis",
+        "machin learn",
+        "relev feedback"
+      ]
+    },
+    {
+      "id": "H-24",
+      "track": "H",
+      "domain": "Information Retrieval & Web Systems",
+      "title": "Investigating the Querying and Browsing Behavior of Advanced Search Engine Users",
+      "xml_path": "C:\\Users\\likhi\\OneDrive\\Pictures\\Desktop\\CollabProj\\PaperMind\\data\\public_benchmarks\\semeval2010\\papers\\H-24.xml",
+      "sentences": 292,
+      "words": 7674,
+      "gold_keyphrases_count": 14,
+      "gold_keyphrases_sample": [
+        "search engin",
+        "queri",
+        "relev inform",
+        "search strategi",
+        "toler latenc"
+      ]
+    },
+    {
+      "id": "H-25",
+      "track": "H",
+      "domain": "Information Retrieval & Web Systems",
+      "title": "Term Feedback for Information Retrieval with Language Models",
+      "xml_path": "C:\\Users\\likhi\\OneDrive\\Pictures\\Desktop\\CollabProj\\PaperMind\\data\\public_benchmarks\\semeval2010\\papers\\H-25.xml",
+      "sentences": 305,
+      "words": 7615,
+      "gold_keyphrases_count": 12,
+      "gold_keyphrases_sample": [
+        "term-base feedback",
+        "inform retriev",
+        "languag model",
+        "queri expans process",
+        "queri model"
+      ]
+    },
+    {
+      "id": "H-26",
+      "track": "H",
+      "domain": "Information Retrieval & Web Systems",
+      "title": "A Support Vector Method for Optimizing Average Precision",
+      "xml_path": "C:\\Users\\likhi\\OneDrive\\Pictures\\Desktop\\CollabProj\\PaperMind\\data\\public_benchmarks\\semeval2010\\papers\\H-26.xml",
+      "sentences": 323,
+      "words": 6678,
+      "gold_keyphrases_count": 14,
+      "gold_keyphrases_sample": [
+        "machin learn",
+        "rank retriev system",
+        "learn techniqu",
+        "mean averag precis",
+        "optim solut"
+      ]
+    },
+    {
+      "id": "H-29",
+      "track": "H",
+      "domain": "Information Retrieval & Web Systems",
+      "title": "Estimation and Use of Uncertainty in Pseudo-relevance Feedback",
+      "xml_path": "C:\\Users\\likhi\\OneDrive\\Pictures\\Desktop\\CollabProj\\PaperMind\\data\\public_benchmarks\\semeval2010\\papers\\H-29.xml",
+      "sentences": 299,
+      "words": 6501,
+      "gold_keyphrases_count": 13,
+      "gold_keyphrases_sample": [
+        "feedback method",
+        "posterior distribut",
+        "enhanc feedback model",
+        "inform retriev",
+        "queri expans"
+      ]
+    },
+    {
+      "id": "H-30",
+      "track": "H",
+      "domain": "Information Retrieval & Web Systems",
+      "title": "Latent Concept Expansion Using Markov Random Fields",
+      "xml_path": "C:\\Users\\likhi\\OneDrive\\Pictures\\Desktop\\CollabProj\\PaperMind\\data\\public_benchmarks\\semeval2010\\papers\\H-30.xml",
+      "sentences": 323,
+      "words": 6466,
+      "gold_keyphrases_count": 17,
+      "gold_keyphrases_sample": [
+        "robust queri expans techniqu",
+        "languag model queri expans techniqu",
+        "relev feedback",
+        "pseudo-relev feedback",
+        "inform retriev"
+      ]
+    },
+    {
+      "id": "H-31",
+      "track": "H",
+      "domain": "Information Retrieval & Web Systems",
+      "title": "A Study of Poisson Query Generation Model for Information Retrieval",
+      "xml_path": "C:\\Users\\likhi\\OneDrive\\Pictures\\Desktop\\CollabProj\\PaperMind\\data\\public_benchmarks\\semeval2010\\papers\\H-31.xml",
+      "sentences": 311,
+      "words": 6531,
+      "gold_keyphrases_count": 17,
+      "gold_keyphrases_sample": [
+        "multinomi distribut",
+        "queri gener probabilist model",
+        "poisson distribut",
+        "two-stage smooth",
+        "multivari bernoullu distribut"
+      ]
+    },
+    {
+      "id": "H-32",
+      "track": "H",
+      "domain": "Information Retrieval & Web Systems",
+      "title": "Interesting Nuggets and Their Impact on Definitional Question Answering",
+      "xml_path": "C:\\Users\\likhi\\OneDrive\\Pictures\\Desktop\\CollabProj\\PaperMind\\data\\public_benchmarks\\semeval2010\\papers\\H-32.xml",
+      "sentences": 316,
+      "words": 6791,
+      "gold_keyphrases_count": 17,
+      "gold_keyphrases_sample": [
+        "us of linguist linguist us",
+        "extern knowledg",
+        "comput of human interest human interest comput",
+        "new corpu",
+        "question topic"
+      ]
+    },
+    {
+      "id": "I-1",
+      "track": "I",
+      "domain": "Artificial Intelligence & Machine Learning",
+      "title": "Aborting Tasks in BDI Agents",
+      "xml_path": "C:\\Users\\likhi\\OneDrive\\Pictures\\Desktop\\CollabProj\\PaperMind\\data\\public_benchmarks\\semeval2010\\papers\\I-1.xml",
+      "sentences": 391,
+      "words": 9162,
+      "gold_keyphrases_count": 12,
+      "gold_keyphrases_sample": [
+        "intellig agent",
+        "failur",
+        "deal",
+        "cleanup method",
+        "abort-method"
+      ]
+    },
+    {
+      "id": "I-4",
+      "track": "I",
+      "domain": "Artificial Intelligence & Machine Learning",
+      "title": "Meta-Level Coordination for Solving Negotiation Chains in Semi-Cooperative Multi-Agent Systems",
+      "xml_path": "C:\\Users\\likhi\\OneDrive\\Pictures\\Desktop\\CollabProj\\PaperMind\\data\\public_benchmarks\\semeval2010\\papers\\I-4.xml",
+      "sentences": 348,
+      "words": 7895,
+      "gold_keyphrases_count": 15,
+      "gold_keyphrases_sample": [
+        "multipl agent",
+        "negoti framework",
+        "negoti chain",
+        "semi-cooper multi-agent system",
+        "pre-negoti"
+      ]
+    },
+    {
+      "id": "I-5",
+      "track": "I",
+      "domain": "Artificial Intelligence & Machine Learning",
+      "title": "Towards Self-organising Agent-based Resource Allocation in a Multi-Server Environment",
+      "xml_path": "C:\\Users\\likhi\\OneDrive\\Pictures\\Desktop\\CollabProj\\PaperMind\\data\\public_benchmarks\\semeval2010\\papers\\I-5.xml",
+      "sentences": 342,
+      "words": 6530,
+      "gold_keyphrases_count": 12,
+      "gold_keyphrases_sample": [
+        "multi-agent system",
+        "agent",
+        "resourc alloc",
+        "distribut algorithm",
+        "dynam alloc task"
+      ]
+    },
+    {
+      "id": "I-6",
+      "track": "I",
+      "domain": "Artificial Intelligence & Machine Learning",
+      "title": "Dynamic Semantics for Agent Communication Languages",
+      "xml_path": "C:\\Users\\likhi\\OneDrive\\Pictures\\Desktop\\CollabProj\\PaperMind\\data\\public_benchmarks\\semeval2010\\papers\\I-6.xml",
+      "sentences": 257,
+      "words": 7945,
+      "gold_keyphrases_count": 10,
+      "gold_keyphrases_sample": [
+        "agent commun languag",
+        "dynam semant",
+        "social reason",
+        "commit-base semant",
+        "state transit system"
+      ]
+    },
+    {
+      "id": "I-7",
+      "track": "I",
+      "domain": "Artificial Intelligence & Machine Learning",
+      "title": "Commitment and Extortion *",
+      "xml_path": "C:\\Users\\likhi\\OneDrive\\Pictures\\Desktop\\CollabProj\\PaperMind\\data\\public_benchmarks\\semeval2010\\papers\\I-7.xml",
+      "sentences": 415,
+      "words": 9862,
+      "gold_keyphrases_count": 16,
+      "gold_keyphrases_sample": [
+        "commit",
+        "credibl",
+        "game theori",
+        "decis make",
+        "strateg posit"
+      ]
+    },
+    {
+      "id": "I-9",
+      "track": "I",
+      "domain": "Artificial Intelligence & Machine Learning",
+      "title": "Temporal Linear Logic as a Basis for Flexible Agent Interactions",
+      "xml_path": "C:\\Users\\likhi\\OneDrive\\Pictures\\Desktop\\CollabProj\\PaperMind\\data\\public_benchmarks\\semeval2010\\papers\\I-9.xml",
+      "sentences": 408,
+      "words": 7897,
+      "gold_keyphrases_count": 16,
+      "gold_keyphrases_sample": [
+        "multi-agent environ",
+        "interact behavior",
+        "tempor constraint",
+        "interact protocol",
+        "linear logic"
+      ]
+    },
+    {
+      "id": "I-10",
+      "track": "I",
+      "domain": "Artificial Intelligence & Machine Learning",
+      "title": "SMILE : Sound Multi-agent Incremental LEarning ;--RRB- *",
+      "xml_path": "C:\\Users\\likhi\\OneDrive\\Pictures\\Desktop\\CollabProj\\PaperMind\\data\\public_benchmarks\\semeval2010\\papers\\I-10.xml",
+      "sentences": 306,
+      "words": 6994,
+      "gold_keyphrases_count": 10,
+      "gold_keyphrases_sample": [
+        "multi-agent learn",
+        "collabor concept learn",
+        "learn process",
+        "knowledg",
+        "ma-consist"
+      ]
+    },
+    {
+      "id": "I-11",
+      "track": "I",
+      "domain": "Artificial Intelligence & Machine Learning",
+      "title": "Real-Time Agent Characterization and Prediction",
+      "xml_path": "C:\\Users\\likhi\\OneDrive\\Pictures\\Desktop\\CollabProj\\PaperMind\\data\\public_benchmarks\\semeval2010\\papers\\I-11.xml",
+      "sentences": 351,
+      "words": 6707,
+      "gold_keyphrases_count": 19,
+      "gold_keyphrases_sample": [
+        "agent reason",
+        "extern behavior",
+        "intern state",
+        "agent behavior predict",
+        "behavior evolut and extrapol"
+      ]
+    },
+    {
+      "id": "I-12",
+      "track": "I",
+      "domain": "Artificial Intelligence & Machine Learning",
+      "title": "Sharing Experiences to Learn User Characteristics in Dynamic Environments with Sparse Data",
+      "xml_path": "C:\\Users\\likhi\\OneDrive\\Pictures\\Desktop\\CollabProj\\PaperMind\\data\\public_benchmarks\\semeval2010\\papers\\I-12.xml",
+      "sentences": 307,
+      "words": 8139,
+      "gold_keyphrases_count": 11,
+      "gold_keyphrases_sample": [
+        "probabilist paramet",
+        "agent",
+        "inform share",
+        "decis make",
+        "fast-pace environ"
+      ]
+    },
+    {
+      "id": "I-14",
+      "track": "I",
+      "domain": "Artificial Intelligence & Machine Learning",
+      "title": "A Reinforcement Learning based Distributed Search Algorithm For Hierarchical Peer-to-Peer Information Retrieval Systems",
+      "xml_path": "C:\\Users\\likhi\\OneDrive\\Pictures\\Desktop\\CollabProj\\PaperMind\\data\\public_benchmarks\\semeval2010\\papers\\I-14.xml",
+      "sentences": 311,
+      "words": 6796,
+      "gold_keyphrases_count": 12,
+      "gold_keyphrases_sample": [
+        "peer-to-peer inform retriev system",
+        "reinforc learn",
+        "distribut search algorithm",
+        "rout decis",
+        "util"
+      ]
+    },
+    {
+      "id": "I-15",
+      "track": "I",
+      "domain": "Artificial Intelligence & Machine Learning",
+      "title": "Information Searching and Sharing in Large-Scale Dynamic Networks",
+      "xml_path": "C:\\Users\\likhi\\OneDrive\\Pictures\\Desktop\\CollabProj\\PaperMind\\data\\public_benchmarks\\semeval2010\\papers\\I-15.xml",
+      "sentences": 270,
+      "words": 7658,
+      "gold_keyphrases_count": 16,
+      "gold_keyphrases_sample": [
+        "inform search and share",
+        "social network",
+        "cooper agent",
+        "peer to peer search network",
+        "peer-to-peer system"
+      ]
+    },
+    {
+      "id": "I-16",
+      "track": "I",
+      "domain": "Artificial Intelligence & Machine Learning",
+      "title": "An Advanced Bidding Agent for Advertisement Selection on Public Displays",
+      "xml_path": "C:\\Users\\likhi\\OneDrive\\Pictures\\Desktop\\CollabProj\\PaperMind\\data\\public_benchmarks\\semeval2010\\papers\\I-16.xml",
+      "sentences": 291,
+      "words": 7818,
+      "gold_keyphrases_count": 14,
+      "gold_keyphrases_sample": [
+        "advanc bid agent",
+        "bluscreen",
+        "experiment public advertis system",
+        "bluetooth",
+        "probabilist model"
+      ]
+    },
+    {
+      "id": "I-18",
+      "track": "I",
+      "domain": "Artificial Intelligence & Machine Learning",
+      "title": "Collaboration Among a Satellite Swarm",
+      "xml_path": "C:\\Users\\likhi\\OneDrive\\Pictures\\Desktop\\CollabProj\\PaperMind\\data\\public_benchmarks\\semeval2010\\papers\\I-18.xml",
+      "sentences": 345,
+      "words": 6193,
+      "gold_keyphrases_count": 14,
+      "gold_keyphrases_sample": [
+        "on-board plan",
+        "satellit swarm",
+        "commun and negoti",
+        "reactiv decis rule",
+        "inform system applic"
+      ]
+    },
+    {
+      "id": "I-19",
+      "track": "I",
+      "domain": "Artificial Intelligence & Machine Learning",
+      "title": "Bidding Optimally in Concurrent Second-Price Auctions of Perfectly Substitutable Goods",
+      "xml_path": "C:\\Users\\likhi\\OneDrive\\Pictures\\Desktop\\CollabProj\\PaperMind\\data\\public_benchmarks\\semeval2010\\papers\\I-19.xml",
+      "sentences": 352,
+      "words": 8562,
+      "gold_keyphrases_count": 12,
+      "gold_keyphrases_sample": [
+        "optim bid strategi",
+        "global bid agent",
+        "simultan second-price auction",
+        "non-decreas valuat distribut",
+        "onlin market"
+      ]
+    },
+    {
+      "id": "I-20",
+      "track": "I",
+      "domain": "Artificial Intelligence & Machine Learning",
+      "title": "Computing the Banzhaf Power Index in Network Flow Games",
+      "xml_path": "C:\\Users\\likhi\\OneDrive\\Pictures\\Desktop\\CollabProj\\PaperMind\\data\\public_benchmarks\\semeval2010\\papers\\I-20.xml",
+      "sentences": 286,
+      "words": 7194,
+      "gold_keyphrases_count": 13,
+      "gold_keyphrases_sample": [
+        "prefer aggreg",
+        "multiag applic",
+        "vote theori",
+        "banzhaf power index",
+        "analysi of algorithm and problem complex algorithm and problem complex analysi"
+      ]
+    },
+    {
+      "id": "I-21",
+      "track": "I",
+      "domain": "Artificial Intelligence & Machine Learning",
+      "title": "Interactions between Market Barriers and Communication Networks in Marketing Systems",
+      "xml_path": "C:\\Users\\likhi\\OneDrive\\Pictures\\Desktop\\CollabProj\\PaperMind\\data\\public_benchmarks\\semeval2010\\papers\\I-21.xml",
+      "sentences": 187,
+      "words": 6269,
+      "gold_keyphrases_count": 15,
+      "gold_keyphrases_sample": [
+        "referr system",
+        "purchas behaviour",
+        "word-of-mouth commun",
+        "market system",
+        "defect behaviour"
+      ]
+    },
+    {
+      "id": "I-22",
+      "track": "I",
+      "domain": "Artificial Intelligence & Machine Learning",
+      "title": "Realistic Cognitive Load Modeling for Enhancing Shared Mental Models in Human-Agent Collaboration",
+      "xml_path": "C:\\Users\\likhi\\OneDrive\\Pictures\\Desktop\\CollabProj\\PaperMind\\data\\public_benchmarks\\semeval2010\\papers\\I-22.xml",
+      "sentences": 322,
+      "words": 7924,
+      "gold_keyphrases_count": 19,
+      "gold_keyphrases_sample": [
+        "share belief map",
+        "multiag teamwork",
+        "heurist",
+        "reason",
+        "problem-solv"
+      ]
+    },
+    {
+      "id": "I-26",
+      "track": "I",
+      "domain": "Artificial Intelligence & Machine Learning",
+      "title": "Sequential Decision Making in Parallel Two-Sided Economic Search",
+      "xml_path": "C:\\Users\\likhi\\OneDrive\\Pictures\\Desktop\\CollabProj\\PaperMind\\data\\public_benchmarks\\semeval2010\\papers\\I-26.xml",
+      "sentences": 277,
+      "words": 8043,
+      "gold_keyphrases_count": 19,
+      "gold_keyphrases_sample": [
+        "pairwis partnership",
+        "decis",
+        "peer-to-peer applic",
+        "inform process",
+        "util"
+      ]
+    },
+    {
+      "id": "I-29",
+      "track": "I",
+      "domain": "Artificial Intelligence & Machine Learning",
+      "title": "Distributed Management of Flexible Times Schedules",
+      "xml_path": "C:\\Users\\likhi\\OneDrive\\Pictures\\Desktop\\CollabProj\\PaperMind\\data\\public_benchmarks\\semeval2010\\papers\\I-29.xml",
+      "sentences": 301,
+      "words": 7377,
+      "gold_keyphrases_count": 18,
+      "gold_keyphrases_sample": [
+        "manag schedul",
+        "distribut environ",
+        "agent architectur",
+        "schedul",
+        "inter-depend activ"
+      ]
+    },
+    {
+      "id": "I-30",
+      "track": "I",
+      "domain": "Artificial Intelligence & Machine Learning",
+      "title": "Distributed Task Allocation in Social Networks",
+      "xml_path": "C:\\Users\\likhi\\OneDrive\\Pictures\\Desktop\\CollabProj\\PaperMind\\data\\public_benchmarks\\semeval2010\\papers\\I-30.xml",
+      "sentences": 376,
+      "words": 7687,
+      "gold_keyphrases_count": 14,
+      "gold_keyphrases_sample": [
+        "social network",
+        "social relationship",
+        "task alloc",
+        "util",
+        "alloc"
+      ]
+    },
+    {
+      "id": "I-31",
+      "track": "I",
+      "domain": "Artificial Intelligence & Machine Learning",
+      "title": "Reasoning about Judgment and Preference Aggregation \u25e6",
+      "xml_path": "C:\\Users\\likhi\\OneDrive\\Pictures\\Desktop\\CollabProj\\PaperMind\\data\\public_benchmarks\\semeval2010\\papers\\I-31.xml",
+      "sentences": 360,
+      "words": 9747,
+      "gold_keyphrases_count": 15,
+      "gold_keyphrases_sample": [
+        "knowledg represent formal",
+        "social welfar function",
+        "complet axiomatis",
+        "syntax and semant of jal jal syntax and semant",
+        "discurs paradox"
+      ]
+    },
+    {
+      "id": "I-32",
+      "track": "I",
+      "domain": "Artificial Intelligence & Machine Learning",
+      "title": "An Adversarial Environment Model for Bounded Rational Agents in Zero-Sum Interactions",
+      "xml_path": "C:\\Users\\likhi\\OneDrive\\Pictures\\Desktop\\CollabProj\\PaperMind\\data\\public_benchmarks\\semeval2010\\papers\\I-32.xml",
+      "sentences": 367,
+      "words": 8648,
+      "gold_keyphrases_count": 17,
+      "gold_keyphrases_sample": [
+        "multiag environ",
+        "adversari interact",
+        "adversari environ",
+        "behavior axiom",
+        "bilater and multilater instanti"
+      ]
+    },
+    {
+      "id": "I-33",
+      "track": "I",
+      "domain": "Artificial Intelligence & Machine Learning",
+      "title": "A Formal Road from Institutional Norms to Organizational Structures",
+      "xml_path": "C:\\Users\\likhi\\OneDrive\\Pictures\\Desktop\\CollabProj\\PaperMind\\data\\public_benchmarks\\semeval2010\\papers\\I-33.xml",
+      "sentences": 312,
+      "words": 8139,
+      "gold_keyphrases_count": 15,
+      "gold_keyphrases_sample": [
+        "formal method",
+        "institut norm",
+        "abstract constraint",
+        "formal for repres organiz structur",
+        "entiti"
+      ]
+    },
+    {
+      "id": "I-34",
+      "track": "I",
+      "domain": "Artificial Intelligence & Machine Learning",
+      "title": "Resolving Conflict and Inconsistency in Norm-Regulated Virtual Organizations",
+      "xml_path": "C:\\Users\\likhi\\OneDrive\\Pictures\\Desktop\\CollabProj\\PaperMind\\data\\public_benchmarks\\semeval2010\\papers\\I-34.xml",
+      "sentences": 285,
+      "words": 6743,
+      "gold_keyphrases_count": 10,
+      "gold_keyphrases_sample": [
+        "virtual organ",
+        "multi-agent system",
+        "norm-regul vo",
+        "agent",
+        "norm conflict"
+      ]
+    },
+    {
+      "id": "I-35",
+      "track": "I",
+      "domain": "Artificial Intelligence & Machine Learning",
+      "title": "Distributed Norm Management in Regulated Multi-Agent Systems *",
+      "xml_path": "C:\\Users\\likhi\\OneDrive\\Pictures\\Desktop\\CollabProj\\PaperMind\\data\\public_benchmarks\\semeval2010\\papers\\I-35.xml",
+      "sentences": 353,
+      "words": 8115,
+      "gold_keyphrases_count": 18,
+      "gold_keyphrases_sample": [
+        "algorithm",
+        "activ",
+        "scenario",
+        "norm posit",
+        "protocol"
+      ]
+    },
+    {
+      "id": "J-1",
+      "track": "J",
+      "domain": "Computer Architecture & Theory",
+      "title": "Generalized Trade Reduction Mechanisms",
+      "xml_path": "C:\\Users\\likhi\\OneDrive\\Pictures\\Desktop\\CollabProj\\PaperMind\\data\\public_benchmarks\\semeval2010\\papers\\J-1.xml",
+      "sentences": 442,
+      "words": 9073,
+      "gold_keyphrases_count": 14,
+      "gold_keyphrases_sample": [
+        "trade reduct",
+        "budget balanc",
+        "intern competit",
+        "extern competit",
+        "effici"
+      ]
+    },
+    {
+      "id": "J-2",
+      "track": "J",
+      "domain": "Computer Architecture & Theory",
+      "title": "Worst-Case Optimal Redistribution of VCG Payments in Heterogeneous-Item Auctions with Unit Demand",
+      "xml_path": "C:\\Users\\likhi\\OneDrive\\Pictures\\Desktop\\CollabProj\\PaperMind\\data\\public_benchmarks\\semeval2010\\papers\\J-2.xml",
+      "sentences": 336,
+      "words": 7294,
+      "gold_keyphrases_count": 13,
+      "gold_keyphrases_sample": [
+        "mechan design",
+        "vickrei-clark-grove",
+        "redistribut payment",
+        "effici mechan",
+        "strategi-proof"
+      ]
+    },
+    {
+      "id": "J-3",
+      "track": "J",
+      "domain": "Computer Architecture & Theory",
+      "title": "Budget Optimization in Search-Based Advertising Auctions",
+      "xml_path": "C:\\Users\\likhi\\OneDrive\\Pictures\\Desktop\\CollabProj\\PaperMind\\data\\public_benchmarks\\semeval2010\\papers\\J-3.xml",
+      "sentences": 423,
+      "words": 10302,
+      "gold_keyphrases_count": 15,
+      "gold_keyphrases_sample": [
+        "budget optim",
+        "search-base advertis auction",
+        "internet",
+        "advertis",
+        "game theori"
+      ]
+    },
+    {
+      "id": "J-4",
+      "track": "J",
+      "domain": "Computer Architecture & Theory",
+      "title": "Revenue Analysis of a Family of Ranking Rules for Keyword Auctions",
+      "xml_path": "C:\\Users\\likhi\\OneDrive\\Pictures\\Desktop\\CollabProj\\PaperMind\\data\\public_benchmarks\\semeval2010\\papers\\J-4.xml",
+      "sentences": 273,
+      "words": 5741,
+      "gold_keyphrases_count": 14,
+      "gold_keyphrases_sample": [
+        "revenu",
+        "keyword auction",
+        "revenu-optim rank",
+        "rank rule",
+        "search engin"
+      ]
+    },
+    {
+      "id": "J-7",
+      "track": "J",
+      "domain": "Computer Architecture & Theory",
+      "title": "The Role of Compatibility in the Diffusion of Technologies Through Social Networks",
+      "xml_path": "C:\\Users\\likhi\\OneDrive\\Pictures\\Desktop\\CollabProj\\PaperMind\\data\\public_benchmarks\\semeval2010\\papers\\J-7.xml",
+      "sentences": 368,
+      "words": 10678,
+      "gold_keyphrases_count": 15,
+      "gold_keyphrases_sample": [
+        "diffus process",
+        "game-theoret diffus model",
+        "strateg incompat",
+        "bilingu",
+        "limit compat"
+      ]
+    },
+    {
+      "id": "J-8",
+      "track": "J",
+      "domain": "Computer Architecture & Theory",
+      "title": "Strong Equilibrium in Cost Sharing Connection Games *",
+      "xml_path": "C:\\Users\\likhi\\OneDrive\\Pictures\\Desktop\\CollabProj\\PaperMind\\data\\public_benchmarks\\semeval2010\\papers\\J-8.xml",
+      "sentences": 382,
+      "words": 9297,
+      "gold_keyphrases_count": 20,
+      "gold_keyphrases_sample": [
+        "cost share connect game",
+        "number of player player number",
+        "singl sourc and sink",
+        "singl sourc multipl sink",
+        "multi sourc and sink"
+      ]
+    },
+    {
+      "id": "J-9",
+      "track": "J",
+      "domain": "Computer Architecture & Theory",
+      "title": "Computation in a Distributed Information Market \u2217",
+      "xml_path": "C:\\Users\\likhi\\OneDrive\\Pictures\\Desktop\\CollabProj\\PaperMind\\data\\public_benchmarks\\semeval2010\\papers\\J-9.xml",
+      "sentences": 367,
+      "words": 8819,
+      "gold_keyphrases_count": 28,
+      "gold_keyphrases_sample": [
+        "econom theori",
+        "empir and laboratori evid",
+        "equilibrium price",
+        "financi secur",
+        "secur's valu"
+      ]
+    },
+    {
+      "id": "J-10",
+      "track": "J",
+      "domain": "Computer Architecture & Theory",
+      "title": "Understanding User Behavior in Online Feedback Reporting",
+      "xml_path": "C:\\Users\\likhi\\OneDrive\\Pictures\\Desktop\\CollabProj\\PaperMind\\data\\public_benchmarks\\semeval2010\\papers\\J-10.xml",
+      "sentences": 306,
+      "words": 7337,
+      "gold_keyphrases_count": 12,
+      "gold_keyphrases_sample": [
+        "onlin review",
+        "reput mechan",
+        "featur-by-featur estim of qualiti",
+        "absenc of clear incent clear incent absenc",
+        "util of the product product util"
+      ]
+    },
+    {
+      "id": "J-11",
+      "track": "J",
+      "domain": "Computer Architecture & Theory",
+      "title": "Trading Networks with Price-Setting Agents",
+      "xml_path": "C:\\Users\\likhi\\OneDrive\\Pictures\\Desktop\\CollabProj\\PaperMind\\data\\public_benchmarks\\semeval2010\\papers\\J-11.xml",
+      "sentences": 410,
+      "words": 10856,
+      "gold_keyphrases_count": 14,
+      "gold_keyphrases_sample": [
+        "algorithm game theori",
+        "market",
+        "trade network",
+        "interact of buyer and seller buyer and seller interact",
+        "initi endow of monei"
+      ]
+    },
+    {
+      "id": "J-13",
+      "track": "J",
+      "domain": "Computer Architecture & Theory",
+      "title": "On The Complexity of Combinatorial Auctions : Structured Item Graphs and Hypertree Decompositions",
+      "xml_path": "C:\\Users\\likhi\\OneDrive\\Pictures\\Desktop\\CollabProj\\PaperMind\\data\\public_benchmarks\\semeval2010\\papers\\J-13.xml",
+      "sentences": 322,
+      "words": 9811,
+      "gold_keyphrases_count": 12,
+      "gold_keyphrases_sample": [
+        "hypergraph",
+        "combinatori auction",
+        "hypertre decomposit",
+        "well-known mechan for resourc and task alloc",
+        "hypertre-base decomposit method"
+      ]
+    },
+    {
+      "id": "J-14",
+      "track": "J",
+      "domain": "Computer Architecture & Theory",
+      "title": "Computing Good Nash Equilibria in Graphical Games *",
+      "xml_path": "C:\\Users\\likhi\\OneDrive\\Pictures\\Desktop\\CollabProj\\PaperMind\\data\\public_benchmarks\\semeval2010\\papers\\J-14.xml",
+      "sentences": 481,
+      "words": 14063,
+      "gold_keyphrases_count": 13,
+      "gold_keyphrases_sample": [
+        "graphic game",
+        "nash equilibrium",
+        "approxim scheme",
+        "exponenti-time algorithm",
+        "approxim"
+      ]
+    },
+    {
+      "id": "J-15",
+      "track": "J",
+      "domain": "Computer Architecture & Theory",
+      "title": "Generalized Value Decomposition and Structured Multiattribute Auctions",
+      "xml_path": "C:\\Users\\likhi\\OneDrive\\Pictures\\Desktop\\CollabProj\\PaperMind\\data\\public_benchmarks\\semeval2010\\papers\\J-15.xml",
+      "sentences": 424,
+      "words": 9618,
+      "gold_keyphrases_count": 8,
+      "gold_keyphrases_sample": [
+        "auction",
+        "multiattribut auction",
+        "prefer handl",
+        "theori of measur valu function measur valu function theori",
+        "iter auction mechan"
+      ]
+    },
+    {
+      "id": "J-17",
+      "track": "J",
+      "domain": "Computer Architecture & Theory",
+      "title": "Truthful Mechanism Design for Multi-Dimensional Scheduling via Cycle Monotonicity",
+      "xml_path": "C:\\Users\\likhi\\OneDrive\\Pictures\\Desktop\\CollabProj\\PaperMind\\data\\public_benchmarks\\semeval2010\\papers\\J-17.xml",
+      "sentences": 446,
+      "words": 11664,
+      "gold_keyphrases_count": 12,
+      "gold_keyphrases_sample": [
+        "mechan design",
+        "approxim algorithm",
+        "schedul",
+        "multi-dimension schedul",
+        "cycl monoton"
+      ]
+    },
+    {
+      "id": "J-18",
+      "track": "J",
+      "domain": "Computer Architecture & Theory",
+      "title": "Mediators in Position Auctions",
+      "xml_path": "C:\\Users\\likhi\\OneDrive\\Pictures\\Desktop\\CollabProj\\PaperMind\\data\\public_benchmarks\\semeval2010\\papers\\J-18.xml",
+      "sentences": 390,
+      "words": 9126,
+      "gold_keyphrases_count": 13,
+      "gold_keyphrases_sample": [
+        "auction",
+        "mediat",
+        "ex post equilibrium",
+        "agent",
+        "posit auction"
+      ]
+    },
+    {
+      "id": "J-20",
+      "track": "J",
+      "domain": "Computer Architecture & Theory",
+      "title": "Clearing Algorithms for Barter Exchange Markets : Enabling Nationwide Kidney Exchanges",
+      "xml_path": "C:\\Users\\likhi\\OneDrive\\Pictures\\Desktop\\CollabProj\\PaperMind\\data\\public_benchmarks\\semeval2010\\papers\\J-20.xml",
+      "sentences": 449,
+      "words": 9583,
+      "gold_keyphrases_count": 14,
+      "gold_keyphrases_sample": [
+        "barter-exchang market",
+        "match",
+        "column gener",
+        "kidnei",
+        "transplant"
+      ]
+    },
+    {
+      "id": "J-21",
+      "track": "J",
+      "domain": "Computer Architecture & Theory",
+      "title": "A Strategic Model for Information Markets",
+      "xml_path": "C:\\Users\\likhi\\OneDrive\\Pictures\\Desktop\\CollabProj\\PaperMind\\data\\public_benchmarks\\semeval2010\\papers\\J-21.xml",
+      "sentences": 387,
+      "words": 9847,
+      "gold_keyphrases_count": 13,
+      "gold_keyphrases_sample": [
+        "inform market",
+        "dynam parimutuel market",
+        "project game model",
+        "predict market",
+        "market score rule"
+      ]
+    },
+    {
+      "id": "J-22",
+      "track": "J",
+      "domain": "Computer Architecture & Theory",
+      "title": "Betting on Permutations",
+      "xml_path": "C:\\Users\\likhi\\OneDrive\\Pictures\\Desktop\\CollabProj\\PaperMind\\data\\public_benchmarks\\semeval2010\\papers\\J-22.xml",
+      "sentences": 438,
+      "words": 9787,
+      "gold_keyphrases_count": 15,
+      "gold_keyphrases_sample": [
+        "permut bet",
+        "subset bet",
+        "bilater trade partner",
+        "polynomi-time algorithm",
+        "inform aggreg"
+      ]
+    },
+    {
+      "id": "J-23",
+      "track": "J",
+      "domain": "Computer Architecture & Theory",
+      "title": "Frugality Ratios And Improved Truthful Mechanisms for Vertex Cover * In set-system auctions , there are several overlapping teams of agents , and a task that can be completed by any of these teams . The auctioneer 's goal is to hire a team and pay as little as possible . Examples of this setting include shortest-path auctions and vertex-cover auctions . Recently , Karlin , Kempe and Tamir introduced a new definition offrugality ratio for this problem . Informally , the `` frugality ratio '' is the ratio of the total payment of a mechanism to a desired payment bound . The ratio captures the extent to which the mechanism overpays , relative to perceived fair cost in a truthful auction . In this paper , we propose a new truthful polynomial-time auction for the vertex cover problem and bound its frugality ratio . We show that the solution quality is with a constant factor of optimal and the frugality ratio is within a constant factor of the best possible worst-case bound ; this is the first auction for this problem to have these properties . Moreover , we show how to transform any truthful auction into a frugal one while preserving the approximation ratio . Also , we consider two natural modifications of the definition of Karlin et al. , and we analyse the properties of the resulting payment bounds , such as monotonicity , computational hardness , and robustness with respect to the draw-resolution rule . We study the relationships between the different payment bounds , both for general set systems and for specific set-system auctions , such as path auctions and vertex-cover auctions . We use these new definitions in the proof of our main result for vertex-cover auctions via a bootstrapping technique , which may be of independent interest .",
+      "xml_path": "C:\\Users\\likhi\\OneDrive\\Pictures\\Desktop\\CollabProj\\PaperMind\\data\\public_benchmarks\\semeval2010\\papers\\J-23.xml",
+      "sentences": 526,
+      "words": 13974,
+      "gold_keyphrases_count": 12,
+      "gold_keyphrases_sample": [
+        "frugal ratio",
+        "bootstrap techniqu",
+        "vertex-cover auction",
+        "transfer util",
+        "consecut payment bound"
+      ]
+    },
+    {
+      "id": "J-25",
+      "track": "J",
+      "domain": "Computer Architecture & Theory",
+      "title": "Betting Boolean-Style : A Framework for Trading in Securities Based on Logical Formulas",
+      "xml_path": "C:\\Users\\likhi\\OneDrive\\Pictures\\Desktop\\CollabProj\\PaperMind\\data\\public_benchmarks\\semeval2010\\papers\\J-25.xml",
+      "sentences": 467,
+      "words": 11025,
+      "gold_keyphrases_count": 20,
+      "gold_keyphrases_sample": [
+        "combinatori bet",
+        "effect probabl assess",
+        "arbitrari logic combin",
+        "compound secur",
+        "bayesian network"
+      ]
+    },
+    {
+      "id": "J-26",
+      "track": "J",
+      "domain": "Computer Architecture & Theory",
+      "title": "Combinatorial Agency",
+      "xml_path": "C:\\Users\\likhi\\OneDrive\\Pictures\\Desktop\\CollabProj\\PaperMind\\data\\public_benchmarks\\semeval2010\\papers\\J-26.xml",
+      "sentences": 455,
+      "words": 11914,
+      "gold_keyphrases_count": 14,
+      "gold_keyphrases_sample": [
+        "optim set of contract",
+        "classic princip-agent",
+        "qualiti of servic servic qualiti",
+        "combinatori agenc",
+        "nash equilibrium"
+      ]
+    },
+    {
+      "id": "J-27",
+      "track": "J",
+      "domain": "Computer Architecture & Theory",
+      "title": "Learning From Revealed Preference",
+      "xml_path": "C:\\Users\\likhi\\OneDrive\\Pictures\\Desktop\\CollabProj\\PaperMind\\data\\public_benchmarks\\semeval2010\\papers\\J-27.xml",
+      "sentences": 246,
+      "words": 6146,
+      "gold_keyphrases_count": 13,
+      "gold_keyphrases_sample": [
+        "learn from reveal prefer",
+        "complex problem",
+        "forecast",
+        "probabl approxim correct",
+        "monoton concav util function"
+      ]
+    },
+    {
+      "id": "J-28",
+      "track": "J",
+      "domain": "Computer Architecture & Theory",
+      "title": "Approximately-Strategyproof and Tractable Multi-Unit Auctions",
+      "xml_path": "C:\\Users\\likhi\\OneDrive\\Pictures\\Desktop\\CollabProj\\PaperMind\\data\\public_benchmarks\\semeval2010\\papers\\J-28.xml",
+      "sentences": 455,
+      "words": 10938,
+      "gold_keyphrases_count": 13,
+      "gold_keyphrases_sample": [
+        "approxim-effici and approximatelystrategyproof auction mechan",
+        "singl-good multi-unit alloc problem",
+        "fulli polynomi-time approxim scheme",
+        "vickrei-clark-grove",
+        "forward auction"
+      ]
+    },
+    {
+      "id": "J-30",
+      "track": "J",
+      "domain": "Computer Architecture & Theory",
+      "title": "Implementation with a Bounded Action Space",
+      "xml_path": "C:\\Users\\likhi\\OneDrive\\Pictures\\Desktop\\CollabProj\\PaperMind\\data\\public_benchmarks\\semeval2010\\papers\\J-30.xml",
+      "sentences": 372,
+      "words": 9567,
+      "gold_keyphrases_count": 13,
+      "gold_keyphrases_sample": [
+        "bound action space",
+        "implement",
+        "domin strategi",
+        "social-choic function",
+        "decis function"
+      ]
+    },
+    {
+      "id": "J-31",
+      "track": "J",
+      "domain": "Computer Architecture & Theory",
+      "title": "Computing the Optimal Strategy to Commit to \u2217",
+      "xml_path": "C:\\Users\\likhi\\OneDrive\\Pictures\\Desktop\\CollabProj\\PaperMind\\data\\public_benchmarks\\semeval2010\\papers\\J-31.xml",
+      "sentences": 293,
+      "words": 7897,
+      "gold_keyphrases_count": 15,
+      "gold_keyphrases_sample": [
+        "optim strategi",
+        "multiag system",
+        "simultan manner",
+        "stackelberg model",
+        "leadership model"
+      ]
+    },
+    {
+      "id": "J-32",
+      "track": "J",
+      "domain": "Computer Architecture & Theory",
+      "title": "Nash Equilibria in Graphical Games on Trees Revisited * Graphical games have been proposed as a game-theoretic model of large-scale distributed networks of non-cooperative agents . When the number of players is large , and the underlying graph has low degree , they provide a concise way to represent the players ' payoffs . It has recently been shown that the problem of finding Nash equilibria in a general degree-3 graphical game with two actions per player is complete for the complexity class PPAD , indicating that it is unlikely that there is any polynomial-time algorithm for this problem . In this paper , we study the complexity of graphical games with two actions per player on bounded-degree trees . This setting was first considered by Kearns , Littman and Singh , who proposed a dynamic programming-based algorithm that computes all Nash equilibria of such games . The running time of their algorithm is exponential , though approximate equilibria can be computed efficiently . Later , Littman , Kearns and Singh proposed a modification to this algorithm that can find a single Nash equilibrium in polynomial time . We show that this modified algorithm is incorrect -- the output is not always a Nash equilibrium . We then propose a new algorithm that is based on the ideas of Kearns et al. and computes all Nash equilibria in quadratic time if the input graph is a path , and in polynomial time if it is an arbitrary graph of maximum degree 2 . Moreover , our algorithm can be used to compute Nash equilibria of graphical games on arbitrary trees , but the running time can be exponential , even when the tree has bounded degree . We show that this is inevitable -- any algorithm of this type will take exponential time , even on bounded-degree trees with pathwidth 2 . It is an open question whether our algorithm runs in polynomial time on graphs with pathwidth 1 , but we show that finding a Nash equilibrium for a 2-action graphical game in which the underlying graph has maximum degree 3 and constant pathwidth is PPAD-complete -LRB- so is unlikely to be tractable -RRB- . * This research is supported by the EPSRC research grants `` Algorithmics of Network-sharing Games '' and `` Discontinuous Behaviour in the Complexity of randomized Algorithms '' .",
+      "xml_path": "C:\\Users\\likhi\\OneDrive\\Pictures\\Desktop\\CollabProj\\PaperMind\\data\\public_benchmarks\\semeval2010\\papers\\J-32.xml",
+      "sentences": 444,
+      "words": 13906,
+      "gold_keyphrases_count": 11,
+      "gold_keyphrases_sample": [
+        "graphic game",
+        "larg-scale distribut network",
+        "nash equilibrium",
+        "degre",
+        "dynam program-base algorithm"
+      ]
+    }
+  ],
+  "real_arxiv_pdfs": [
+    {
+      "key": "short_paper",
+      "arxiv_id": "1512.03385",
+      "title": "Deep Residual Learning for Image Recognition",
+      "domain": "Computer Vision / Deep Learning (ResNet)",
+      "scale": "Short (12 pages)",
+      "pages": 12,
+      "size_mb": 0.78,
+      "pdf_path": "C:\\Users\\likhi\\OneDrive\\Pictures\\Desktop\\CollabProj\\PaperMind\\data\\public_benchmarks\\sample_pdfs\\arxiv_1512.03385_resnet.pdf",
+      "upload_path": "C:\\Users\\likhi\\OneDrive\\Pictures\\Desktop\\CollabProj\\PaperMind\\backend-node\\src\\uploads\\papers\\arxiv_1512.03385_resnet.pdf"
+    },
+    {
+      "key": "medium_paper",
+      "arxiv_id": "1706.03762",
+      "title": "Attention Is All You Need",
+      "domain": "Natural Language Processing / Transformers",
+      "scale": "Medium (15 pages)",
+      "pages": 15,
+      "size_mb": 2.11,
+      "pdf_path": "C:\\Users\\likhi\\OneDrive\\Pictures\\Desktop\\CollabProj\\PaperMind\\data\\public_benchmarks\\sample_pdfs\\arxiv_1706.03762_transformer.pdf",
+      "upload_path": "C:\\Users\\likhi\\OneDrive\\Pictures\\Desktop\\CollabProj\\PaperMind\\backend-node\\src\\uploads\\papers\\arxiv_1706.03762_transformer.pdf"
+    },
+    {
+      "key": "long_survey",
+      "arxiv_id": "2303.18223",
+      "title": "A Survey of Large Language Models",
+      "domain": "Large Language Models & AI Systems",
+      "scale": "Long Monograph / Survey (~84 pages)",
+      "pages": 144,
+      "size_mb": 5.58,
+      "pdf_path": "C:\\Users\\likhi\\OneDrive\\Pictures\\Desktop\\CollabProj\\PaperMind\\data\\public_benchmarks\\sample_pdfs\\arxiv_2303.18223_llm_survey.pdf",
+      "upload_path": "C:\\Users\\likhi\\OneDrive\\Pictures\\Desktop\\CollabProj\\PaperMind\\backend-node\\src\\uploads\\papers\\arxiv_2303.18223_llm_survey.pdf"
+    }
+  ]
+}

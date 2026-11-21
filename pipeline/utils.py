@@ -255,9 +255,22 @@ def call_gemini_with_retry(model, prompt, generation_config=None, max_retries=1,
 
 
 def clean_text(text):
-    """Normalize whitespace and standard ligatures."""
+    """Normalize whitespace, ligatures, hyphens, and line-break dashes."""
+    if not text:
+        return ""
+    # Rejoin line-broken hyphenated words: "fine-\n tuned" -> "fine-tuned"
+    text = re.sub(r"(\w+)[-\u2010\u2011\u2012\u2013\u2014\u2212]\s*\n\s*(\w+)", r"\1-\2", text)
+    # Normalize unicode hyphens/dashes to standard ASCII hyphen
+    text = re.sub(r"[\u2010\u2011\u2012\u2013\u2014\u2212]", "-", text)
+    # Normalize whitespace and standard ligatures
     text = re.sub(r"\s+", " ", text)
-    text = text.replace("\ufb01", "fi").replace("\ufb02", "fl")
+    text = (
+        text.replace("\ufb00", "ff")
+        .replace("\ufb01", "fi")
+        .replace("\ufb02", "fl")
+        .replace("\ufb03", "ffi")
+        .replace("\ufb04", "ffl")
+    )
     return text.strip()
 
 

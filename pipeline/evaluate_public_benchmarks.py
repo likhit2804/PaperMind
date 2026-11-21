@@ -13,8 +13,9 @@ from pipeline.research_paper.extract_paper_concepts import (
 )
 from pipeline.research_paper.extract_notations_local import is_valid_symbol
 
+PROJECT_ROOT = os.path.dirname(os.path.dirname(__file__))
 DATASET_CACHE_DIR = os.path.join(
-    os.path.dirname(os.path.dirname(__file__)), "data", "public_benchmarks"
+    PROJECT_ROOT, "docs", "benchmarks", "semeval2010", "raw"
 )
 
 
@@ -265,8 +266,11 @@ def main():
     print("=" * 75)
 
     out_path = os.path.join(
-        os.path.dirname(os.path.dirname(__file__)),
-        "ablation_results",
+        PROJECT_ROOT,
+        "docs",
+        "benchmarks",
+        "semeval2010",
+        "results",
         "public_dataset_eval_results.json",
     )
     os.makedirs(os.path.dirname(out_path), exist_ok=True)
